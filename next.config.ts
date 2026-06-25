@@ -4,7 +4,7 @@ import { withWorkflow } from "workflow/next";
 
 const nextConfig: NextConfig = {
   allowedDevOrigins: ["127.0.0.1"],
-  serverExternalPackages: ["sharp"],
+  serverExternalPackages: ["@vercel/oidc", "sharp"],
 };
 
 const workflowConfig = withWorkflow(nextConfig);

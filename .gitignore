@@ -22,6 +22,7 @@
 
 # production
 /build
+/.output/
 
 # local app/runtime data
 /.data/
