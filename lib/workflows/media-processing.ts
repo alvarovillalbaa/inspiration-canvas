@@ -1,6 +1,6 @@
 import sharp from "sharp";
 
-import { getMissingAiMessage } from "@/lib/config";
+import { getConfig, getMissingAiMessage } from "@/lib/config";
 import {
   createMediaItem,
   getMediaItem,
@@ -91,6 +91,7 @@ export async function completeChildGeneration(input: {
     canvasId: input.run.canvasId,
     type: "generated_image",
     url,
+    storageDriver: getConfig().storageDriver,
     storageKey: key,
     thumbnailUrl,
     thumbnailStorageKey: thumbnailKey,
@@ -123,4 +124,3 @@ export async function completeChildGeneration(input: {
   });
   return child;
 }
-

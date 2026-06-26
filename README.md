@@ -7,8 +7,10 @@ The first screen is the product canvas. There is no landing page.
 ## Stack
 
 - Next.js App Router, TypeScript, Tailwind CSS, shadcn/ui, Geist
-- Local SQLite/libSQL query layer with a Neon-compatible hosted path
-- Local filesystem uploads by default, Vercel Blob in hosted mode
+- Anonymous browser storage for four-hour temporary canvases
+- Local SQLite/libSQL query layer for development
+- Supabase Auth/Postgres/Storage for hosted persistence
+- Optional Vercel Blob media storage for signed-in hosted uploads
 - Vercel AI SDK through AI Gateway
 - Vercel Workflow SDK for ingestion and child generation
 - Vercel Eve for the Curator Agent and approval-gated tools
@@ -26,25 +28,28 @@ corepack pnpm dev
 
 Open `http://localhost:3000`.
 
-Without AI credentials, uploads, canvas persistence, comments, preview, drag, resize, crop metadata, delete, and zoom still work. AI actions show a clear credentials message.
+Without Supabase credentials, the app runs as an anonymous browser canvas and stores uploads temporarily for four hours in `localStorage` plus IndexedDB. Without AI credentials, uploads, comments, preview, drag, resize, crop metadata, delete, and zoom still work. AI actions ask anonymous users to sign in or show a clear credentials message.
 
 ## Vercel Setup
 
 1. Create/link a Vercel project.
-2. Enable AI Gateway and run `vercel env pull .env.local` for OIDC, or set `AI_GATEWAY_API_KEY`.
-3. Provision Vercel Blob and set `BLOB_READ_WRITE_TOKEN`.
-4. Provision Neon Postgres through Vercel Marketplace and set `DATABASE_URL`.
-5. Set `STORAGE_DRIVER=blob` and `ENABLE_BLOB_STORAGE=true`.
-6. Deploy normally through Vercel.
+2. Create a Supabase project and run `supabase/migrations/20260626000000_create_inspiration_canvas_schema.sql`.
+3. In Supabase Auth, add the production origin and `/auth/confirm` callback URL.
+4. Set `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, and `SUPABASE_MEDIA_BUCKET=inspiration-media` in Vercel.
+5. Use `STORAGE_DRIVER=supabase` for Supabase Storage, or provision Vercel Blob, set `BLOB_READ_WRITE_TOKEN`, and use `STORAGE_DRIVER=blob`.
+6. Enable AI Gateway and run `vercel env pull .env.local` for OIDC, or set `AI_GATEWAY_API_KEY`.
+7. Deploy normally through Vercel.
 
 ## Environment
 
 See `.env.example` for all variables:
 
-- `DATABASE_URL`: local `file:.data/inspiration-canvas.db` or hosted Postgres.
-- `STORAGE_DRIVER`: `local` or `blob`.
+- `DATABASE_URL`: local `file:.data/inspiration-canvas.db` for development fallback.
+- `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`: Supabase Auth/Postgres credentials for hosted persistence.
+- `SUPABASE_MEDIA_BUCKET`: Supabase Storage bucket, default `inspiration-media`.
+- `STORAGE_DRIVER`: `local`, `supabase`, or `blob`.
 - `UPLOAD_DIR`: local upload directory.
-- `BLOB_READ_WRITE_TOKEN`: Vercel Blob token for hosted media.
+- `BLOB_READ_WRITE_TOKEN`: Vercel Blob token when `STORAGE_DRIVER=blob`.
 - `ENABLE_AI`: toggles AI features.
 - `AI_GATEWAY_API_KEY` / `VERCEL_OIDC_TOKEN`: AI Gateway credentials.
 - `MAX_UPLOAD_MB`, `ENABLE_VIDEO_UPLOADS`, `AI_TEXT_MODEL`, `AI_IMAGE_MODEL`.
@@ -81,10 +86,9 @@ corepack pnpm db:seed
 
 ## Roadmap
 
-- Auth and multi-user workspaces
-- Direct Blob client uploads for very large video files
+- Supabase-backed AI ingestion and child generation workflows
+- Direct Blob or Supabase client uploads for very large video files
 - Vector similarity search for visual embeddings
 - Generated video workflows
 - Richer crop UI with visible crop handles
 - Full Eve streaming UI once hosted Eve sessions are configured
-

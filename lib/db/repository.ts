@@ -46,6 +46,10 @@ function mediaFromRow(row: DbRow): MediaItem {
     canvasId: String(row.canvas_id),
     type: String(row.type) as MediaKind,
     url: String(row.url),
+    storageDriver:
+      row.storage_driver === "blob" || row.storage_driver === "supabase"
+        ? row.storage_driver
+        : "local",
     storageKey: String(row.storage_key),
     thumbnailUrl: row.thumbnail_url ? String(row.thumbnail_url) : null,
     thumbnailStorageKey: row.thumbnail_storage_key
@@ -241,17 +245,18 @@ export async function createMediaItem(input: CreateMediaInput): Promise<MediaIte
   const db = await getDatabase();
   await db.query(
     `INSERT INTO media_items (
-      id, canvas_id, type, url, storage_key, thumbnail_url, thumbnail_storage_key,
+      id, canvas_id, type, url, storage_driver, storage_key, thumbnail_url, thumbnail_storage_key,
       mime_type, file_name, size_bytes, intrinsic_width, intrinsic_height,
       duration_seconds, x, y, width, height, z_index, rotation, crop_json,
       tags_json, category, subcategory, description, design_analysis_json,
       analysis_status, analysis_error, parent_ids_json, created_at, updated_at
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       media.id,
       media.canvasId,
       media.type,
       media.url,
+      media.storageDriver,
       media.storageKey,
       media.thumbnailUrl,
       media.thumbnailStorageKey,
@@ -550,4 +555,3 @@ export async function updateAgentApprovalStatus(
   );
   return approvalFromRow({ ...row, status, updated_at: updatedAt });
 }
-

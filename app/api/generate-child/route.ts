@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { getMissingAiMessage } from "@/lib/config";
+import { getRequestPersistenceContext } from "@/lib/api/auth";
 import { childGenerationRequestSchema } from "@/lib/ai/schemas";
 import {
   MissingAICredentialsError,
@@ -18,6 +19,18 @@ export async function POST(request: Request) {
   if (!parsed.success) {
     return NextResponse.json({ error: parsed.error.message }, { status: 400 });
   }
+  const persistence = await getRequestPersistenceContext();
+  if (persistence.mode === "error") return persistence.response;
+  if (persistence.mode === "supabase") {
+    return NextResponse.json(
+      {
+        error:
+          "Child media generation for signed-in Supabase canvases is not connected yet.",
+      },
+      { status: 501 },
+    );
+  }
+
   const mediaItems = (
     await Promise.all(parsed.data.mediaIds.map((id) => getMediaItem(id)))
   ).filter((item) => item != null);
@@ -64,4 +77,3 @@ export async function POST(request: Request) {
     );
   }
 }
-

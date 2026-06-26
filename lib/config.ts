@@ -1,6 +1,6 @@
 export const DEFAULT_CANVAS_ID = "default-canvas";
 
-export type StorageDriver = "local" | "blob";
+export type StorageDriver = "local" | "blob" | "supabase";
 
 export type AppConfig = {
   databaseUrl: string;
@@ -10,6 +10,7 @@ export type AppConfig = {
   enableVideoUploads: boolean;
   enableAi: boolean;
   enableBlobStorage: boolean;
+  supabaseMediaBucket: string;
   aiTextModel: string;
   aiImageModel: string;
 };
@@ -26,10 +27,12 @@ function readNumber(name: string, fallback: number): number {
 }
 
 export function getConfig(): AppConfig {
-  const storageDriver =
-    process.env.STORAGE_DRIVER === "blob" || readBoolean("ENABLE_BLOB_STORAGE", false)
-      ? "blob"
-      : "local";
+  const storageDriver: StorageDriver =
+    process.env.STORAGE_DRIVER === "supabase"
+      ? "supabase"
+      : process.env.STORAGE_DRIVER === "blob" || readBoolean("ENABLE_BLOB_STORAGE", false)
+        ? "blob"
+        : "local";
 
   return {
     databaseUrl: process.env.DATABASE_URL || "file:.data/inspiration-canvas.db",
@@ -39,10 +42,23 @@ export function getConfig(): AppConfig {
     enableVideoUploads: readBoolean("ENABLE_VIDEO_UPLOADS", true),
     enableAi: readBoolean("ENABLE_AI", true),
     enableBlobStorage: storageDriver === "blob",
+    supabaseMediaBucket: process.env.SUPABASE_MEDIA_BUCKET || "inspiration-media",
     aiTextModel: process.env.AI_TEXT_MODEL || "openai/gpt-5.4",
     aiImageModel:
       process.env.AI_IMAGE_MODEL || "google/gemini-3.1-flash-image-preview",
   };
+}
+
+export function hasSupabaseConfig(): boolean {
+  return Boolean(
+    process.env.NEXT_PUBLIC_SUPABASE_URL &&
+      (process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ||
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY),
+  );
+}
+
+export function isHostedRuntime(): boolean {
+  return Boolean(process.env.VERCEL);
 }
 
 export function hasAiCredentials(): boolean {
@@ -56,4 +72,3 @@ export function getMissingAiMessage(): string {
 export function isPostgresUrl(url: string): boolean {
   return /^postgres(ql)?:\/\//i.test(url);
 }
-

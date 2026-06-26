@@ -1,7 +1,9 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 
-import { getConfig } from "@/lib/config";
+import type { SupabaseClient } from "@supabase/supabase-js";
+
+import { getConfig, type StorageDriver } from "@/lib/config";
 
 export type StoredFileInput = Buffer | Uint8Array | File;
 
@@ -101,14 +103,64 @@ export class VercelBlobStorageAdapter implements StorageAdapter {
   }
 }
 
-let adapter: StorageAdapter | null = null;
+export class SupabaseStorageAdapter implements StorageAdapter {
+  constructor(
+    private readonly client: SupabaseClient,
+    private readonly bucket = getConfig().supabaseMediaBucket,
+  ) {}
 
-export function getStorageAdapter(): StorageAdapter {
-  if (adapter) return adapter;
-  adapter =
-    getConfig().storageDriver === "blob"
-      ? new VercelBlobStorageAdapter()
-      : new LocalStorageAdapter();
-  return adapter;
+  async putFile(
+    input: StoredFileInput,
+    key: string,
+    options: PutFileOptions = {},
+  ): Promise<string> {
+    const { error } = await this.client.storage
+      .from(this.bucket)
+      .upload(key, await toBuffer(input), {
+        contentType: options.contentType,
+        cacheControl: "3600",
+        upsert: true,
+      });
+    if (error) throw new Error(error.message);
+    return this.getUrl(key);
+  }
+
+  async getUrl(key: string): Promise<string> {
+    const { data } = this.client.storage.from(this.bucket).getPublicUrl(key);
+    return data.publicUrl;
+  }
+
+  async deleteFile(key: string): Promise<void> {
+    const { error } = await this.client.storage.from(this.bucket).remove([key]);
+    if (error) throw new Error(error.message);
+  }
+
+  async exists(key: string): Promise<boolean> {
+    const prefix = path.posix.dirname(key);
+    const name = path.posix.basename(key);
+    const { data, error } = await this.client.storage
+      .from(this.bucket)
+      .list(prefix === "." ? "" : prefix, { limit: 1, search: name });
+    if (error) throw new Error(error.message);
+    return Boolean(data?.some((item) => item.name === name));
+  }
 }
 
+let adapter: StorageAdapter | null = null;
+
+export function getStorageAdapter(options: {
+  driver?: StorageDriver;
+  supabase?: SupabaseClient;
+} = {}): StorageAdapter {
+  const driver = options.driver || getConfig().storageDriver;
+  if (driver === "supabase") {
+    if (!options.supabase) {
+      throw new Error("Supabase storage requires an authenticated Supabase client.");
+    }
+    return new SupabaseStorageAdapter(options.supabase);
+  }
+
+  if (adapter) return adapter;
+  adapter = driver === "blob" ? new VercelBlobStorageAdapter() : new LocalStorageAdapter();
+  return adapter;
+}

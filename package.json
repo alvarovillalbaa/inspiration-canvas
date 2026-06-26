@@ -24,11 +24,13 @@
     "test:e2e": "playwright test"
   },
   "dependencies": {
+    "@base-ui/react": "^1.6.0",
     "@libsql/client": "^0.17.4",
     "@neondatabase/serverless": "^1.1.0",
+    "@supabase/ssr": "^0.12.0",
+    "@supabase/supabase-js": "^2.108.2",
     "@vercel/blob": "^2.4.1",
     "@vercel/oidc": "3.2.0",
-    "@base-ui/react": "^1.6.0",
     "ai": "7.0.0-beta.178",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
@@ -45,8 +47,8 @@
     "react": "19.2.4",
     "react-day-picker": "^10.0.1",
     "react-dom": "19.2.4",
-    "react-rnd": "^10.5.3",
     "react-resizable-panels": "^4.11.2",
+    "react-rnd": "^10.5.3",
     "react-zoom-pan-pinch": "^4.0.3",
     "recharts": "^3.8.0",
     "shadcn": "^4.11.0",
@@ -73,10 +75,10 @@
     "eslint": "^9",
     "eslint-config-next": "16.2.9",
     "jsdom": "^28.0.0",
+    "playwright": "^1.57.0",
     "tailwindcss": "^4",
     "tsx": "^4.21.0",
     "typescript": "^5",
-    "vitest": "^4.1.9",
-    "playwright": "^1.57.0"
+    "vitest": "^4.1.9"
   }
 }

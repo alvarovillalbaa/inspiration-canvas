@@ -10,12 +10,13 @@ import {
   Crop,
   FileText,
   Focus,
+  GripVertical,
   ImagePlus,
+  LogIn,
+  LogOut,
   MessageSquare,
   Minus,
-  MoreHorizontal,
   Plus,
-  RefreshCcw,
   Sparkles,
   Trash2,
   Upload,
@@ -53,6 +54,13 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuSeparator,
+  ContextMenuTrigger,
+} from "@/components/ui/context-menu";
+import {
   Dialog,
   DialogContent,
   DialogDescription,
@@ -64,7 +72,6 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
@@ -97,6 +104,19 @@ import {
   type Transform,
 } from "@/lib/canvas/math";
 import { getCroppedImageStyle, normalizeCropJson } from "@/lib/canvas/crop";
+import {
+  addTempComment,
+  addTempFilesToCanvas,
+  clearTempCanvasState,
+  deleteTempMedia,
+  getTempBlob,
+  getTemporaryStorageAcknowledgedAt,
+  loadTempCanvasState,
+  markTemporaryStorageAcknowledged,
+  updateTempMediaItems,
+  type TempCanvasState,
+} from "@/lib/canvas/temp-store";
+import { createBrowserSupabaseClient } from "@/lib/supabase/browser";
 import type { CanvasRecord, CommentRecord, MediaItem } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
@@ -111,6 +131,8 @@ type CropDraft = {
   width: number;
   height: number;
 };
+
+type AuthState = "checking" | "anonymous" | "authenticated";
 
 const CANVAS_SIZE = 12000;
 const DEFAULT_TRANSFORM: Transform = { scale: 0.65, positionX: 120, positionY: 80 };
@@ -165,6 +187,13 @@ export function InspirationCanvas() {
   const [commentsOpen, setCommentsOpen] = useState(false);
   const [comments, setComments] = useState<CommentRecord[]>([]);
   const [commentBody, setCommentBody] = useState("");
+  const [authState, setAuthState] = useState<AuthState>("checking");
+  const [authDialogOpen, setAuthDialogOpen] = useState(false);
+  const [authEmail, setAuthEmail] = useState("");
+  const [authMessage, setAuthMessage] = useState<string | null>(null);
+  const [authLoading, setAuthLoading] = useState(false);
+  const [tempState, setTempState] = useState<TempCanvasState | null>(null);
+  const [savingTemporaryCanvas, setSavingTemporaryCanvas] = useState(false);
   const [tasteText, setTasteText] = useState("");
   const [tasteOpen, setTasteOpen] = useState(false);
   const [agentOpen, setAgentOpen] = useState(false);
@@ -184,22 +213,46 @@ export function InspirationCanvas() {
     [items, selectedIds],
   );
   const primarySelected = selectedItems[0] || null;
+  const isAuthenticated = authState === "authenticated";
+  const canAuthenticate = useMemo(() => Boolean(createBrowserSupabaseClient()), []);
+
+  const applyTemporaryState = useCallback((next: TempCanvasState) => {
+    setTempState(next);
+    setCanvas(next.canvas);
+    setItems(next.mediaItems);
+  }, []);
+
+  const loadTemporaryCanvas = useCallback(async (showDialog = true) => {
+    setError(null);
+    const state = await loadTempCanvasState();
+    applyTemporaryState(state);
+    setAuthState("anonymous");
+    setLoading(false);
+    if (showDialog && !getTemporaryStorageAcknowledgedAt()) {
+      setAuthDialogOpen(true);
+    }
+  }, [applyTemporaryState]);
 
   const loadCanvas = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
       const response = await fetch("/api/canvas", { cache: "no-store" });
+      if (response.status === 401 || response.status === 503) {
+        await loadTemporaryCanvas();
+        return;
+      }
       if (!response.ok) throw new Error("Could not load canvas.");
       const data = (await response.json()) as CanvasResponse;
       setCanvas(data.canvas);
       setItems(data.mediaItems);
+      setAuthState("authenticated");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not load canvas.");
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [loadTemporaryCanvas]);
 
   const fitToView = useCallback(() => {
     const bounds = getItemsBounds(items);
@@ -216,10 +269,47 @@ export function InspirationCanvas() {
   }, [items]);
 
   useEffect(() => {
-    queueMicrotask(() => {
-      void loadCanvas();
+    const supabase = createBrowserSupabaseClient();
+
+    if (!supabase) {
+      queueMicrotask(() => {
+        void loadTemporaryCanvas();
+      });
+      return;
+    }
+
+    let active = true;
+    void supabase.auth.getUser().then(async ({ data }) => {
+      if (!active) return;
+      const pendingTemporaryState = await loadTempCanvasState();
+      setTempState(pendingTemporaryState);
+      if (data.user) {
+        setAuthState("authenticated");
+        await loadCanvas();
+        if (pendingTemporaryState.mediaItems.length > 0) {
+          setAuthDialogOpen(true);
+        }
+      } else {
+        await loadTemporaryCanvas();
+      }
     });
-  }, [loadCanvas]);
+
+    const { data: subscription } = supabase.auth.onAuthStateChange((event) => {
+      if (!active) return;
+      if (event === "SIGNED_IN") {
+        setAuthState("authenticated");
+        void loadCanvas();
+      }
+      if (event === "SIGNED_OUT") {
+        void loadTemporaryCanvas();
+      }
+    });
+
+    return () => {
+      active = false;
+      subscription.subscription.unsubscribe();
+    };
+  }, [loadCanvas, loadTemporaryCanvas]);
 
   useEffect(() => {
     function onKeyDown(event: KeyboardEvent) {
@@ -244,6 +334,24 @@ export function InspirationCanvas() {
   }, [fitToView, items, selectedIds]);
 
   async function patchMedia(id: string, patch: Partial<MediaItem>) {
+    if (!isAuthenticated) {
+      if (!tempState) return;
+      applyTemporaryState(
+        updateTempMediaItems(tempState, (current) =>
+          current.map((item) =>
+            item.id === id
+              ? {
+                  ...item,
+                  ...patch,
+                  updatedAt: new Date().toISOString(),
+                }
+              : item,
+          ),
+        ),
+      );
+      return;
+    }
+
     const response = await fetch(`/api/media/${id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
@@ -258,6 +366,22 @@ export function InspirationCanvas() {
   }
 
   async function patchMediaBatch(updates: Array<{ id: string; patch: Partial<MediaItem> }>) {
+    if (!isAuthenticated) {
+      if (!tempState) return;
+      const byId = new Map(updates.map((update) => [update.id, update.patch]));
+      applyTemporaryState(
+        updateTempMediaItems(tempState, (current) =>
+          current.map((item) => {
+            const patch = byId.get(item.id);
+            return patch
+              ? { ...item, ...patch, updatedAt: new Date().toISOString() }
+              : item;
+          }),
+        ),
+      );
+      return;
+    }
+
     const response = await fetch("/api/media/batch", {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
@@ -280,10 +404,19 @@ export function InspirationCanvas() {
   }
 
   async function uploadFiles(files: FileList | File[], point?: { x: number; y: number }) {
-    if (!canvas) return;
     setUploading(true);
     setError(null);
     try {
+      if (!isAuthenticated) {
+        const current = tempState || (await loadTempCanvasState());
+        const next = await addTempFilesToCanvas(current, Array.from(files), point);
+        applyTemporaryState(next);
+        if (!getTemporaryStorageAcknowledgedAt()) {
+          setAuthDialogOpen(true);
+        }
+        return;
+      }
+      if (!canvas) return;
       for (const [index, file] of Array.from(files).entries()) {
         const form = new FormData();
         form.append("file", file);
@@ -316,6 +449,16 @@ export function InspirationCanvas() {
 
   async function deleteSelected() {
     const ids = [...selectedIds];
+    if (!isAuthenticated) {
+      if (tempState) {
+        const next = await deleteTempMedia(tempState, ids);
+        applyTemporaryState(next);
+      }
+      setSelectedIds(new Set());
+      setConfirmDelete(false);
+      return;
+    }
+
     await Promise.all(ids.map((id) => fetch(`/api/media/${id}`, { method: "DELETE" })));
     setItems((current) => current.filter((item) => !selectedIds.has(item.id)));
     setSelectedIds(new Set());
@@ -323,6 +466,11 @@ export function InspirationCanvas() {
   }
 
   async function loadComments(mediaId: string) {
+    if (!isAuthenticated) {
+      setComments(tempState?.commentsByMediaId[mediaId] || []);
+      return;
+    }
+
     const response = await fetch(`/api/media/${mediaId}/comments`, { cache: "no-store" });
     const data = (await response.json()) as { comments: CommentRecord[] };
     setComments(data.comments);
@@ -330,6 +478,15 @@ export function InspirationCanvas() {
 
   async function addComment() {
     if (!primarySelected || !commentBody.trim()) return;
+    if (!isAuthenticated) {
+      if (!tempState) return;
+      const result = addTempComment(tempState, primarySelected.id, commentBody);
+      setTempState(result.state);
+      setComments((current) => [...current, result.comment]);
+      setCommentBody("");
+      return;
+    }
+
     const response = await fetch(`/api/media/${primarySelected.id}/comments`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -346,6 +503,11 @@ export function InspirationCanvas() {
 
   async function generateTasteBrief() {
     if (!canvas || selectedItems.length === 0) return;
+    if (!isAuthenticated) {
+      setError("Sign in to save this temporary canvas before using AI actions.");
+      setAuthDialogOpen(true);
+      return;
+    }
     setTasteOpen(true);
     setTasteText("");
     setError(null);
@@ -367,6 +529,11 @@ export function InspirationCanvas() {
 
   async function generateChildMedia() {
     if (!canvas || selectedItems.length < 2) return;
+    if (!isAuthenticated) {
+      setError("Sign in to save this temporary canvas before using AI actions.");
+      setAuthDialogOpen(true);
+      return;
+    }
     setError(null);
     const response = await fetch("/api/generate-child", {
       method: "POST",
@@ -402,6 +569,103 @@ export function InspirationCanvas() {
         "In local fallback mode this panel summarizes available context. On Vercel, Eve endpoints can stream full agent sessions through the same tool set.",
       ].join("\n"),
     );
+  }
+
+  async function sendSignInLink() {
+    if (!authEmail.trim()) return;
+    const supabase = createBrowserSupabaseClient();
+    if (!supabase) {
+      setAuthMessage("Supabase sign-in is not configured for this deployment.");
+      return;
+    }
+    setAuthLoading(true);
+    setAuthMessage(null);
+    try {
+      const { error: signInError } = await supabase.auth.signInWithOtp({
+        email: authEmail.trim(),
+        options: {
+          emailRedirectTo: `${window.location.origin}/auth/confirm?next=/`,
+        },
+      });
+      if (signInError) throw signInError;
+      setAuthMessage("Check your email for a sign-in link.");
+    } catch (err) {
+      setAuthMessage(err instanceof Error ? err.message : "Could not send sign-in link.");
+    } finally {
+      setAuthLoading(false);
+    }
+  }
+
+  async function signOut() {
+    const supabase = createBrowserSupabaseClient();
+    await supabase?.auth.signOut();
+    await loadTemporaryCanvas();
+  }
+
+  async function saveTemporaryCanvasToAccount() {
+    if (!tempState || !canvas || !isAuthenticated || tempState.mediaItems.length === 0) return;
+    setSavingTemporaryCanvas(true);
+    setError(null);
+    try {
+      for (const tempItem of tempState.mediaItems) {
+        const blob = await getTempBlob(tempItem.storageKey);
+        if (!blob) continue;
+        const file = new File([blob], tempItem.fileName, { type: tempItem.mimeType });
+        const form = new FormData();
+        form.append("file", file);
+        form.append("canvasId", canvas.id);
+        form.append("x", String(tempItem.x));
+        form.append("y", String(tempItem.y));
+        const response = await fetch("/api/upload", { method: "POST", body: form });
+        const data = (await response.json()) as { media?: MediaItem; error?: string };
+        if (!response.ok || !data.media) throw new Error(data.error || "Upload failed.");
+        await fetch(`/api/media/${data.media.id}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            width: tempItem.width,
+            height: tempItem.height,
+            zIndex: tempItem.zIndex,
+            rotation: tempItem.rotation,
+            cropJson: tempItem.cropJson,
+            tagsJson: tempItem.tagsJson,
+            category: tempItem.category,
+            subcategory: tempItem.subcategory,
+            description: tempItem.description,
+          }),
+        });
+        for (const comment of tempState.commentsByMediaId[tempItem.id] || []) {
+          await fetch(`/api/media/${data.media.id}/comments`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ body: comment.body }),
+          });
+        }
+      }
+      await clearTempCanvasState();
+      setTempState(null);
+      setAuthDialogOpen(false);
+      await loadCanvas();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not save temporary canvas.");
+    } finally {
+      setSavingTemporaryCanvas(false);
+    }
+  }
+
+  function openCommentsForItem(item: MediaItem) {
+    setSelectedIds(new Set([item.id]));
+    setCommentsOpen(true);
+    void loadComments(item.id);
+  }
+
+  function bringForward(item: MediaItem) {
+    const maxZ = Math.max(0, ...items.map((candidate) => candidate.zIndex));
+    void patchMedia(item.id, { zIndex: maxZ + 1 });
+  }
+
+  function sendBackward(item: MediaItem) {
+    void patchMedia(item.id, { zIndex: Math.max(0, item.zIndex - 1) });
   }
 
   function openCrop(item: MediaItem) {
@@ -468,76 +732,159 @@ export function InspirationCanvas() {
         className="group"
         style={{ zIndex: item.zIndex }}
       >
-        <button
-          type="button"
-          data-testid="media-item"
-          data-media-id={item.id}
-          onClick={(event) => selectItem(item, event)}
-          onDoubleClick={() => setPreview(item)}
-          className={cn(
-            "relative size-full overflow-hidden rounded-md border bg-card text-left shadow-sm outline-none transition-colors",
-            selected ? "border-primary ring-2 ring-primary/35" : "border-border",
-          )}
-        >
-          {isVideo(item) ? (
-            <video
-              src={item.url}
-              className="size-full object-cover"
-              muted
-              playsInline
-              preload="metadata"
-            />
-          ) : (
-            <span
-              className="absolute inset-0 overflow-hidden"
-              data-cropped={crop ? "true" : "false"}
-              data-testid="media-crop-viewport"
+        <ContextMenu>
+          <ContextMenuTrigger asChild>
+            <div
+              role="button"
+              tabIndex={0}
+              data-testid="media-item"
+              data-media-id={item.id}
+              onClick={(event) => selectItem(item, event)}
+              onContextMenu={() => setSelectedIds(new Set([item.id]))}
+              onDoubleClick={() => setPreview(item)}
+              onKeyDown={(event) => {
+                if (event.key === "Enter" || event.key === " ") {
+                  event.preventDefault();
+                  setSelectedIds(new Set([item.id]));
+                }
+              }}
+              className={cn(
+                "relative size-full overflow-hidden rounded-md border bg-card text-left shadow-sm outline-none transition-colors",
+                selected ? "border-primary ring-2 ring-primary/35" : "border-border",
+              )}
             >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={item.thumbnailUrl || item.url}
-                alt={item.description || item.fileName}
-                className={cn(
-                  crop
-                    ? "absolute left-0 top-0 max-w-none object-cover"
-                    : "size-full object-cover",
+              {isVideo(item) ? (
+                <video
+                  src={item.url}
+                  className="size-full object-cover"
+                  muted
+                  playsInline
+                  preload="metadata"
+                />
+              ) : (
+                <span
+                  className="absolute inset-0 overflow-hidden"
+                  data-cropped={crop ? "true" : "false"}
+                  data-testid="media-crop-viewport"
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={item.thumbnailUrl || item.url}
+                    alt={item.description || item.fileName}
+                    className={cn(
+                      crop
+                        ? "absolute left-0 top-0 max-w-none object-cover"
+                        : "size-full object-cover",
+                    )}
+                    data-testid="media-image"
+                    loading="lazy"
+                    style={crop ? getCroppedImageStyle(crop) : undefined}
+                  />
+                </span>
+              )}
+              <div className="absolute inset-x-0 bottom-0 flex items-center justify-between gap-2 bg-background/80 px-2 py-1 text-[11px] text-muted-foreground backdrop-blur-sm">
+                <span className="truncate">{item.fileName}</span>
+                {item.analysisStatus === "processing" || item.analysisStatus === "pending" ? (
+                  <Activity className="size-3" />
+                ) : item.analysisStatus === "complete" ? (
+                  <Check className="size-3 text-primary" />
+                ) : (
+                  <X className="size-3 text-destructive" />
                 )}
-                data-testid="media-image"
-                loading="lazy"
-                style={crop ? getCroppedImageStyle(crop) : undefined}
-              />
-            </span>
-          )}
-          <div className="absolute inset-x-0 bottom-0 flex items-center justify-between gap-2 bg-background/80 px-2 py-1 text-[11px] text-muted-foreground backdrop-blur-sm">
-            <span className="truncate">{item.fileName}</span>
-            {item.analysisStatus === "processing" || item.analysisStatus === "pending" ? (
-              <Activity className="size-3" />
-            ) : item.analysisStatus === "complete" ? (
-              <Check className="size-3 text-primary" />
-            ) : (
-              <X className="size-3 text-destructive" />
-            )}
-          </div>
-          {item.parentIdsJson.length > 0 ? (
-            <Popover>
-              <PopoverTrigger asChild>
-                <Badge className="absolute left-2 top-2 h-6 gap-1 rounded-md" variant="secondary">
-                  <Sparkles className="size-3" />
-                  child
-                </Badge>
-              </PopoverTrigger>
-              <PopoverContent className="w-72">
-                <div className="text-sm font-medium">Lineage</div>
-                <div className="mt-2 space-y-1 text-xs text-muted-foreground">
-                  {item.parentIdsJson.map((parentId) => {
-                    const parent = items.find((candidate) => candidate.id === parentId);
-                    return <div key={parentId}>{parent?.fileName || parentId}</div>;
-                  })}
-                </div>
-              </PopoverContent>
-            </Popover>
-          ) : null}
-        </button>
+              </div>
+              {selected ? (
+                <DropdownMenu>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          aria-label="Media actions"
+                          size="icon"
+                          variant="secondary"
+                          className="absolute right-2 top-2 size-8 rounded-md opacity-95 shadow-sm"
+                          onPointerDown={(event) => event.stopPropagation()}
+                          onClick={(event) => event.stopPropagation()}
+                        >
+                          <GripVertical className="size-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                    </TooltipTrigger>
+                    <TooltipContent>Media actions</TooltipContent>
+                  </Tooltip>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem onClick={() => openCommentsForItem(item)}>
+                      <MessageSquare className="size-4" />
+                      Comments
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      disabled={isVideo(item)}
+                      onClick={() => openCrop(item)}
+                    >
+                      <Crop className="size-4" />
+                      Crop
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => bringForward(item)}>
+                      <ArrowUp className="size-4" />
+                      Bring forward
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => sendBackward(item)}>
+                      <ArrowDown className="size-4" />
+                      Send backward
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              ) : null}
+              {item.parentIdsJson.length > 0 ? (
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Badge className="absolute left-2 top-2 h-6 gap-1 rounded-md" variant="secondary">
+                      <Sparkles className="size-3" />
+                      child
+                    </Badge>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-72">
+                    <div className="text-sm font-medium">Lineage</div>
+                    <div className="mt-2 space-y-1 text-xs text-muted-foreground">
+                      {item.parentIdsJson.map((parentId) => {
+                        const parent = items.find((candidate) => candidate.id === parentId);
+                        return <div key={parentId}>{parent?.fileName || parentId}</div>;
+                      })}
+                    </div>
+                  </PopoverContent>
+                </Popover>
+              ) : null}
+            </div>
+          </ContextMenuTrigger>
+          <ContextMenuContent>
+            <ContextMenuItem onClick={() => openCommentsForItem(item)}>
+              <MessageSquare className="size-4" />
+              Comments
+            </ContextMenuItem>
+            <ContextMenuItem disabled={isVideo(item)} onClick={() => openCrop(item)}>
+              <Crop className="size-4" />
+              Crop
+            </ContextMenuItem>
+            <ContextMenuItem onClick={() => bringForward(item)}>
+              <ArrowUp className="size-4" />
+              Bring forward
+            </ContextMenuItem>
+            <ContextMenuItem onClick={() => sendBackward(item)}>
+              <ArrowDown className="size-4" />
+              Send backward
+            </ContextMenuItem>
+            <ContextMenuSeparator />
+            <ContextMenuItem
+              className="text-destructive focus:text-destructive"
+              onClick={() => {
+                setSelectedIds(new Set([item.id]));
+                setConfirmDelete(true);
+              }}
+            >
+              <Trash2 className="size-4" />
+              Delete
+            </ContextMenuItem>
+          </ContextMenuContent>
+        </ContextMenu>
       </Rnd>
     );
   }
@@ -585,11 +932,24 @@ export function InspirationCanvas() {
         </TransformWrapper>
 
         <div className="pointer-events-none absolute inset-x-0 top-0 z-20 flex items-start justify-between p-4">
-          <div className="pointer-events-auto rounded-md border border-border bg-background/85 px-3 py-2 shadow-sm backdrop-blur-sm">
-            <div className="text-sm font-medium">{canvas?.name || "Inspiration Canvas"}</div>
-            <div className="text-xs text-muted-foreground">
-              {items.length} media / {selectedIds.size} selected
+          <div className="pointer-events-auto flex items-center gap-3 rounded-md border border-border bg-background/85 px-3 py-2 shadow-sm backdrop-blur-sm">
+            <div>
+              <div className="text-sm font-medium">{canvas?.name || "Inspiration Canvas"}</div>
+              <div className="text-xs text-muted-foreground">
+                {items.length} media / {selectedIds.size} selected
+              </div>
             </div>
+            {authState === "authenticated" ? (
+              <Button size="sm" variant="ghost" className="h-8 rounded-md" onClick={() => void signOut()}>
+                <LogOut className="size-4" />
+                Sign out
+              </Button>
+            ) : (
+              <Button size="sm" variant="secondary" className="h-8 rounded-md" onClick={() => setAuthDialogOpen(true)}>
+                <LogIn className="size-4" />
+                Sign in
+              </Button>
+            )}
           </div>
           {error ? (
             <Alert className="pointer-events-auto w-[420px] border-destructive/50 bg-background/95">
@@ -660,9 +1020,6 @@ export function InspirationCanvas() {
             <ToolButton label="Fit view" onClick={fitToView}>
               <Focus className="size-4" />
             </ToolButton>
-            <ToolButton label="Reset zoom" onClick={() => transformRef.current?.resetTransform(120)}>
-              <RefreshCcw className="size-4" />
-            </ToolButton>
             <Separator orientation="vertical" className="h-6" />
             <ToolButton
               label="Generate taste text"
@@ -681,77 +1038,91 @@ export function InspirationCanvas() {
             <ToolButton label="Curator Agent" onClick={() => setAgentOpen(true)}>
               <Bot className="size-4" />
             </ToolButton>
-            <DropdownMenu>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <DropdownMenuTrigger asChild>
-                    <Button
-                      aria-label="More actions"
-                      size="icon"
-                      variant="ghost"
-                      className="size-9 rounded-md"
-                    >
-                      <MoreHorizontal className="size-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                </TooltipTrigger>
-                <TooltipContent>More actions</TooltipContent>
-              </Tooltip>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem
-                  disabled={!primarySelected}
-                  onClick={() => {
-                    if (primarySelected) {
-                      setCommentsOpen(true);
-                      void loadComments(primarySelected.id);
-                    }
-                  }}
-                >
-                  <MessageSquare className="size-4" />
-                  Comments
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  disabled={!primarySelected || isVideo(primarySelected)}
-                  onClick={() => primarySelected && openCrop(primarySelected)}
-                >
-                  <Crop className="size-4" />
-                  Crop metadata
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  disabled={!primarySelected}
-                  onClick={() =>
-                    primarySelected &&
-                    void patchMedia(primarySelected.id, { zIndex: primarySelected.zIndex + 1 })
-                  }
-                >
-                  <ArrowUp className="size-4" />
-                  Bring forward
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  disabled={!primarySelected}
-                  onClick={() =>
-                    primarySelected &&
-                    void patchMedia(primarySelected.id, {
-                      zIndex: Math.max(0, primarySelected.zIndex - 1),
-                    })
-                  }
-                >
-                  <ArrowDown className="size-4" />
-                  Send backward
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem
-                  className="text-destructive focus:text-destructive"
-                  disabled={selectedItems.length === 0}
-                  onClick={() => setConfirmDelete(true)}
-                >
-                  <Trash2 className="size-4" />
-                  Delete selected
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <ToolButton
+              label="Delete selected"
+              disabled={selectedItems.length === 0}
+              onClick={() => setConfirmDelete(true)}
+            >
+              <Trash2 className="size-4" />
+            </ToolButton>
           </div>
         </div>
+
+        <Dialog open={authDialogOpen} onOpenChange={setAuthDialogOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>
+                {authState === "authenticated" && tempState?.mediaItems.length
+                  ? "Save temporary canvas"
+                  : "Temporary canvas expires in 4 hours"}
+              </DialogTitle>
+              <DialogDescription>
+                {authState === "authenticated" && tempState?.mediaItems.length
+                  ? "Move your temporary uploads into your signed-in account so they persist in the database."
+                  : `Uploads are stored in this browser until ${
+                      tempState
+                        ? new Date(tempState.expiresAt).toLocaleString()
+                        : "four hours from now"
+                    }. Sign in or register to keep them permanently.`}
+              </DialogDescription>
+            </DialogHeader>
+            {authState === "authenticated" ? (
+              <div className="space-y-3">
+                {tempState?.mediaItems.length ? (
+                  <Button
+                    className="w-full"
+                    onClick={() => void saveTemporaryCanvasToAccount()}
+                    disabled={savingTemporaryCanvas}
+                  >
+                    {savingTemporaryCanvas ? <Activity className="size-4" /> : <Upload className="size-4" />}
+                    Save temporary canvas
+                  </Button>
+                ) : (
+                  <div className="rounded-md border border-border p-3 text-sm text-muted-foreground">
+                    Your signed-in canvas is already using permanent storage.
+                  </div>
+                )}
+              </div>
+            ) : (
+              <form
+                className="space-y-3"
+                onSubmit={(event) => {
+                  event.preventDefault();
+                  void sendSignInLink();
+                }}
+              >
+                <Input
+                  type="email"
+                  value={authEmail}
+                  onChange={(event) => setAuthEmail(event.target.value)}
+                  placeholder="you@example.com"
+                  disabled={!canAuthenticate || authLoading}
+                />
+                {authMessage ? (
+                  <div className="rounded-md border border-border p-3 text-sm text-muted-foreground">
+                    {authMessage}
+                  </div>
+                ) : null}
+                <DialogFooter className="gap-2 sm:gap-0">
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    onClick={() => {
+                      markTemporaryStorageAcknowledged();
+                      setAuthDialogOpen(false);
+                    }}
+                  >
+                    Keep temporary
+                  </Button>
+                  <Button type="submit" disabled={!canAuthenticate || authLoading || !authEmail.trim()}>
+                    {authLoading ? <Activity className="size-4" /> : <LogIn className="size-4" />}
+                    Send sign-in link
+                  </Button>
+                </DialogFooter>
+              </form>
+            )}
+          </DialogContent>
+        </Dialog>
 
         <Sheet open={commentsOpen} onOpenChange={setCommentsOpen}>
           <SheetContent className="w-[380px] sm:max-w-[380px]">

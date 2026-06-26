@@ -10,6 +10,7 @@ export const SQLITE_SCHEMA = [
     canvas_id TEXT NOT NULL REFERENCES canvases(id) ON DELETE CASCADE,
     type TEXT NOT NULL,
     url TEXT NOT NULL,
+    storage_driver TEXT NOT NULL DEFAULT 'local',
     storage_key TEXT NOT NULL,
     thumbnail_url TEXT,
     thumbnail_storage_key TEXT,
@@ -77,10 +78,17 @@ export const SQLITE_SCHEMA = [
   `CREATE INDEX IF NOT EXISTS generation_runs_canvas_idx ON generation_runs(canvas_id)`,
 ];
 
+export const SQLITE_MIGRATIONS = [
+  `ALTER TABLE media_items ADD COLUMN storage_driver TEXT NOT NULL DEFAULT 'local'`,
+];
+
+export const POSTGRES_MIGRATIONS = [
+  `ALTER TABLE media_items ADD COLUMN IF NOT EXISTS storage_driver TEXT NOT NULL DEFAULT 'local'`,
+];
+
 export const POSTGRES_SCHEMA = SQLITE_SCHEMA.map((statement) =>
   statement
     .replaceAll("INTEGER", "BIGINT")
     .replaceAll("REAL", "DOUBLE PRECISION")
     .replaceAll("TEXT PRIMARY KEY", "TEXT PRIMARY KEY"),
 );
-

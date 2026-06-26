@@ -5,7 +5,12 @@ import { createClient, type Client } from "@libsql/client";
 import { neon, type NeonQueryFunction } from "@neondatabase/serverless";
 
 import { getConfig, isPostgresUrl } from "@/lib/config";
-import { POSTGRES_SCHEMA, SQLITE_SCHEMA } from "@/lib/db/schema";
+import {
+  POSTGRES_MIGRATIONS,
+  POSTGRES_SCHEMA,
+  SQLITE_MIGRATIONS,
+  SQLITE_SCHEMA,
+} from "@/lib/db/schema";
 
 export type DbRow = Record<string, unknown>;
 
@@ -80,6 +85,15 @@ export async function initializeDatabase(): Promise<void> {
         : SQLITE_SCHEMA;
       for (const statement of statements) {
         await client.query(statement);
+      }
+      const migrations = isPostgresUrl(config.databaseUrl)
+        ? POSTGRES_MIGRATIONS
+        : SQLITE_MIGRATIONS;
+      for (const statement of migrations) {
+        await client.query(statement).catch((error: unknown) => {
+          const message = error instanceof Error ? error.message : String(error);
+          if (!/duplicate column|already exists/i.test(message)) throw error;
+        });
       }
     })();
   }

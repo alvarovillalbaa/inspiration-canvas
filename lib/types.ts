@@ -26,8 +26,10 @@ export type DesignAnalysis = {
 export type MediaItem = {
   id: string;
   canvasId: string;
+  userId?: string | null;
   type: MediaKind;
   url: string;
+  storageDriver: "local" | "blob" | "supabase";
   storageKey: string;
   thumbnailUrl: string | null;
   thumbnailStorageKey: string | null;
@@ -94,4 +96,3 @@ export type AgentToolApproval = {
   createdAt: string;
   updatedAt: string;
 };
-
