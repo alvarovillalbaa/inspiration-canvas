@@ -9,6 +9,7 @@ export default defineTool({
   inputSchema: z.object({
     mediaId: z.string().min(1),
     metadata: z.object({
+      title: z.string().nullable().optional(),
       tagsJson: z.array(z.string()).optional(),
       category: z.string().nullable().optional(),
       subcategory: z.string().nullable().optional(),
@@ -24,4 +25,3 @@ export default defineTool({
     }),
   }),
 });
-

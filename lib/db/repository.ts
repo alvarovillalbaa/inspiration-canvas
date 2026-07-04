@@ -57,6 +57,7 @@ function mediaFromRow(row: DbRow): MediaItem {
       : null,
     mimeType: String(row.mime_type),
     fileName: String(row.file_name),
+    title: row.title ? String(row.title) : null,
     sizeBytes: Number(row.size_bytes),
     intrinsicWidth: row.intrinsic_width == null ? null : Number(row.intrinsic_width),
     intrinsicHeight: row.intrinsic_height == null ? null : Number(row.intrinsic_height),
@@ -246,11 +247,11 @@ export async function createMediaItem(input: CreateMediaInput): Promise<MediaIte
   await db.query(
     `INSERT INTO media_items (
       id, canvas_id, type, url, storage_driver, storage_key, thumbnail_url, thumbnail_storage_key,
-      mime_type, file_name, size_bytes, intrinsic_width, intrinsic_height,
+      mime_type, file_name, title, size_bytes, intrinsic_width, intrinsic_height,
       duration_seconds, x, y, width, height, z_index, rotation, crop_json,
       tags_json, category, subcategory, description, design_analysis_json,
       analysis_status, analysis_error, parent_ids_json, created_at, updated_at
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       media.id,
       media.canvasId,
@@ -262,6 +263,7 @@ export async function createMediaItem(input: CreateMediaInput): Promise<MediaIte
       media.thumbnailStorageKey,
       media.mimeType,
       media.fileName,
+      media.title,
       media.sizeBytes,
       media.intrinsicWidth,
       media.intrinsicHeight,
@@ -293,6 +295,7 @@ const MEDIA_UPDATE_COLUMNS: Partial<Record<keyof MediaItem, string>> = {
   storageKey: "storage_key",
   thumbnailUrl: "thumbnail_url",
   thumbnailStorageKey: "thumbnail_storage_key",
+  title: "title",
   intrinsicWidth: "intrinsic_width",
   intrinsicHeight: "intrinsic_height",
   durationSeconds: "duration_seconds",

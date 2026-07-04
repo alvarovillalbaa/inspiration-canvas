@@ -97,6 +97,7 @@ export async function completeChildGeneration(input: {
     thumbnailStorageKey: thumbnailKey,
     mimeType: input.image.mediaType,
     fileName,
+    title: "Generated child media",
     sizeBytes: input.image.data.byteLength,
     intrinsicWidth: metadata.width,
     intrinsicHeight: metadata.height,

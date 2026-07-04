@@ -8,6 +8,7 @@ import type {
   JsonRecord,
   MediaItem,
   MediaKind,
+  TasteBrief,
 } from "@/lib/types";
 
 type JsonValue =
@@ -39,6 +40,7 @@ type MediaRow = {
   thumbnail_storage_key: string | null;
   mime_type: string;
   file_name: string;
+  title: string | null;
   size_bytes: number;
   intrinsic_width: number | null;
   intrinsic_height: number | null;
@@ -69,6 +71,15 @@ type CommentRow = {
   body: string;
   created_at: string;
   updated_at: string;
+};
+
+type TasteBriefRow = {
+  id: string;
+  canvas_id: string;
+  user_id: string;
+  media_item_ids_json: JsonValue | null;
+  text: string;
+  created_at: string;
 };
 
 export type CreateSupabaseMediaInput = Omit<
@@ -127,6 +138,7 @@ function mediaFromRow(row: MediaRow): MediaItem {
     thumbnailStorageKey: row.thumbnail_storage_key,
     mimeType: row.mime_type,
     fileName: row.file_name,
+    title: row.title,
     sizeBytes: Number(row.size_bytes),
     intrinsicWidth: row.intrinsic_width == null ? null : Number(row.intrinsic_width),
     intrinsicHeight: row.intrinsic_height == null ? null : Number(row.intrinsic_height),
@@ -158,6 +170,16 @@ function commentFromRow(row: CommentRow): CommentRecord {
     body: row.body,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
+  };
+}
+
+function tasteBriefFromRow(row: TasteBriefRow): TasteBrief {
+  return {
+    id: row.id,
+    canvasId: row.canvas_id,
+    mediaItemIdsJson: asStringArray(row.media_item_ids_json),
+    text: row.text,
+    createdAt: row.created_at,
   };
 }
 
@@ -342,6 +364,7 @@ export async function createMediaItemForUser(
       thumbnail_storage_key: input.thumbnailStorageKey,
       mime_type: input.mimeType,
       file_name: input.fileName,
+      title: input.title,
       size_bytes: input.sizeBytes,
       intrinsic_width: input.intrinsicWidth,
       intrinsic_height: input.intrinsicHeight,
@@ -375,6 +398,7 @@ const MEDIA_UPDATE_COLUMNS: Partial<Record<keyof MediaItem, keyof MediaRow>> = {
   storageKey: "storage_key",
   thumbnailUrl: "thumbnail_url",
   thumbnailStorageKey: "thumbnail_storage_key",
+  title: "title",
   intrinsicWidth: "intrinsic_width",
   intrinsicHeight: "intrinsic_height",
   durationSeconds: "duration_seconds",
@@ -490,4 +514,27 @@ export async function createCommentForUser(
     .single<CommentRow>();
   throwIfError(inserted.error);
   return commentFromRow(inserted.data);
+}
+
+export async function createTasteBriefForUser(
+  supabase: SupabaseClient,
+  userId: string,
+  canvasId: string,
+  mediaIds: string[],
+  text: string,
+): Promise<TasteBrief> {
+  const inserted = await supabase
+    .from("taste_briefs")
+    .insert({
+      id: id(),
+      canvas_id: canvasId,
+      user_id: userId,
+      media_item_ids_json: mediaIds,
+      text,
+      created_at: now(),
+    })
+    .select("*")
+    .single<TasteBriefRow>();
+  throwIfError(inserted.error);
+  return tasteBriefFromRow(inserted.data);
 }

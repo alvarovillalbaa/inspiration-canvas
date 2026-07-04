@@ -266,6 +266,7 @@ export async function addTempFilesToCanvas(
       thumbnailStorageKey: file.type.startsWith("image/") ? storageKey : null,
       mimeType: file.type,
       fileName: safeName,
+      title: safeName.replace(/\.[^.]+$/, "").replace(/[-_]+/g, " "),
       sizeBytes: file.size,
       intrinsicWidth: metadata.width,
       intrinsicHeight: metadata.height,

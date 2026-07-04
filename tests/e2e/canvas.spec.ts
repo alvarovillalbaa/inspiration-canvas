@@ -40,6 +40,11 @@ test("loads the canvas and exposes offline AI behavior", async ({ page }) => {
   await expect(page.getByRole("button", { name: "Upload", exact: true })).toBeVisible();
   await expect(page.getByLabel("Generate taste text")).toBeDisabled();
   await expect(page.getByLabel("Generate child media")).toBeDisabled();
+  await page.getByRole("button", { name: "Sign in" }).click();
+  const emailInput = page.getByPlaceholder("you@example.com");
+  await emailInput.fill("person@example.com");
+  await expect(emailInput).toHaveValue("person@example.com");
+  await page.getByRole("button", { name: "Keep temporary" }).click();
 });
 
 test("uploads media, edits it, comments, previews, and degrades AI clearly", async ({
@@ -96,9 +101,27 @@ test("uploads media, edits it, comments, previews, and degrades AI clearly", asy
   await expect(item.getByTestId("media-crop-viewport")).toHaveAttribute("data-cropped", "true");
 
   await item.getByRole("button", { name: "Media actions" }).click();
+  await page.getByRole("menuitem", { name: "Info" }).click();
+  const infoPanel = page.locator("aside").filter({ hasText: "Media info" });
+  const titleInput = infoPanel.getByLabel("Title");
+  await titleInput.fill("XContrast study");
+  await titleInput.evaluate((element) => {
+    const input = element as HTMLInputElement;
+    input.setSelectionRange(0, 0);
+  });
+  await titleInput.press("Delete");
+  await expect(titleInput).toHaveValue("Contrast study");
+  await expect(page.getByText("Delete selected media?")).toBeHidden();
+  await infoPanel.getByLabel("Category", { exact: true }).fill("Interface references");
+  await infoPanel.getByLabel("Tags", { exact: true }).fill("contrast, compact");
+  await infoPanel.getByRole("button", { name: "Save info" }).click();
+  await expect(item.locator("span.truncate", { hasText: "Contrast study" }).first()).toBeVisible();
+  await page.getByRole("button", { name: "Close info" }).click();
+
+  await item.getByRole("button", { name: "Media actions" }).click();
   await page.getByRole("menuitem", { name: "Comments" }).click();
-  await page.getByPlaceholder("Add a note about why this reference matters...").fill("Strong contrast and compact composition.");
-  await page.getByRole("button", { name: "Add comment" }).click();
+  await page.getByPlaceholder("Add a note...").fill("Strong contrast and compact composition.");
+  await item.locator("button", { hasText: "Add comment" }).click();
   await expect(page.getByText("Strong contrast and compact composition.")).toBeVisible();
   await page.keyboard.press("Escape");
 
@@ -110,7 +133,8 @@ test("uploads media, edits it, comments, previews, and degrades AI clearly", asy
   await expect(page.getByLabel("Generate taste text")).toBeEnabled();
 
   await page.getByLabel("Generate taste text").click();
-  await expect(page.getByText("Sign in to save this temporary canvas before using AI actions.")).toBeVisible();
+  await expect(page.getByRole("dialog", { name: "Taste/design text" })).toBeVisible();
+  await expect(page.getByText("AI analysis requires Vercel AI Gateway credentials.")).toBeVisible();
 });
 
 test("multi-select enables taste and child media actions", async ({ page }) => {

@@ -27,6 +27,7 @@ async function executeApprovedTool(approvalId: string) {
     const patch = mediaPatchSchema
       .pick({
         tagsJson: true,
+        title: true,
         category: true,
         subcategory: true,
         description: true,

@@ -35,6 +35,7 @@ export type MediaItem = {
   thumbnailStorageKey: string | null;
   mimeType: string;
   fileName: string;
+  title: string | null;
   sizeBytes: number;
   intrinsicWidth: number | null;
   intrinsicHeight: number | null;

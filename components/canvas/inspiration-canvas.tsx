@@ -6,12 +6,16 @@ import {
   ArrowUp,
   Bot,
   Check,
+  ChevronDown,
+  ChevronRight,
   Copy,
   Crop,
   FileText,
   Focus,
   GripVertical,
   ImagePlus,
+  Info,
+  Layers,
   LogIn,
   LogOut,
   MessageSquare,
@@ -23,6 +27,8 @@ import {
   WandSparkles,
   X,
 } from "lucide-react";
+import { useChat } from "@ai-sdk/react";
+import { DefaultChatTransport, type UIMessage } from "ai";
 import {
   useCallback,
   useEffect,
@@ -39,7 +45,21 @@ import {
   type ReactZoomPanPinchRef,
 } from "react-zoom-pan-pinch";
 
+import {
+  Conversation,
+  ConversationContent,
+  ConversationEmptyState,
+  ConversationScrollButton,
+} from "@/components/ai-elements/conversation";
 import { MessageResponse } from "@/components/ai-elements/message";
+import {
+  PromptInput,
+  PromptInputBody,
+  PromptInputFooter,
+  PromptInputSubmit,
+  PromptInputTextarea,
+} from "@/components/ai-elements/prompt-input";
+import { Suggestion, Suggestions } from "@/components/ai-elements/suggestion";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import {
   AlertDialog,
@@ -82,13 +102,6 @@ import {
 } from "@/components/ui/popover";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/sheet";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
 import {
@@ -133,9 +146,74 @@ type CropDraft = {
 };
 
 type AuthState = "checking" | "anonymous" | "authenticated";
+type SidePanel = "info" | "curator" | null;
+type GroupByMode = "none" | "category";
+
+type InfoDraft = {
+  title: string;
+  category: string;
+  subcategory: string;
+  tags: string;
+  description: string;
+};
+
+type ClientMediaContext = {
+  id: string;
+  canvasId: string;
+  type: MediaItem["type"];
+  url?: string;
+  storageDriver: MediaItem["storageDriver"];
+  storageKey: string;
+  thumbnailUrl: string | null;
+  thumbnailStorageKey: string | null;
+  mimeType: string;
+  fileName: string;
+  title: string | null;
+  sizeBytes: number;
+  intrinsicWidth: number | null;
+  intrinsicHeight: number | null;
+  durationSeconds: number | null;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  zIndex: number;
+  rotation: number;
+  cropJson: MediaItem["cropJson"];
+  tagsJson: string[];
+  category: string | null;
+  subcategory: string | null;
+  description: string | null;
+  designAnalysisJson: MediaItem["designAnalysisJson"];
+  analysisStatus: MediaItem["analysisStatus"];
+  analysisError: string | null;
+  parentIdsJson: string[];
+  comments: CommentRecord[];
+  file?: {
+    dataUrl: string;
+    mediaType: string;
+    filename: string;
+  };
+};
 
 const CANVAS_SIZE = 12000;
 const DEFAULT_TRANSFORM: Transform = { scale: 0.65, positionX: 120, positionY: 80 };
+const MAX_AI_INLINE_FILE_BYTES = 6 * 1024 * 1024;
+
+const EMPTY_INFO_DRAFT: InfoDraft = {
+  title: "",
+  category: "",
+  subcategory: "",
+  tags: "",
+  description: "",
+};
+
+const CURATOR_SUGGESTIONS = [
+  "Cluster the selected references",
+  "Suggest tighter tags and categories",
+  "Write a design direction",
+  "Find what feels inconsistent",
+];
 
 function ToolButton({
   label,
@@ -171,10 +249,64 @@ function isVideo(item: MediaItem) {
   return item.type === "video" || item.type === "generated_video";
 }
 
+function mediaLabel(item: MediaItem) {
+  return item.title?.trim() || item.fileName;
+}
+
+function splitTags(value: string) {
+  return [
+    ...new Set(
+      value
+        .split(",")
+        .map((tag) => tag.trim())
+        .filter(Boolean),
+    ),
+  ];
+}
+
+function infoDraftFromItem(item: MediaItem): InfoDraft {
+  return {
+    title: item.title || "",
+    category: item.category || "",
+    subcategory: item.subcategory || "",
+    tags: item.tagsJson.join(", "),
+    description: item.description || "",
+  };
+}
+
+function isEditableTarget(target: EventTarget | null) {
+  if (!(target instanceof HTMLElement)) return false;
+  return Boolean(
+    target.closest(
+      'input, textarea, select, button, [contenteditable="true"], [role="textbox"], [cmdk-input]',
+    ),
+  );
+}
+
+function messageText(message: UIMessage) {
+  return message.parts
+    .map((part) => (part.type === "text" ? part.text : ""))
+    .join("");
+}
+
+function blobToDataUrl(blob: Blob): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result || ""));
+    reader.onerror = () => reject(reader.error || new Error("Could not read file."));
+    reader.readAsDataURL(blob);
+  });
+}
+
 export function InspirationCanvas() {
   const wrapperRef = useRef<HTMLDivElement>(null);
   const transformRef = useRef<ReactZoomPanPinchRef | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const curatorContextRef = useRef<{
+    canvas: { id: string; name: string } | null;
+    selectedIds: string[];
+    mediaContext: ClientMediaContext[];
+  }>({ canvas: null, selectedIds: [], mediaContext: [] });
   const [canvas, setCanvas] = useState<CanvasRecord | null>(null);
   const [items, setItems] = useState<MediaItem[]>([]);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
@@ -184,9 +316,8 @@ export function InspirationCanvas() {
   const [draggingItem, setDraggingItem] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [preview, setPreview] = useState<MediaItem | null>(null);
-  const [commentsOpen, setCommentsOpen] = useState(false);
-  const [comments, setComments] = useState<CommentRecord[]>([]);
-  const [commentBody, setCommentBody] = useState("");
+  const [commentsByMediaId, setCommentsByMediaId] = useState<Record<string, CommentRecord[]>>({});
+  const [commentDrafts, setCommentDrafts] = useState<Record<string, string>>({});
   const [authState, setAuthState] = useState<AuthState>("checking");
   const [authDialogOpen, setAuthDialogOpen] = useState(false);
   const [authEmail, setAuthEmail] = useState("");
@@ -196,9 +327,13 @@ export function InspirationCanvas() {
   const [savingTemporaryCanvas, setSavingTemporaryCanvas] = useState(false);
   const [tasteText, setTasteText] = useState("");
   const [tasteOpen, setTasteOpen] = useState(false);
-  const [agentOpen, setAgentOpen] = useState(false);
-  const [agentPrompt, setAgentPrompt] = useState("");
-  const [agentOutput, setAgentOutput] = useState("");
+  const [sidePanel, setSidePanel] = useState<SidePanel>(null);
+  const [infoItemId, setInfoItemId] = useState<string | null>(null);
+  const [infoDraft, setInfoDraft] = useState<InfoDraft>(EMPTY_INFO_DRAFT);
+  const [curatorInput, setCuratorInput] = useState("");
+  const [groupBy, setGroupBy] = useState<GroupByMode>("none");
+  const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(new Set());
+  const [classifying, setClassifying] = useState(false);
   const [cropItem, setCropItem] = useState<MediaItem | null>(null);
   const [cropDraft, setCropDraft] = useState<CropDraft>({
     x: 0,
@@ -215,11 +350,77 @@ export function InspirationCanvas() {
   const primarySelected = selectedItems[0] || null;
   const isAuthenticated = authState === "authenticated";
   const canAuthenticate = useMemo(() => Boolean(createBrowserSupabaseClient()), []);
+  const infoItem = useMemo(
+    () =>
+      (infoItemId ? items.find((item) => item.id === infoItemId) : null) ||
+      primarySelected,
+    [infoItemId, items, primarySelected],
+  );
+  const existingCategories = useMemo(
+    () => [...new Set(items.map((item) => item.category).filter(Boolean) as string[])],
+    [items],
+  );
+  const existingTags = useMemo(
+    () => [...new Set(items.flatMap((item) => item.tagsJson))].sort(),
+    [items],
+  );
+  const groupSections = useMemo(() => {
+    if (groupBy === "none") return [];
+    const sections = new Map<string, MediaItem[]>();
+    for (const item of items) {
+      const key = item.category?.trim() || "Uncategorized";
+      sections.set(key, [...(sections.get(key) || []), item]);
+    }
+    return [...sections.entries()]
+      .map(([name, groupItems]) => {
+        const bounds = getItemsBounds(groupItems);
+        return bounds ? { id: name, name, items: groupItems, bounds } : null;
+      })
+      .filter(Boolean)
+      .sort((a, b) => a!.name.localeCompare(b!.name)) as Array<{
+        id: string;
+        name: string;
+        items: MediaItem[];
+        bounds: NonNullable<ReturnType<typeof getItemsBounds>>;
+      }>;
+  }, [groupBy, items]);
+  const collapsedItemIds = useMemo(() => {
+    const ids = new Set<string>();
+    for (const section of groupSections) {
+      if (!collapsedGroups.has(section.id)) continue;
+      for (const item of section.items) ids.add(item.id);
+    }
+    return ids;
+  }, [collapsedGroups, groupSections]);
+  const curatorTransport = useMemo(
+    () =>
+      new DefaultChatTransport<UIMessage>({
+        api: "/api/curator",
+        prepareSendMessagesRequest: ({ messages }) => ({
+          body: {
+            messages,
+            ...curatorContextRef.current,
+          },
+        }),
+      }),
+    [],
+  );
+  const {
+    messages: curatorMessages,
+    sendMessage: sendCuratorMessage,
+    status: curatorStatus,
+    error: curatorError,
+    stop: stopCurator,
+  } = useChat({
+    transport: curatorTransport,
+    onError: (chatError) => setError(chatError.message),
+  });
 
   const applyTemporaryState = useCallback((next: TempCanvasState) => {
     setTempState(next);
     setCanvas(next.canvas);
     setItems(next.mediaItems);
+    setCommentsByMediaId(next.commentsByMediaId);
   }, []);
 
   const loadTemporaryCanvas = useCallback(async (showDialog = true) => {
@@ -322,8 +523,14 @@ export function InspirationCanvas() {
         event.preventDefault();
         setSelectedIds(new Set(items.map((item) => item.id)));
       }
-      if (event.key === "Delete" || event.key === "Backspace") {
-        if (selectedIds.size > 0) setConfirmDelete(true);
+      if (
+        (event.key === "Delete" || event.key === "Backspace") &&
+        !isEditableTarget(event.target)
+      ) {
+        if (selectedIds.size > 0) {
+          event.preventDefault();
+          setConfirmDelete(true);
+        }
       }
       if (event.key === "+") transformRef.current?.zoomIn(0.2, 120);
       if (event.key === "-") transformRef.current?.zoomOut(0.2, 120);
@@ -332,6 +539,14 @@ export function InspirationCanvas() {
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [fitToView, items, selectedIds]);
+
+  useEffect(() => {
+    curatorContextRef.current = {
+      canvas: canvas ? { id: canvas.id, name: canvas.name } : null,
+      selectedIds: [...selectedIds],
+      mediaContext: items.map((item) => createClientMediaContext(item)),
+    };
+  });
 
   async function patchMedia(id: string, patch: Partial<MediaItem>) {
     if (!isAuthenticated) {
@@ -401,6 +616,7 @@ export function InspirationCanvas() {
       else next.add(item.id);
       return next;
     });
+    void loadComments(item.id);
   }
 
   async function uploadFiles(files: FileList | File[], point?: { x: number; y: number }) {
@@ -467,56 +683,116 @@ export function InspirationCanvas() {
 
   async function loadComments(mediaId: string) {
     if (!isAuthenticated) {
-      setComments(tempState?.commentsByMediaId[mediaId] || []);
+      setCommentsByMediaId((current) => ({
+        ...current,
+        [mediaId]: tempState?.commentsByMediaId[mediaId] || [],
+      }));
       return;
     }
 
     const response = await fetch(`/api/media/${mediaId}/comments`, { cache: "no-store" });
     const data = (await response.json()) as { comments: CommentRecord[] };
-    setComments(data.comments);
+    setCommentsByMediaId((current) => ({ ...current, [mediaId]: data.comments }));
   }
 
-  async function addComment() {
-    if (!primarySelected || !commentBody.trim()) return;
+  async function addComment(mediaId: string) {
+    const body = commentDrafts[mediaId]?.trim();
+    if (!body) return;
     if (!isAuthenticated) {
       if (!tempState) return;
-      const result = addTempComment(tempState, primarySelected.id, commentBody);
+      const result = addTempComment(tempState, mediaId, body);
       setTempState(result.state);
-      setComments((current) => [...current, result.comment]);
-      setCommentBody("");
+      setCommentsByMediaId(result.state.commentsByMediaId);
+      setCommentDrafts((current) => ({ ...current, [mediaId]: "" }));
       return;
     }
 
-    const response = await fetch(`/api/media/${primarySelected.id}/comments`, {
+    const response = await fetch(`/api/media/${mediaId}/comments`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ body: commentBody }),
+      body: JSON.stringify({ body }),
     });
     const data = (await response.json()) as { comment?: CommentRecord; error?: string };
     if (!response.ok || !data.comment) {
       setError(data.error || "Could not add comment.");
       return;
     }
-    setComments((current) => [...current, data.comment!]);
-    setCommentBody("");
+    setCommentsByMediaId((current) => ({
+      ...current,
+      [mediaId]: [...(current[mediaId] || []), data.comment!],
+    }));
+    setCommentDrafts((current) => ({ ...current, [mediaId]: "" }));
+  }
+
+  function createClientMediaContext(item: MediaItem): ClientMediaContext {
+    return {
+      id: item.id,
+      canvasId: item.canvasId,
+      type: item.type,
+      url: item.url,
+      storageDriver: item.storageDriver,
+      storageKey: item.storageKey,
+      thumbnailUrl: item.thumbnailUrl,
+      thumbnailStorageKey: item.thumbnailStorageKey,
+      mimeType: item.mimeType,
+      fileName: item.fileName,
+      title: item.title,
+      sizeBytes: item.sizeBytes,
+      intrinsicWidth: item.intrinsicWidth,
+      intrinsicHeight: item.intrinsicHeight,
+      durationSeconds: item.durationSeconds,
+      x: item.x,
+      y: item.y,
+      width: item.width,
+      height: item.height,
+      zIndex: item.zIndex,
+      rotation: item.rotation,
+      cropJson: item.cropJson,
+      tagsJson: item.tagsJson,
+      category: item.category,
+      subcategory: item.subcategory,
+      description: item.description,
+      designAnalysisJson: item.designAnalysisJson,
+      analysisStatus: item.analysisStatus,
+      analysisError: item.analysisError,
+      parentIdsJson: item.parentIdsJson,
+      comments:
+        commentsByMediaId[item.id] ||
+        tempState?.commentsByMediaId[item.id] ||
+        [],
+    };
+  }
+
+  async function createAiMediaContext(item: MediaItem): Promise<ClientMediaContext> {
+    const context = createClientMediaContext(item);
+    if (!isAuthenticated && item.mimeType.startsWith("image/")) {
+      const blob = await getTempBlob(item.storageKey);
+      if (blob && blob.size <= MAX_AI_INLINE_FILE_BYTES) {
+        context.file = {
+          dataUrl: await blobToDataUrl(blob),
+          mediaType: item.mimeType,
+          filename: item.fileName,
+        };
+      }
+    }
+    return context;
   }
 
   async function generateTasteBrief() {
     if (!canvas || selectedItems.length === 0) return;
-    if (!isAuthenticated) {
-      setError("Sign in to save this temporary canvas before using AI actions.");
-      setAuthDialogOpen(true);
-      return;
-    }
     setTasteOpen(true);
     setTasteText("");
     setError(null);
+    const mediaContext = !isAuthenticated
+      ? await Promise.all(selectedItems.map((item) => createAiMediaContext(item)))
+      : undefined;
     const response = await fetch("/api/taste-brief", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         canvasId: canvas.id,
         mediaIds: selectedItems.map((item) => item.id),
+        mediaContext,
       }),
     });
     const data = (await response.json()) as { text?: string; error?: string };
@@ -530,7 +806,7 @@ export function InspirationCanvas() {
   async function generateChildMedia() {
     if (!canvas || selectedItems.length < 2) return;
     if (!isAuthenticated) {
-      setError("Sign in to save this temporary canvas before using AI actions.");
+      setError("Sign in to save this temporary canvas before generating child media.");
       setAuthDialogOpen(true);
       return;
     }
@@ -551,24 +827,56 @@ export function InspirationCanvas() {
     setTimeout(() => void loadCanvas(), 1200);
   }
 
-  async function sendAgentMessage() {
-    if (!agentPrompt.trim()) return;
-    const selection = selectedItems.map((item) => `${item.fileName} (${item.id})`).join(", ");
-    setAgentOutput(
-      [
-        "## Curator Agent",
-        "",
-        "Eve agent files are installed under `agent/` with canvas/media tools and approval gates.",
-        "",
-        selection
-          ? `Current selection: ${selection}.`
-          : "No media selected. Select references before asking for curation.",
-        "",
-        `Request: ${agentPrompt}`,
-        "",
-        "In local fallback mode this panel summarizes available context. On Vercel, Eve endpoints can stream full agent sessions through the same tool set.",
-      ].join("\n"),
-    );
+  async function runAutoClassify() {
+    if (!canvas || selectedItems.length === 0) return;
+    setClassifying(true);
+    setError(null);
+    try {
+      const mediaContext = !isAuthenticated
+        ? await Promise.all(selectedItems.map((item) => createAiMediaContext(item)))
+        : undefined;
+      const response = await fetch("/api/media/auto-classify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          canvasId: canvas.id,
+          mediaIds: selectedItems.map((item) => item.id),
+          mediaContext,
+        }),
+      });
+      const data = (await response.json()) as {
+        results?: Array<{ id: string; media?: MediaItem; patch?: Partial<MediaItem> }>;
+        error?: string;
+      };
+      if (!response.ok || !data.results) {
+        throw new Error(data.error || "Auto-classify failed.");
+      }
+      const updates = new Map(
+        data.results.map((result) => [result.id, result.media || result.patch || null]),
+      );
+      setItems((current) =>
+        current.map((item) => {
+          const update = updates.get(item.id);
+          return update ? { ...item, ...update } : item;
+        }),
+      );
+      if (!isAuthenticated && tempState) {
+        applyTemporaryState(
+          updateTempMediaItems(tempState, (current) =>
+            current.map((item) => {
+              const update = updates.get(item.id);
+              return update
+                ? { ...item, ...update, updatedAt: new Date().toISOString() }
+                : item;
+            }),
+          ),
+        );
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Auto-classify failed.");
+    } finally {
+      setClassifying(false);
+    }
   }
 
   async function sendSignInLink() {
@@ -623,6 +931,7 @@ export function InspirationCanvas() {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
+            title: tempItem.title,
             width: tempItem.width,
             height: tempItem.height,
             zIndex: tempItem.zIndex,
@@ -655,8 +964,381 @@ export function InspirationCanvas() {
 
   function openCommentsForItem(item: MediaItem) {
     setSelectedIds(new Set([item.id]));
-    setCommentsOpen(true);
     void loadComments(item.id);
+  }
+
+  function openInfoForItem(item: MediaItem) {
+    setSelectedIds(new Set([item.id]));
+    setInfoItemId(item.id);
+    setInfoDraft(infoDraftFromItem(item));
+    setSidePanel("info");
+    void loadComments(item.id);
+  }
+
+  async function saveInfo() {
+    if (!infoItem) return;
+    await patchMedia(infoItem.id, {
+      title: infoDraft.title.trim() || null,
+      category: infoDraft.category.trim() || null,
+      subcategory: infoDraft.subcategory.trim() || null,
+      tagsJson: splitTags(infoDraft.tags),
+      description: infoDraft.description.trim() || null,
+    });
+  }
+
+  function addCategoryToDraft(category: string) {
+    setInfoDraft((current) => ({ ...current, category }));
+  }
+
+  function addTagToDraft(tag: string) {
+    setInfoDraft((current) => {
+      const tags = splitTags(current.tags);
+      if (!tags.includes(tag)) tags.push(tag);
+      return { ...current, tags: tags.join(", ") };
+    });
+  }
+
+  function toggleGroup(groupId: string) {
+    setCollapsedGroups((current) => {
+      const next = new Set(current);
+      if (next.has(groupId)) next.delete(groupId);
+      else next.add(groupId);
+      return next;
+    });
+  }
+
+  function renderGroupSections() {
+    if (groupSections.length === 0) return null;
+    return groupSections.map((section) => {
+      const collapsed = collapsedGroups.has(section.id);
+      const padding = 28;
+      return (
+        <div
+          key={section.id}
+          className="absolute rounded-md border border-dashed border-primary/60 bg-primary/5"
+          style={{
+            left: section.bounds.x - padding,
+            top: section.bounds.y - padding,
+            width: section.bounds.width + padding * 2,
+            height: collapsed ? 54 : section.bounds.height + padding * 2,
+            zIndex: 1,
+          }}
+        >
+          <button
+            type="button"
+            className="absolute left-3 top-3 flex h-8 items-center gap-2 rounded-md border border-border bg-background/90 px-2 text-xs font-medium shadow-sm backdrop-blur"
+            onClick={(event) => {
+              event.stopPropagation();
+              toggleGroup(section.id);
+            }}
+          >
+            {collapsed ? <ChevronRight className="size-3" /> : <ChevronDown className="size-3" />}
+            <span className="max-w-48 truncate">{section.name}</span>
+            <span className="text-muted-foreground">{section.items.length}</span>
+          </button>
+        </div>
+      );
+    });
+  }
+
+  function renderCommentsPopover(item: MediaItem) {
+    if (!selectedIds.has(item.id)) return null;
+    const itemComments = commentsByMediaId[item.id] || tempState?.commentsByMediaId[item.id] || [];
+    return (
+      <div
+        className="absolute left-[calc(100%+10px)] top-0 w-80 rounded-md border border-border bg-background/95 p-3 shadow-lg backdrop-blur"
+        onClick={(event) => event.stopPropagation()}
+        onMouseDown={(event) => event.stopPropagation()}
+        style={{ zIndex: 60 }}
+      >
+        <div className="mb-2 flex items-center justify-between gap-2">
+          <div className="min-w-0">
+            <div className="truncate text-sm font-medium">Comments</div>
+            <div className="truncate text-xs text-muted-foreground">{mediaLabel(item)}</div>
+          </div>
+          <Button
+            aria-label="Close comments"
+            size="icon"
+            variant="ghost"
+            className="size-7 rounded-md"
+            onClick={() => setSelectedIds((current) => {
+              const next = new Set(current);
+              next.delete(item.id);
+              return next;
+            })}
+          >
+            <X className="size-3" />
+          </Button>
+        </div>
+        <ScrollArea className="max-h-48 pr-3">
+          <div className="space-y-2">
+            {itemComments.length === 0 ? (
+              <div className="rounded-md border border-dashed border-border p-3 text-sm text-muted-foreground">
+                No comments yet.
+              </div>
+            ) : (
+              itemComments.map((comment) => (
+                <div key={comment.id} className="rounded-md border border-border p-2 text-sm">
+                  {comment.body}
+                  <div className="mt-1 text-[11px] text-muted-foreground">
+                    {new Date(comment.createdAt).toLocaleString()}
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        </ScrollArea>
+        <div className="mt-3 space-y-2">
+          <Textarea
+            value={commentDrafts[item.id] || ""}
+            onChange={(event) =>
+              setCommentDrafts((current) => ({ ...current, [item.id]: event.target.value }))
+            }
+            placeholder="Add a note..."
+            className="min-h-20 resize-none"
+          />
+          <Button
+            className="w-full"
+            size="sm"
+            onClick={() => void addComment(item.id)}
+            disabled={!commentDrafts[item.id]?.trim()}
+          >
+            Add comment
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  function renderSidePanel() {
+    if (sidePanel === "info") {
+      return (
+        <aside className="flex h-[100dvh] w-[390px] shrink-0 flex-col border-l border-border bg-background">
+          <div className="flex items-center justify-between gap-3 border-b border-border p-4">
+            <div className="min-w-0">
+              <div className="text-sm font-medium">Media info</div>
+              <div className="truncate text-xs text-muted-foreground">
+                {infoItem ? mediaLabel(infoItem) : "No media selected"}
+              </div>
+            </div>
+            <Button
+              aria-label="Close info"
+              size="icon"
+              variant="ghost"
+              className="size-8 rounded-md"
+              onClick={() => setSidePanel(null)}
+            >
+              <X className="size-4" />
+            </Button>
+          </div>
+          {infoItem ? (
+            <ScrollArea className="flex-1">
+              <div className="space-y-4 p-4">
+                <label className="space-y-1 text-sm">
+                  <span className="text-muted-foreground">Title</span>
+                  <Input
+                    value={infoDraft.title}
+                    onChange={(event) =>
+                      setInfoDraft((current) => ({ ...current, title: event.target.value }))
+                    }
+                    placeholder="Reference title"
+                  />
+                </label>
+                <label className="space-y-1 text-sm">
+                  <span className="text-muted-foreground">Category</span>
+                  <Input
+                    value={infoDraft.category}
+                    onChange={(event) =>
+                      setInfoDraft((current) => ({ ...current, category: event.target.value }))
+                    }
+                    placeholder="Create or choose a category"
+                    list="media-categories"
+                  />
+                  <datalist id="media-categories">
+                    {existingCategories.map((category) => (
+                      <option key={category} value={category} />
+                    ))}
+                  </datalist>
+                </label>
+                {existingCategories.length > 0 ? (
+                  <div className="flex flex-wrap gap-2">
+                    {existingCategories.slice(0, 8).map((category) => (
+                      <Button
+                        key={category}
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        className="h-7 rounded-md px-2 text-xs"
+                        onClick={() => addCategoryToDraft(category)}
+                      >
+                        {category}
+                      </Button>
+                    ))}
+                  </div>
+                ) : null}
+                <label className="space-y-1 text-sm">
+                  <span className="text-muted-foreground">Subcategory</span>
+                  <Input
+                    value={infoDraft.subcategory}
+                    onChange={(event) =>
+                      setInfoDraft((current) => ({ ...current, subcategory: event.target.value }))
+                    }
+                    placeholder="Optional subcategory"
+                  />
+                </label>
+                <label className="space-y-1 text-sm">
+                  <span className="text-muted-foreground">Tags</span>
+                  <Input
+                    value={infoDraft.tags}
+                    onChange={(event) =>
+                      setInfoDraft((current) => ({ ...current, tags: event.target.value }))
+                    }
+                    placeholder="Comma-separated tags"
+                    list="media-tags"
+                  />
+                  <datalist id="media-tags">
+                    {existingTags.map((tag) => (
+                      <option key={tag} value={tag} />
+                    ))}
+                  </datalist>
+                </label>
+                {existingTags.length > 0 ? (
+                  <div className="flex flex-wrap gap-2">
+                    {existingTags.slice(0, 14).map((tag) => (
+                      <Button
+                        key={tag}
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        className="h-7 rounded-md px-2 text-xs"
+                        onClick={() => addTagToDraft(tag)}
+                      >
+                        {tag}
+                      </Button>
+                    ))}
+                  </div>
+                ) : null}
+                <label className="space-y-1 text-sm">
+                  <span className="text-muted-foreground">Description</span>
+                  <Textarea
+                    value={infoDraft.description}
+                    onChange={(event) =>
+                      setInfoDraft((current) => ({ ...current, description: event.target.value }))
+                    }
+                    placeholder="What makes this reference useful?"
+                    className="min-h-28 resize-none"
+                  />
+                </label>
+              </div>
+            </ScrollArea>
+          ) : (
+            <div className="p-4 text-sm text-muted-foreground">Select media to edit its metadata.</div>
+          )}
+          <div className="border-t border-border p-4">
+            <Button className="w-full" onClick={() => void saveInfo()} disabled={!infoItem}>
+              Save info
+            </Button>
+          </div>
+        </aside>
+      );
+    }
+
+    if (sidePanel === "curator") {
+      return (
+        <aside className="flex h-[100dvh] w-[460px] shrink-0 flex-col border-l border-border bg-background">
+          <div className="flex items-center justify-between gap-3 border-b border-border p-4">
+            <div>
+              <div className="text-sm font-medium">Curator</div>
+              <div className="text-xs text-muted-foreground">
+                {selectedIds.size} selected / {items.length} total
+              </div>
+            </div>
+            <Button
+              aria-label="Close curator"
+              size="icon"
+              variant="ghost"
+              className="size-8 rounded-md"
+              onClick={() => setSidePanel(null)}
+            >
+              <X className="size-4" />
+            </Button>
+          </div>
+          <Conversation className="min-h-0 flex-1">
+            <ConversationContent className="gap-4 p-4">
+              {curatorMessages.length === 0 ? (
+                <ConversationEmptyState
+                  icon={<Bot className="size-7" />}
+                  title="Ask the curator"
+                  description="Use the selected media and canvas metadata as context."
+                />
+              ) : (
+                curatorMessages.map((message) => (
+                  <div
+                    key={message.id}
+                    className={cn(
+                      "max-w-[92%] rounded-md border px-3 py-2 text-sm",
+                      message.role === "user"
+                        ? "ml-auto border-primary/25 bg-primary/10"
+                        : "border-border bg-muted/35",
+                    )}
+                  >
+                    <MessageResponse className="prose-p:my-0">{messageText(message)}</MessageResponse>
+                  </div>
+                ))
+              )}
+              {curatorError ? (
+                <Alert className="border-destructive/50">
+                  <AlertTitle>Curator failed</AlertTitle>
+                  <AlertDescription>{curatorError.message}</AlertDescription>
+                </Alert>
+              ) : null}
+            </ConversationContent>
+            <ConversationScrollButton />
+          </Conversation>
+          <div className="space-y-3 border-t border-border p-4">
+            <Suggestions>
+              {CURATOR_SUGGESTIONS.map((suggestion) => (
+                <Suggestion
+                  key={suggestion}
+                  suggestion={suggestion}
+                  onClick={(value) => setCuratorInput(value)}
+                />
+              ))}
+            </Suggestions>
+            <PromptInput
+              onSubmit={(message, event) => {
+                event.preventDefault();
+                const text = message.text.trim();
+                if (!text) return;
+                void sendCuratorMessage({ text });
+                setCuratorInput("");
+              }}
+            >
+              <PromptInputBody>
+                <PromptInputTextarea
+                  value={curatorInput}
+                  onChange={(event) => setCuratorInput(event.target.value)}
+                  placeholder="Ask for clusters, tags, direction, or cleanup..."
+                  className="min-h-24"
+                />
+              </PromptInputBody>
+              <PromptInputFooter>
+                <div className="text-xs text-muted-foreground">
+                  Uses current canvas context
+                </div>
+                <PromptInputSubmit
+                  status={curatorStatus}
+                  onStop={() => stopCurator()}
+                  disabled={!curatorInput.trim() && curatorStatus === "ready"}
+                />
+              </PromptInputFooter>
+            </PromptInput>
+          </div>
+        </aside>
+      );
+    }
+
+    return null;
   }
 
   function bringForward(item: MediaItem) {
@@ -686,6 +1368,7 @@ export function InspirationCanvas() {
   }
 
   function renderMedia(item: MediaItem) {
+    if (collapsedItemIds.has(item.id)) return null;
     const selected = selectedIds.has(item.id);
     const crop = isVideo(item) ? null : normalizeCropJson(item.cropJson);
     return (
@@ -730,7 +1413,7 @@ export function InspirationCanvas() {
           });
         }}
         className="group"
-        style={{ zIndex: item.zIndex }}
+        style={{ zIndex: item.zIndex + 10 }}
       >
         <ContextMenu>
           <ContextMenuTrigger asChild>
@@ -749,48 +1432,50 @@ export function InspirationCanvas() {
                 }
               }}
               className={cn(
-                "relative size-full overflow-hidden rounded-md border bg-card text-left shadow-sm outline-none transition-colors",
+                "relative size-full overflow-visible rounded-md border bg-card text-left shadow-sm outline-none transition-colors",
                 selected ? "border-primary ring-2 ring-primary/35" : "border-border",
               )}
             >
-              {isVideo(item) ? (
-                <video
-                  src={item.url}
-                  className="size-full object-cover"
-                  muted
-                  playsInline
-                  preload="metadata"
-                />
-              ) : (
-                <span
-                  className="absolute inset-0 overflow-hidden"
-                  data-cropped={crop ? "true" : "false"}
-                  data-testid="media-crop-viewport"
-                >
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={item.thumbnailUrl || item.url}
-                    alt={item.description || item.fileName}
-                    className={cn(
-                      crop
-                        ? "absolute left-0 top-0 max-w-none object-cover"
-                        : "size-full object-cover",
-                    )}
-                    data-testid="media-image"
-                    loading="lazy"
-                    style={crop ? getCroppedImageStyle(crop) : undefined}
+              <div className="pointer-events-none absolute inset-0 overflow-hidden rounded-md">
+                {isVideo(item) ? (
+                  <video
+                    src={item.url}
+                    className="size-full object-cover"
+                    muted
+                    playsInline
+                    preload="metadata"
                   />
-                </span>
-              )}
-              <div className="absolute inset-x-0 bottom-0 flex items-center justify-between gap-2 bg-background/80 px-2 py-1 text-[11px] text-muted-foreground backdrop-blur-sm">
-                <span className="truncate">{item.fileName}</span>
-                {item.analysisStatus === "processing" || item.analysisStatus === "pending" ? (
-                  <Activity className="size-3" />
-                ) : item.analysisStatus === "complete" ? (
-                  <Check className="size-3 text-primary" />
                 ) : (
-                  <X className="size-3 text-destructive" />
+                  <span
+                    className="absolute inset-0 overflow-hidden"
+                    data-cropped={crop ? "true" : "false"}
+                    data-testid="media-crop-viewport"
+                  >
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={item.thumbnailUrl || item.url}
+                      alt={item.description || item.fileName}
+                      className={cn(
+                        crop
+                          ? "absolute left-0 top-0 max-w-none object-cover"
+                          : "size-full object-cover",
+                      )}
+                      data-testid="media-image"
+                      loading="lazy"
+                      style={crop ? getCroppedImageStyle(crop) : undefined}
+                    />
+                  </span>
                 )}
+                <div className="absolute inset-x-0 bottom-0 flex items-center justify-between gap-2 bg-background/80 px-2 py-1 text-[11px] text-muted-foreground backdrop-blur-sm">
+                  <span className="truncate">{mediaLabel(item)}</span>
+                  {item.analysisStatus === "processing" || item.analysisStatus === "pending" ? (
+                    <Activity className="size-3" />
+                  ) : item.analysisStatus === "complete" ? (
+                    <Check className="size-3 text-primary" />
+                  ) : (
+                    <X className="size-3 text-destructive" />
+                  )}
+                </div>
               </div>
               {selected ? (
                 <DropdownMenu>
@@ -812,6 +1497,10 @@ export function InspirationCanvas() {
                     <TooltipContent>Media actions</TooltipContent>
                   </Tooltip>
                   <DropdownMenuContent align="end">
+                    <DropdownMenuItem onClick={() => openInfoForItem(item)}>
+                      <Info className="size-4" />
+                      Info
+                    </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => openCommentsForItem(item)}>
                       <MessageSquare className="size-4" />
                       Comments
@@ -847,15 +1536,20 @@ export function InspirationCanvas() {
                     <div className="mt-2 space-y-1 text-xs text-muted-foreground">
                       {item.parentIdsJson.map((parentId) => {
                         const parent = items.find((candidate) => candidate.id === parentId);
-                        return <div key={parentId}>{parent?.fileName || parentId}</div>;
+                        return <div key={parentId}>{parent ? mediaLabel(parent) : parentId}</div>;
                       })}
                     </div>
                   </PopoverContent>
                 </Popover>
               ) : null}
+              {renderCommentsPopover(item)}
             </div>
           </ContextMenuTrigger>
           <ContextMenuContent>
+            <ContextMenuItem onClick={() => openInfoForItem(item)}>
+              <Info className="size-4" />
+              Info
+            </ContextMenuItem>
             <ContextMenuItem onClick={() => openCommentsForItem(item)}>
               <MessageSquare className="size-4" />
               Comments
@@ -891,48 +1585,50 @@ export function InspirationCanvas() {
 
   return (
     <TooltipProvider>
-      <div
-        ref={wrapperRef}
-        className="relative min-h-[100dvh] overflow-hidden bg-background text-foreground"
-        onDragOver={(event) => event.preventDefault()}
-        onDrop={onDrop}
-      >
-        <TransformWrapper
-          ref={transformRef}
-          minScale={0.12}
-          maxScale={4}
-          initialScale={DEFAULT_TRANSFORM.scale}
-          initialPositionX={DEFAULT_TRANSFORM.positionX}
-          initialPositionY={DEFAULT_TRANSFORM.positionY}
-          limitToBounds={false}
-          centerOnInit={false}
-          doubleClick={{ disabled: true }}
-          panning={{ disabled: draggingItem, excluded: ["input", "textarea", "button"] }}
-          wheel={{ step: 0.08 }}
-          onTransform={(_, state) => setTransform(state)}
+      <div className="flex min-h-[100dvh] bg-background text-foreground">
+        <div
+          ref={wrapperRef}
+          className="relative min-h-[100dvh] min-w-0 flex-1 overflow-hidden"
+          onDragOver={(event) => event.preventDefault()}
+          onDrop={onDrop}
         >
-          <TransformComponent
-            wrapperClass="!h-[100dvh] !w-full"
-            contentClass="!h-[12000px] !w-[12000px]"
+          <TransformWrapper
+            ref={transformRef}
+            minScale={0.12}
+            maxScale={4}
+            initialScale={DEFAULT_TRANSFORM.scale}
+            initialPositionX={DEFAULT_TRANSFORM.positionX}
+            initialPositionY={DEFAULT_TRANSFORM.positionY}
+            limitToBounds={false}
+            centerOnInit={false}
+            doubleClick={{ disabled: true }}
+            panning={{ disabled: draggingItem, excluded: ["input", "textarea", "button"] }}
+            wheel={{ step: 0.08 }}
+            onTransform={(_, state) => setTransform(state)}
           >
-            <div
-              className="relative"
-              style={{
-                width: CANVAS_SIZE,
-                height: CANVAS_SIZE,
-                backgroundImage:
-                  "radial-gradient(circle at 1px 1px, var(--border) 1px, transparent 0)",
-                backgroundSize: "32px 32px",
-              }}
-              onClick={() => setSelectedIds(new Set())}
+            <TransformComponent
+              wrapperClass="!h-[100dvh] !w-full"
+              contentClass="!h-[12000px] !w-[12000px]"
             >
-              {items.map(renderMedia)}
-            </div>
-          </TransformComponent>
-        </TransformWrapper>
+              <div
+                className="relative"
+                style={{
+                  width: CANVAS_SIZE,
+                  height: CANVAS_SIZE,
+                  backgroundImage:
+                    "radial-gradient(circle at 1px 1px, var(--border) 1px, transparent 0)",
+                  backgroundSize: "32px 32px",
+                }}
+                onClick={() => setSelectedIds(new Set())}
+              >
+                {renderGroupSections()}
+                {items.map(renderMedia)}
+              </div>
+            </TransformComponent>
+          </TransformWrapper>
 
-        <div className="pointer-events-none absolute inset-x-0 top-0 z-20 flex items-start justify-between p-4">
-          <div className="pointer-events-auto flex items-center gap-3 rounded-md border border-border bg-background/85 px-3 py-2 shadow-sm backdrop-blur-sm">
+          <div className="pointer-events-none absolute inset-x-0 top-0 z-20 flex items-start justify-between p-4">
+            <div className="pointer-events-auto flex items-center gap-3 rounded-md border border-border bg-background/85 px-3 py-2 shadow-sm backdrop-blur-sm">
             <div>
               <div className="text-sm font-medium">{canvas?.name || "Inspiration Canvas"}</div>
               <div className="text-xs text-muted-foreground">
@@ -1002,7 +1698,7 @@ export function InspirationCanvas() {
           }}
         />
 
-        <div className="fixed inset-x-0 bottom-[calc(env(safe-area-inset-bottom)+18px)] z-30 flex justify-center px-4">
+        <div className="absolute inset-x-0 bottom-[calc(env(safe-area-inset-bottom)+18px)] z-30 flex justify-center px-4">
           <div className="flex items-center gap-1 rounded-md border border-border bg-background/90 p-1 shadow-lg backdrop-blur-sm">
             <ToolButton label="Upload" onClick={() => fileInputRef.current?.click()}>
               {uploading ? <Activity className="size-4" /> : <Upload className="size-4" />}
@@ -1035,7 +1731,41 @@ export function InspirationCanvas() {
             >
               <WandSparkles className="size-4" />
             </ToolButton>
-            <ToolButton label="Curator Agent" onClick={() => setAgentOpen(true)}>
+            <ToolButton
+              label="Auto-classify"
+              disabled={selectedItems.length === 0 || classifying}
+              onClick={runAutoClassify}
+            >
+              {classifying ? <Activity className="size-4" /> : <Sparkles className="size-4" />}
+            </ToolButton>
+            <DropdownMenu>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      aria-label="Group media"
+                      size="icon"
+                      variant="ghost"
+                      className="size-9 rounded-md"
+                    >
+                      <Layers className="size-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                </TooltipTrigger>
+                <TooltipContent>Group media</TooltipContent>
+              </Tooltip>
+              <DropdownMenuContent align="center">
+                <DropdownMenuItem onClick={() => setGroupBy("none")}>
+                  {groupBy === "none" ? <Check className="size-4" /> : <span className="size-4" />}
+                  None
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setGroupBy("category")}>
+                  {groupBy === "category" ? <Check className="size-4" /> : <span className="size-4" />}
+                  Category
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+            <ToolButton label="Curator" onClick={() => setSidePanel("curator")}>
               <Bot className="size-4" />
             </ToolButton>
             <ToolButton
@@ -1096,8 +1826,13 @@ export function InspirationCanvas() {
                   value={authEmail}
                   onChange={(event) => setAuthEmail(event.target.value)}
                   placeholder="you@example.com"
-                  disabled={!canAuthenticate || authLoading}
+                  disabled={authLoading}
                 />
+                {!canAuthenticate ? (
+                  <div className="rounded-md border border-border p-3 text-sm text-muted-foreground">
+                    Authentication is not configured here, but the field remains editable.
+                  </div>
+                ) : null}
                 {authMessage ? (
                   <div className="rounded-md border border-border p-3 text-sm text-muted-foreground">
                     {authMessage}
@@ -1123,74 +1858,6 @@ export function InspirationCanvas() {
             )}
           </DialogContent>
         </Dialog>
-
-        <Sheet open={commentsOpen} onOpenChange={setCommentsOpen}>
-          <SheetContent className="w-[380px] sm:max-w-[380px]">
-            <SheetHeader>
-              <SheetTitle>Comments</SheetTitle>
-              <SheetDescription>{primarySelected?.fileName || "No media selected"}</SheetDescription>
-            </SheetHeader>
-            <ScrollArea className="mt-4 h-[calc(100dvh-230px)] pr-4">
-              <div className="space-y-3">
-                {comments.length === 0 ? (
-                  <div className="rounded-md border border-dashed border-border p-4 text-sm text-muted-foreground">
-                    No comments yet.
-                  </div>
-                ) : (
-                  comments.map((comment) => (
-                    <div key={comment.id} className="rounded-md border border-border p-3 text-sm">
-                      {comment.body}
-                      <div className="mt-2 text-xs text-muted-foreground">
-                        {new Date(comment.createdAt).toLocaleString()}
-                      </div>
-                    </div>
-                  ))
-                )}
-              </div>
-            </ScrollArea>
-            <div className="mt-4 space-y-2">
-              <Textarea
-                value={commentBody}
-                onChange={(event) => setCommentBody(event.target.value)}
-                placeholder="Add a note about why this reference matters..."
-              />
-              <Button className="w-full" onClick={addComment} disabled={!commentBody.trim()}>
-                Add comment
-              </Button>
-            </div>
-          </SheetContent>
-        </Sheet>
-
-        <Sheet open={agentOpen} onOpenChange={setAgentOpen}>
-          <SheetContent className="w-[460px] sm:max-w-[460px]">
-            <SheetHeader>
-              <SheetTitle>Curator Agent</SheetTitle>
-              <SheetDescription>Eve-backed tools with approval gates for writes.</SheetDescription>
-            </SheetHeader>
-            <div className="mt-4 space-y-3">
-              <Textarea
-                value={agentPrompt}
-                onChange={(event) => setAgentPrompt(event.target.value)}
-                placeholder="Ask for clusters, metadata suggestions, duplicate detection, or child prompt ideas..."
-                className="min-h-28"
-              />
-              <Button onClick={sendAgentMessage} disabled={!agentPrompt.trim()}>
-                <Bot className="size-4" />
-                Send
-              </Button>
-              <div className="rounded-md border border-border p-3">
-                {agentOutput ? (
-                  <MessageResponse>{agentOutput}</MessageResponse>
-                ) : (
-                  <div className="text-sm text-muted-foreground">
-                    Select media and ask the curator for a design direction, metadata cleanup, or
-                    arrangement proposal.
-                  </div>
-                )}
-              </div>
-            </div>
-          </SheetContent>
-        </Sheet>
 
         <Dialog open={tasteOpen} onOpenChange={setTasteOpen}>
           <DialogContent className="max-w-2xl">
@@ -1293,6 +1960,8 @@ export function InspirationCanvas() {
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
+        </div>
+        {renderSidePanel()}
       </div>
     </TooltipProvider>
   );

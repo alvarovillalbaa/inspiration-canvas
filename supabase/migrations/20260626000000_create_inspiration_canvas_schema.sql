@@ -28,6 +28,7 @@ create table if not exists public.media_items (
   thumbnail_storage_key text,
   mime_type text not null,
   file_name text not null,
+  title text,
   size_bytes bigint not null,
   intrinsic_width double precision,
   intrinsic_height double precision,

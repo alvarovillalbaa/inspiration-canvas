@@ -16,6 +16,7 @@ export const SQLITE_SCHEMA = [
     thumbnail_storage_key TEXT,
     mime_type TEXT NOT NULL,
     file_name TEXT NOT NULL,
+    title TEXT,
     size_bytes INTEGER NOT NULL,
     intrinsic_width INTEGER,
     intrinsic_height INTEGER,
@@ -80,10 +81,12 @@ export const SQLITE_SCHEMA = [
 
 export const SQLITE_MIGRATIONS = [
   `ALTER TABLE media_items ADD COLUMN storage_driver TEXT NOT NULL DEFAULT 'local'`,
+  `ALTER TABLE media_items ADD COLUMN title TEXT`,
 ];
 
 export const POSTGRES_MIGRATIONS = [
   `ALTER TABLE media_items ADD COLUMN IF NOT EXISTS storage_driver TEXT NOT NULL DEFAULT 'local'`,
+  `ALTER TABLE media_items ADD COLUMN IF NOT EXISTS title TEXT`,
 ];
 
 export const POSTGRES_SCHEMA = SQLITE_SCHEMA.map((statement) =>
