@@ -26,6 +26,7 @@ jobs:
           if (value.dependencies.eve !== '^0.13.8' || value.dependencies.ai !== '7.0.0-beta.178') throw new Error('Re-review the changed dependency baseline.');
           value.dependencies.eve = '0.18.0';
           value.dependencies.ai = '7.0.15';
+          value.pnpm.overrides = { ...value.pnpm.overrides, '@vercel/queue>@vercel/oidc': '3.7.0' };
           fs.writeFileSync(file, JSON.stringify(value, null, 2) + '\n');
           NODE
       - name: Generate lockfile without lifecycle scripts
