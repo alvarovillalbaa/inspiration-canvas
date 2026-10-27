@@ -11,7 +11,7 @@ export default defineTool({
     mediaIds: z.array(z.string().min(1)).min(1),
     text: z.string().min(1),
   }),
-  needsApproval: () => true,
+  approval: () => true,
   execute: async ({ canvasId, mediaIds, text }) => ({
     approval: await createAgentApproval({
       toolName: "createTasteBrief",

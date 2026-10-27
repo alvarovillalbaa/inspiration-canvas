@@ -24,7 +24,7 @@ export default defineTool({
     mediaIds: z.array(z.string().min(1)).min(1),
     strategy: z.enum(["grid", "cluster", "timeline"]).default("grid"),
   }),
-  needsApproval: () => true,
+  approval: () => true,
   execute: async ({ canvasId, mediaIds, strategy }) => {
     const existing = (
       await Promise.all(mediaIds.map((mediaId) => getMediaItem(mediaId)))

@@ -84,7 +84,7 @@ corepack pnpm db:seed
 
 - Video thumbnail/duration extraction is best-effort locally without ffmpeg.
 - Generated video is documented as an extension point; v1 implements generated images.
-- Eve is beta and currently has a newer AI SDK peer than the app's requested AI SDK v6 path; see `docs/implementation-notes.md`.
+- Provider-backed Curator and generation acceptance still requires configured credentials and separate runtime checks; the supported Eve/AI versions and release evidence are recorded in `docs/implementation-notes.md`.
 
 ## Roadmap
 

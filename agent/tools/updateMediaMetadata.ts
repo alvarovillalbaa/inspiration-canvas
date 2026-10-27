@@ -16,7 +16,7 @@ export default defineTool({
       description: z.string().nullable().optional(),
     }),
   }),
-  needsApproval: () => true,
+  approval: () => true,
   execute: async ({ mediaId, metadata }) => ({
     approval: await createAgentApproval({
       toolName: "updateMediaMetadata",

@@ -11,7 +11,7 @@ export default defineTool({
     mediaIds: z.array(z.string().min(1)).min(2),
     prompt: z.string().min(1),
   }),
-  needsApproval: () => true,
+  approval: () => true,
   execute: async ({ canvasId, mediaIds, prompt }) => ({
     approval: await createAgentApproval({
       toolName: "generateChildMedia",

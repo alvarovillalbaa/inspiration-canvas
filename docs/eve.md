@@ -33,8 +33,8 @@ Approval records are stored in `agent_tool_approvals` and can be confirmed throu
 
 The canvas sheet includes a local fallback panel that surfaces selected context and documents where the Eve runtime files live. Full Eve session streaming depends on the Eve Next integration and project deployment/runtime configuration.
 
-`next dev` skips `withEve` by default because Eve 0.13.8 currently peers AI SDK `7.0.0-beta.178`, while this app intentionally uses AI SDK v6 for the product AI routes. Set `ENABLE_EVE_DEV=true` to opt into the Eve dev worker after aligning the Eve/AI SDK peer versions.
+`next dev` keeps the Eve worker opt-in with `ENABLE_EVE_DEV=true`. Production retains the existing `withEve(withWorkflow(nextConfig))` integration. The approved supported-runtime update pins Eve 0.18.0 and AI SDK 7.0.15; its hosted acceptance is recorded in [the crop release receipt](results/2026/10-27/visual-crop.md).
 
 ## Assumptions
 
-Eve is beta. The installed package exposes `defineAgent`, `defineTool`, and `withEve`. Its package currently declares a peer on a newer AI SDK beta, while the product implementation follows the requested AI SDK v6 APIs for app AI features.
+Eve 0.18.0 requires Node >=24 and AI SDK `^7.0.0`. Its versioned source retains `defineAgent`, `defineTool` and `withEve`; four tool definitions use `approval: () => true` in place of the removed `needsApproval` field. Their existing app-level approval records and execute functions are unchanged. This compatibility update does not establish live model, provider, session or approval-UI acceptance.
