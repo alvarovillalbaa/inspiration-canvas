@@ -1,0 +1,46 @@
+name: Temporary Eve dependency refresh
+on:
+  push:
+    branches: [maintenance/eve-runtime-upgrade]
+    paths: [.github/workflows/eve-runtime-refresh.yml]
+permissions:
+  contents: read
+jobs:
+  refresh:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24.21.0
+          package-manager-cache: false
+      - name: Apply exact candidate manifest in the disposable runner
+        run: |
+          node <<'NODE'
+          const fs = require('node:fs');
+          const file = 'package.json';
+          const value = JSON.parse(fs.readFileSync(file, 'utf8'));
+          if (value.dependencies.eve !== '^0.13.8' || value.dependencies.ai !== '7.0.0-beta.178') throw new Error('Re-review the changed dependency baseline.');
+          value.dependencies.eve = '0.18.0';
+          value.dependencies.ai = '7.0.15';
+          fs.writeFileSync(file, JSON.stringify(value, null, 2) + '\n');
+          NODE
+      - name: Generate lockfile without lifecycle scripts
+        run: |
+          corepack enable
+          corepack prepare pnpm@10.24.0 --activate
+          corepack pnpm install --lockfile-only --ignore-scripts --no-frozen-lockfile
+      - name: Install in the disposable runner and run only crop frontend tests
+        run: |
+          corepack pnpm install --frozen-lockfile --ignore-scripts
+          corepack pnpm exec vitest run tests/unit/crop.test.ts
+          git diff --check
+      - name: Return public generated diff and checksums without artifact storage
+        run: |
+          printf '%s\n' 'DEPENDENCY_PATCH_BEGIN'
+          git diff --binary -- package.json pnpm-lock.yaml
+          printf '%s\n' 'DEPENDENCY_PATCH_END'
+          sha256sum package.json pnpm-lock.yaml

@@ -31,3 +31,15 @@ Review caught the preexisting nonfinite normalization bug plus two integration r
 - No Inspiration Canvas browser-check approval has been given. Do not reuse another app's approval. Desktop/mobile drag/resize/move, tiny and wide images, keyboard use, Reset/Cancel, failed-save preservation, storage reload and visual selected-area fidelity still need explicit acceptance with disposable authored content. Earlier native file-chooser restrictions have not been resolved by this source change.
 
 No AI call, paid provider, upload, account creation, backend test, migration or production data mutation was used for this repair. Other product QA, including the inline-comment request, remains a separate scope to reconcile against current source. The overall multi-project goal remains active.
+
+## Published source and blocked deployment
+
+Source commit [`9e7ea07c787dbc4639e0134b7244f2dc1578d585`](https://github.com/alvarovillalbaa/inspiration-canvas/commit/9e7ea07c787dbc4639e0134b7244f2dc1578d585) is pushed. Authenticated GitHub readback matched local commit/tree `7d09eb281baef2f1d99f0d08280ec7b88ea72a20`, with a clean checkout after that source publication.
+
+Production deployment `dpl_ERSNaquzpTJkWAkb9itua1Vu7ex8` matched this source and ended **ERROR**. Hosted output recorded Next 16.2.9 compilation success (21.2 seconds), TypeScript completion (7.1 seconds) and all 13 static pages generated. The completed build was refused at deployment with **“Unsupported Eve version detected (eve@0.13.8)”**, followed by a requirement for version 0.18.0 or later. The host cleared its build cache after the dependency security block. No retry or policy bypass was attempted.
+
+The current production alias still returned HTTP 200 after that refusal. **The crop repair is not live.** This outcome does not verify interaction with the new crop controls. No new-deployment runtime scan is meaningful because the new build was never served; drains and monitoring were not changed.
+
+The [supported-runtime proposal](../../../proposals/eve-runtime-upgrade.md) and [temporary CI template](../../../proposals/eve-runtime-refresh.yml.example) are local review artifacts only. They have not been installed, run or published to GitHub. No dependency/configuration change is authorized merely by this failure; the owner must approve the §14 dependency/CI step. This receipt update is also local until the next authorized publication, to avoid automatically rebuilding the same rejected dependency set.
+
+Additional source-only QA reconciliation found comments already render directly beside selected media, without a global comments dialog. A separate bottom label/status strip remains against the text request to leave media bottoms clear. The referenced screenshot could not be fetched (DNS failure), so no visual screenshot comparison or speculative removal was performed.
