@@ -68,4 +68,12 @@ The public [production page](https://inspiration-canvas.vercel.app) returned HTT
 
 A deployment-scoped five-minute error/fatal log count query after the homepage fetch returned no groups. This is a narrow, low-traffic observation, not a claim of ongoing monitoring or complete runtime health. No drain or monitoring configuration was changed. No model/provider or signed-in backend flow was invoked.
 
-The crop repair is now deployed. Focused visual/browser acceptance remains separate and requires the new app-specific browser approval. The current Chrome file-chooser restriction is unchanged; a disposable CI browser proposal can exercise authored fixtures without touching the owner's browser or production data.
+The crop repair is now deployed. The production receipt/test-source commit `53705a81a8d05988d4a095a23aae83aaa30fd146` also reached `READY` in deployment `dpl_82TzkZ3PhZSsB8XnbjV27uYK2SLi`. The current Chrome file-chooser restriction is unchanged; the separately approved disposable CI browser acceptance uses authored fixtures without touching the owner's browser or production data.
+
+## Focused browser acceptance
+
+The owner answered **“Approve crop browser checks”** for the [four-case CI scope](../../../proposals/crop-browser-ci.md). The temporary branch is `qa/crop-browser-acceptance`; no active browser workflow is installed on main. The job supplies no provider credentials, uses browser-local authored PNG content and blocks all non-read HTTP requests. It does not invoke a signed-in backend, production data or AI.
+
+First [run 40515651256](https://github.com/alvarovillalbaa/inspiration-canvas/actions/runs/40515651256), source `94b54bf94b2c5dbf38bf6fcd5c51d7f33f25c1c3`, job `122228797860`, completed with **three desktop cases passed and one mobile case failed**, zero test retries. Desktop checks exercised mouse/keyboard selection, actual saved image geometry, reload/reopen, Reset/Cancel and a controlled local-storage save failure followed by successful retry.
+
+Mobile stopped at its first touch-resize assertion: requested half width `0.5`, observed `0.5018629807692307`. That difference corresponds to less than one CSS pixel at this viewport, but the initial run did not record the actual delivered native touch positions, so it does not by itself establish an application defect or input quantization. A focused harness correction records trusted down/up coordinates and compares the crop against their delivered delta; persisted/rendered geometry keeps its original strict tolerance. The next run is justified by that concrete measurement correction, not a blind retry. Mobile acceptance remains unproven until that run completes.

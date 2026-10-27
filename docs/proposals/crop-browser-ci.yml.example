@@ -107,3 +107,18 @@ jobs:
           CONFIG
       - name: Run only the crop desktop and mobile cases
         run: corepack pnpm exec playwright test --config .crop-ci.playwright.config.ts --project chromium
+      - name: Show bounded context from only the disposable browser on failure
+        if: failure()
+        run: |
+          node <<'NODE'
+          const fs = require('node:fs');
+          const path = require('node:path');
+          const root = 'test-results/crop-ci';
+          if (fs.existsSync(root)) {
+            const files = fs.readdirSync(root, { recursive: true }).filter(name => name.endsWith('error-context.md')).slice(0, 4);
+            for (const file of files) {
+              process.stdout.write('CROP_FAILURE_CONTEXT ' + file + '\n');
+              process.stdout.write(fs.readFileSync(path.join(root, file), 'utf8').split('\n').slice(0, 120).join('\n') + '\n');
+            }
+          }
+          NODE

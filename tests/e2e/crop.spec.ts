@@ -244,20 +244,69 @@ test.describe("anonymous crop desktop", () => {
   });
 });
 
+type DeliveredPoint = {
+  x: number; y: number; pointerId: number; pointerType: string; trusted: boolean; primary: boolean;
+  preview: { x: number; y: number; width: number; height: number };
+};
+
 async function touchDrag(page: Page, session: CDPSession, target: Locator, dx: number, dy: number) {
   await target.scrollIntoViewIfNeeded();
   const box = await target.boundingBox();
   expect(box).not.toBeNull();
   const x = box!.x + box!.width / 2, y = box!.y + box!.height / 2;
+  const label = await target.getAttribute("aria-label") || await target.innerText();
+  const capture = await target.evaluateHandle(element => {
+    const preview = element.closest('[role="dialog"]')!.querySelector('[data-testid="crop-preview-image"]')!;
+    const values: { down: DeliveredPoint | null; up: DeliveredPoint | null; cancelled: boolean } = { down: null, up: null, cancelled: false };
+    const point = (event: PointerEvent): DeliveredPoint => {
+      const rect = preview.getBoundingClientRect();
+      return { x: event.clientX, y: event.clientY, pointerId: event.pointerId, pointerType: event.pointerType, trusted: event.isTrusted, primary: event.isPrimary,
+        preview: { x: rect.x, y: rect.y, width: rect.width, height: rect.height } };
+    };
+    const listener = (event: PointerEvent) => {
+      if (!event.isTrusted || event.pointerType !== "touch" || !event.isPrimary) return;
+      if (event.type === "pointerdown" && values.down === null && event.target instanceof Node && element.contains(event.target)) values.down = point(event);
+      else if (values.down?.pointerId === event.pointerId) {
+        if (event.type === "pointerup") values.up = point(event);
+        if (event.type === "pointercancel") values.cancelled = true;
+      }
+    };
+    for (const type of ["pointerdown", "pointerup", "pointercancel"]) document.addEventListener(type, listener as EventListener, true);
+    return { values, dispose: () => {
+      for (const type of ["pointerdown", "pointerup", "pointercancel"]) document.removeEventListener(type, listener as EventListener, true);
+    } };
+  });
   const point = (x: number, y: number) => [{ x, y, id: 1, radiusX: 1, radiusY: 1, force: 1 }];
-  await session.send("Input.dispatchTouchEvent", { type: "touchStart", touchPoints: point(x, y) });
+  let touching = false;
   try {
+    await session.send("Input.dispatchTouchEvent", { type: "touchStart", touchPoints: point(x, y) });
+    touching = true;
     for (let step = 1; step <= 8; step++) {
       await session.send("Input.dispatchTouchEvent", { type: "touchMove", touchPoints: point(x + dx * step / 8, y + dy * step / 8) });
       await page.evaluate(() => new Promise<void>(resolve => requestAnimationFrame(() => resolve())));
     }
-  } finally {
     await session.send("Input.dispatchTouchEvent", { type: "touchEnd", touchPoints: [] });
+    touching = false;
+    await expect.poll(() => capture.evaluate(capture => capture.values.up !== null || capture.values.cancelled)).toBe(true);
+    const delivered = await capture.evaluate(capture => capture.values);
+    expect(delivered.cancelled).toBe(false);
+    expect(delivered.down).not.toBeNull(); expect(delivered.up).not.toBeNull();
+    const down = delivered.down!, up = delivered.up!;
+    expect(up.pointerId).toBe(down.pointerId);
+    const actualDx = up.x - down.x, actualDy = up.y - down.y;
+    for (const error of [down.x - x, down.y - y, up.x - (x + dx), up.y - (y + dy), actualDx - dx, actualDy - dy]) expect(Math.abs(error)).toBeLessThanOrEqual(1);
+    // Scrolling is finished before pointerdown; layout movement during a gesture
+    // must be diagnosed, not folded into a looser crop assertion.
+    for (const key of ["x", "y", "width", "height"] as const) expect(up.preview[key]).toBeCloseTo(down.preview[key], 3);
+    expect(down.preview.width).toBeGreaterThan(0); expect(down.preview.height).toBeGreaterThan(0);
+    return { dx: actualDx, dy: actualDy, preview: down.preview };
+  } finally {
+    if (touching) await session.send("Input.dispatchTouchEvent", { type: "touchCancel", touchPoints: [] }).catch(() => {});
+    const delivered = await capture.evaluate(capture => capture.values).catch(() => null);
+    console.log("crop-touch-input", JSON.stringify({ target: label, requested: { x, y, dx, dy }, delivered,
+      delta: delivered?.down && delivered.up ? { dx: delivered.up.x - delivered.down.x, dy: delivered.up.y - delivered.down.y } : null }));
+    await capture.evaluate(capture => capture.dispose()).catch(() => {});
+    await capture.dispose();
   }
 }
 
@@ -283,11 +332,15 @@ test.describe("anonymous crop mobile touch", () => {
       const preview = dialog.getByTestId("crop-preview-image");
       const image = await preview.boundingBox();
       expect(image).not.toBeNull();
-      await touchDrag(page, session, dialog.getByRole("button", { name: "Resize crop from right", exact: true }), -image!.width / 2, 0);
-      expectCrop(await selectedCrop(dialog), { ...FULL, width: 0.5 });
-      await touchDrag(page, session, dialog.getByRole("button", { name: "Drag to move crop", exact: true }), image!.width * 0.08, 0);
+      const resize = await touchDrag(page, session, dialog.getByRole("button", { name: "Resize crop from right", exact: true }), -image!.width / 2, 0);
+      const expectedResize = { ...FULL, width: 1 + resize.dx / resize.preview.width };
+      expectCrop(await selectedCrop(dialog), expectedResize);
+      const movement = await touchDrag(page, session, dialog.getByRole("button", { name: "Drag to move crop", exact: true }), image!.width * 0.08, 0);
+      const expectedMove = { ...expectedResize,
+        x: Math.max(0, Math.min(1 - expectedResize.width, movement.dx / movement.preview.width)),
+        y: Math.max(0, Math.min(1 - expectedResize.height, movement.dy / movement.preview.height)) };
       const selection = await selectedCrop(dialog);
-      expectCrop(selection, { ...FULL, x: 0.08, width: 0.5 });
+      expectCrop(selection, expectedMove);
       const received = await events.evaluate(events => events.values);
       expect(received.length).toBeGreaterThanOrEqual(2);
       expect(received.every(event => event.type === "touch" && event.trusted)).toBe(true);
