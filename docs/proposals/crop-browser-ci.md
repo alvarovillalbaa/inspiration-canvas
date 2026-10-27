@@ -2,7 +2,7 @@
 
 Last updated: 2026-10-27
 
-**Status: owner approved “Approve crop browser checks” on 27 October 2026.** The [workflow example](crop-browser-ci.yml.example) remains inactive documentation; its temporary installation and actual run evidence are recorded in the crop receipt. The supplied AGENTS.md §7 requires approval for browser checks, and §14 requires approval for temporary CI changes. Earlier dependency-upgrade or another application's browser approval did not cover this run.
+**Status: completed within the owner-approved scope, 27 October 2026.** The owner approved “Approve crop browser checks”; the final run passed all four cases. The temporary workflow has been removed. The [workflow example](crop-browser-ci.yml.example) remains inactive documentation; source commits, earlier failures and actual run evidence are recorded in the [crop receipt](../results/2026/10-27/visual-crop.md). Earlier dependency-upgrade or another application's browser approval did not cover this run; the supplied AGENTS.md §§7 and 14 required the separate approval that was obtained.
 
 ## Proposed scope
 
