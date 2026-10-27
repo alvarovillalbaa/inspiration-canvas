@@ -112,8 +112,11 @@ async function persistedCrop(page: Page, id: string): Promise<Crop | null> {
 }
 
 async function mouseResizeRight(page: Page, dialog: Locator, delta: number) {
+  const target = dialog.getByRole("button", { name: "Resize crop from right", exact: true });
+  await target.scrollIntoViewIfNeeded();
+  await target.click({ trial: true });
   const image = await dialog.getByTestId("crop-preview-image").boundingBox();
-  const handle = await dialog.getByRole("button", { name: "Resize crop from right", exact: true }).boundingBox();
+  const handle = await target.boundingBox();
   expect(image).not.toBeNull(); expect(handle).not.toBeNull();
   const x = handle!.x + handle!.width / 2, y = handle!.y + handle!.height / 2;
   await page.mouse.move(x, y); await page.mouse.down();
@@ -249,8 +252,15 @@ type DeliveredPoint = {
   preview: { x: number; y: number; width: number; height: number };
 };
 
-async function touchDrag(page: Page, session: CDPSession, target: Locator, dx: number, dy: number) {
+async function touchDrag(page: Page, session: CDPSession, target: Locator, dxFraction: number, dyFraction: number) {
   await target.scrollIntoViewIfNeeded();
+  await target.click({ trial: true });
+  const plannedPreview = await target.evaluate(element => {
+    const rect = element.closest('[role="dialog"]')!.querySelector('[data-testid="crop-preview-image"]')!.getBoundingClientRect();
+    return { x: rect.x, y: rect.y, width: rect.width, height: rect.height };
+  });
+  expect(plannedPreview.width).toBeGreaterThan(0); expect(plannedPreview.height).toBeGreaterThan(0);
+  const dx = dxFraction * plannedPreview.width, dy = dyFraction * plannedPreview.height;
   const box = await target.boundingBox();
   expect(box).not.toBeNull();
   const x = box!.x + box!.width / 2, y = box!.y + box!.height / 2;
@@ -295,15 +305,17 @@ async function touchDrag(page: Page, session: CDPSession, target: Locator, dx: n
     expect(up.pointerId).toBe(down.pointerId);
     const actualDx = up.x - down.x, actualDy = up.y - down.y;
     for (const error of [down.x - x, down.y - y, up.x - (x + dx), up.y - (y + dy), actualDx - dx, actualDy - dy]) expect(Math.abs(error)).toBeLessThanOrEqual(1);
-    // Scrolling is finished before pointerdown; layout movement during a gesture
-    // must be diagnosed, not folded into a looser crop assertion.
-    for (const key of ["x", "y", "width", "height"] as const) expect(up.preview[key]).toBeCloseTo(down.preview[key], 3);
+    // The opening animation and scrolling must finish before planning input;
+    // diagnose any later layout shift instead of weakening crop assertions.
+    for (const endpoint of [down, up]) {
+      for (const key of ["x", "y", "width", "height"] as const) expect(endpoint.preview[key]).toBeCloseTo(plannedPreview[key], 3);
+    }
     expect(down.preview.width).toBeGreaterThan(0); expect(down.preview.height).toBeGreaterThan(0);
     return { dx: actualDx, dy: actualDy, preview: down.preview };
   } finally {
     if (touching) await session.send("Input.dispatchTouchEvent", { type: "touchCancel", touchPoints: [] }).catch(() => {});
     const delivered = await capture.evaluate(capture => capture.values).catch(() => null);
-    console.log("crop-touch-input", JSON.stringify({ target: label, requested: { x, y, dx, dy }, delivered,
+    console.log("crop-touch-input", JSON.stringify({ target: label, requested: { x, y, dx, dy, dxFraction, dyFraction }, plannedPreview, delivered,
       delta: delivered?.down && delivered.up ? { dx: delivered.up.x - delivered.down.x, dy: delivered.up.y - delivered.down.y } : null }));
     await capture.evaluate(capture => capture.dispose()).catch(() => {});
     await capture.dispose();
@@ -329,13 +341,10 @@ test.describe("anonymous crop mobile touch", () => {
     // https://playwright.dev/docs/api/class-browsercontext#browser-context-new-cdp-session
     const session = await page.context().newCDPSession(page);
     try {
-      const preview = dialog.getByTestId("crop-preview-image");
-      const image = await preview.boundingBox();
-      expect(image).not.toBeNull();
-      const resize = await touchDrag(page, session, dialog.getByRole("button", { name: "Resize crop from right", exact: true }), -image!.width / 2, 0);
+      const resize = await touchDrag(page, session, dialog.getByRole("button", { name: "Resize crop from right", exact: true }), -0.5, 0);
       const expectedResize = { ...FULL, width: 1 + resize.dx / resize.preview.width };
       expectCrop(await selectedCrop(dialog), expectedResize);
-      const movement = await touchDrag(page, session, dialog.getByRole("button", { name: "Drag to move crop", exact: true }), image!.width * 0.08, 0);
+      const movement = await touchDrag(page, session, dialog.getByRole("button", { name: "Drag to move crop", exact: true }), 0.08, 0);
       const expectedMove = { ...expectedResize,
         x: Math.max(0, Math.min(1 - expectedResize.width, movement.dx / movement.preview.width)),
         y: Math.max(0, Math.min(1 - expectedResize.height, movement.dy / movement.preview.height)) };
