@@ -92,11 +92,24 @@ test("uploads media, edits it, comments, previews, and degrades AI clearly", asy
 
   await item.getByRole("button", { name: "Media actions" }).click();
   await page.getByRole("menuitem", { name: "Crop" }).click();
-  const cropDialog = page.getByRole("dialog", { name: "Crop metadata" });
-  await cropDialog.getByLabel("x").fill("0.10");
-  await cropDialog.getByLabel("y").fill("0.10");
-  await cropDialog.getByLabel("width").fill("0.80");
-  await cropDialog.getByLabel("height").fill("0.80");
+  const cropDialog = page.getByRole("dialog", { name: "Crop image" });
+  const cropSelection = cropDialog.getByTestId("crop-selection");
+  const cropHandle = cropDialog.getByRole("button", { name: "Resize crop from bottom right", exact: true });
+  await expect(cropHandle).toBeVisible();
+  const imageBox = await cropDialog.getByTestId("crop-preview-image").boundingBox();
+  const cropHandleBox = await cropHandle.boundingBox();
+  expect(imageBox).not.toBeNull();
+  expect(cropHandleBox).not.toBeNull();
+  const cropStartX = cropHandleBox!.x + cropHandleBox!.width / 2;
+  const cropStartY = cropHandleBox!.y + cropHandleBox!.height / 2;
+  await page.mouse.move(cropStartX, cropStartY);
+  await page.mouse.down();
+  await page.mouse.move(cropStartX - imageBox!.width * 0.18, cropStartY - imageBox!.height * 0.18, { steps: 8 });
+  await page.mouse.up();
+  await expect.poll(async () => (await cropSelection.boundingBox())?.width ?? Infinity).toBeLessThan(imageBox!.width * 0.9);
+  await cropDialog.getByRole("button", { name: "Move crop", exact: true }).press("ArrowRight");
+  await cropDialog.getByRole("button", { name: "Move crop", exact: true }).press("ArrowDown");
+  await expect(cropDialog.getByRole("status")).toContainText("Left 1%, top 1%");
   await page.getByRole("button", { name: "Save crop" }).click();
   await expect(item.getByTestId("media-crop-viewport")).toHaveAttribute("data-cropped", "true");
 

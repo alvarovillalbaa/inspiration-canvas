@@ -28,7 +28,9 @@ corepack pnpm dev
 
 Open `http://localhost:3000`.
 
-Without Supabase credentials, the app runs as an anonymous browser canvas and stores uploads temporarily for four hours in `localStorage` plus IndexedDB. Without AI credentials, uploads, comments, preview, drag, resize, crop metadata, delete, and zoom still work. AI actions ask anonymous users to sign in or show a clear credentials message.
+Without Supabase credentials, the app runs as an anonymous browser canvas and stores uploads temporarily for four hours in `localStorage` plus IndexedDB. Without AI credentials, uploads, comments, preview, drag, resize, visual image cropping, delete, and zoom still work. AI actions ask anonymous users to sign in or show a clear credentials message.
+
+The crop editor previews the original image with a movable selection and eight resize handles. Drag with a mouse or touch, or focus a handle and use arrow keys (Shift for larger steps). Reset restores the full image; Cancel discards the current selection. Save keeps the existing normalized crop metadata and original file. Failed saves keep the dialog and selection available for retry. See [the crop release evidence](docs/results/2026/10-27/visual-crop.md) for checks and outstanding browser acceptance.
 
 ## Vercel Setup
 
@@ -90,5 +92,4 @@ corepack pnpm db:seed
 - Direct Blob or Supabase client uploads for very large video files
 - Vector similarity search for visual embeddings
 - Generated video workflows
-- Richer crop UI with visible crop handles
 - Full Eve streaming UI once hosted Eve sessions are configured

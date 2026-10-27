@@ -60,6 +60,8 @@ import {
   PromptInputTextarea,
 } from "@/components/ai-elements/prompt-input";
 import { Suggestion, Suggestions } from "@/components/ai-elements/suggestion";
+import { CropEditor } from "@/components/canvas/crop-editor";
+import { CroppedImage } from "@/components/canvas/cropped-image";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import {
   AlertDialog,
@@ -116,7 +118,10 @@ import {
   screenToCanvas,
   type Transform,
 } from "@/lib/canvas/math";
-import { getCroppedImageStyle, normalizeCropJson } from "@/lib/canvas/crop";
+import {
+  normalizeCropJson,
+  type NormalizedCrop,
+} from "@/lib/canvas/crop";
 import {
   addTempComment,
   addTempFilesToCanvas,
@@ -136,13 +141,6 @@ import { cn } from "@/lib/utils";
 type CanvasResponse = {
   canvas: CanvasRecord;
   mediaItems: MediaItem[];
-};
-
-type CropDraft = {
-  x: number;
-  y: number;
-  width: number;
-  height: number;
 };
 
 type AuthState = "checking" | "anonymous" | "authenticated";
@@ -335,12 +333,15 @@ export function InspirationCanvas() {
   const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(new Set());
   const [classifying, setClassifying] = useState(false);
   const [cropItem, setCropItem] = useState<MediaItem | null>(null);
-  const [cropDraft, setCropDraft] = useState<CropDraft>({
+  const [cropDraft, setCropDraft] = useState<NormalizedCrop>({
     x: 0,
     y: 0,
     width: 1,
     height: 1,
   });
+  const [cropSaving, setCropSaving] = useState(false);
+  const [cropError, setCropError] = useState<string | null>(null);
+  const cropSavingRef = useRef(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
 
   const selectedItems = useMemo(
@@ -514,6 +515,7 @@ export function InspirationCanvas() {
 
   useEffect(() => {
     function onKeyDown(event: KeyboardEvent) {
+      if (cropItem) return;
       if (event.key === "Escape") {
         setPreview(null);
         setCropItem(null);
@@ -538,7 +540,7 @@ export function InspirationCanvas() {
     }
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [fitToView, items, selectedIds]);
+  }, [cropItem, fitToView, items, selectedIds]);
 
   useEffect(() => {
     curatorContextRef.current = {
@@ -548,7 +550,7 @@ export function InspirationCanvas() {
     };
   });
 
-  async function patchMedia(id: string, patch: Partial<MediaItem>) {
+  async function patchMedia(id: string, patch: Partial<MediaItem>, signal?: AbortSignal) {
     if (!isAuthenticated) {
       if (!tempState) return;
       applyTemporaryState(
@@ -571,6 +573,7 @@ export function InspirationCanvas() {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(patch),
+      signal,
     });
     if (!response.ok) {
       const body = (await response.json().catch(() => ({}))) as { error?: string };
@@ -1351,20 +1354,46 @@ export function InspirationCanvas() {
   }
 
   function openCrop(item: MediaItem) {
-    const crop = item.cropJson as Partial<CropDraft> | null;
-    setCropDraft({
-      x: Number(crop?.x ?? 0),
-      y: Number(crop?.y ?? 0),
-      width: Number(crop?.width ?? 1),
-      height: Number(crop?.height ?? 1),
-    });
+    setCropDraft(
+      normalizeCropJson(item.cropJson) || { x: 0, y: 0, width: 1, height: 1 },
+    );
+    setCropError(null);
     setCropItem(item);
   }
 
   async function saveCrop() {
-    if (!cropItem) return;
-    await patchMedia(cropItem.id, { cropJson: cropDraft });
-    setCropItem(null);
+    if (!cropItem || cropSavingRef.current) return;
+    const crop = normalizeCropJson(cropDraft);
+    if (!crop) {
+      setCropError("Choose a crop within the image before saving.");
+      return;
+    }
+    cropSavingRef.current = true;
+    setCropSaving(true);
+    setCropError(null);
+    const controller = new AbortController();
+    const deadline = setTimeout(() => controller.abort(), 20_000);
+    try {
+      if (!isAuthenticated && !tempState) {
+        throw new Error("The temporary canvas is unavailable. Keep this dialog open and try again.");
+      }
+      const currentItems = isAuthenticated ? items : tempState!.mediaItems;
+      if (!currentItems.some((item) => item.id === cropItem.id)) {
+        throw new Error("This image is no longer in the current canvas. Your crop selection is still here.");
+      }
+      await patchMedia(cropItem.id, { cropJson: crop }, controller.signal);
+      setCropItem(null);
+    } catch (err) {
+      setCropError(
+        controller.signal.aborted
+          ? "Saving took too long. The server may have saved it; your selection is still here. Retry to confirm."
+          : err instanceof Error ? err.message : "Could not save this crop. Your selection is still here.",
+      );
+    } finally {
+      clearTimeout(deadline);
+      cropSavingRef.current = false;
+      setCropSaving(false);
+    }
   }
 
   function renderMedia(item: MediaItem) {
@@ -1451,19 +1480,26 @@ export function InspirationCanvas() {
                     data-cropped={crop ? "true" : "false"}
                     data-testid="media-crop-viewport"
                   >
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={item.thumbnailUrl || item.url}
-                      alt={item.description || item.fileName}
-                      className={cn(
-                        crop
-                          ? "absolute left-0 top-0 max-w-none object-cover"
-                          : "size-full object-cover",
-                      )}
-                      data-testid="media-image"
-                      loading="lazy"
-                      style={crop ? getCroppedImageStyle(crop) : undefined}
-                    />
+                    {crop ? (
+                      <CroppedImage
+                        src={item.url}
+                        alt={item.description || item.fileName}
+                        crop={crop}
+                        frameWidth={item.width}
+                        frameHeight={item.height}
+                        intrinsicWidth={item.intrinsicWidth}
+                        intrinsicHeight={item.intrinsicHeight}
+                      />
+                    ) : (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={item.thumbnailUrl || item.url}
+                        alt={item.description || item.fileName}
+                        className="size-full object-cover"
+                        data-testid="media-image"
+                        loading="lazy"
+                      />
+                    )}
                   </span>
                 )}
                 <div className="absolute inset-x-0 bottom-0 flex items-center justify-between gap-2 bg-background/80 px-2 py-1 text-[11px] text-muted-foreground backdrop-blur-sm">
@@ -1908,37 +1944,65 @@ export function InspirationCanvas() {
           </DialogContent>
         </Dialog>
 
-        <Dialog open={Boolean(cropItem)} onOpenChange={(open) => !open && setCropItem(null)}>
-          <DialogContent>
+        <Dialog
+          open={Boolean(cropItem)}
+          onOpenChange={(open) => {
+            if (!open && !cropSavingRef.current) setCropItem(null);
+          }}
+        >
+          <DialogContent
+            className="max-h-[92dvh] overflow-y-auto sm:max-w-3xl"
+            showCloseButton={!cropSaving}
+            onEscapeKeyDown={(event) => {
+              if (cropSavingRef.current) event.preventDefault();
+            }}
+            onInteractOutside={(event) => {
+              if (cropSavingRef.current) event.preventDefault();
+            }}
+          >
             <DialogHeader>
-              <DialogTitle>Crop metadata</DialogTitle>
-              <DialogDescription>Store normalized crop bounds for this image.</DialogDescription>
+              <DialogTitle>Crop image</DialogTitle>
+              <DialogDescription>
+                Drag the frame or its handles to choose what stays in view. The original file is preserved.
+              </DialogDescription>
             </DialogHeader>
-            <div className="grid grid-cols-2 gap-3">
-              {(["x", "y", "width", "height"] as const).map((field) => (
-                <label key={field} className="space-y-1 text-sm">
-                  <span className="capitalize text-muted-foreground">{field}</span>
-                  <Input
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    max="1"
-                    value={cropDraft[field]}
-                    onChange={(event) =>
-                      setCropDraft((current) => ({
-                        ...current,
-                        [field]: Number(event.target.value),
-                      }))
-                    }
-                  />
-                </label>
-              ))}
-            </div>
+            {cropItem && (
+              <CropEditor
+                key={cropItem.id}
+                src={cropItem.url}
+                alt={cropItem.description || cropItem.fileName}
+                value={cropDraft}
+                disabled={cropSaving}
+                onChange={(crop) => {
+                  setCropDraft(crop);
+                  setCropError(null);
+                }}
+              />
+            )}
+            {cropError && (
+              <Alert variant="destructive">
+                <AlertTitle>Crop not saved</AlertTitle>
+                <AlertDescription>{cropError}</AlertDescription>
+              </Alert>
+            )}
             <DialogFooter>
-              <Button variant="secondary" onClick={() => setCropItem(null)}>
+              <Button
+                className="mr-auto min-h-11"
+                variant="outline"
+                disabled={cropSaving}
+                onClick={() => {
+                  setCropDraft({ x: 0, y: 0, width: 1, height: 1 });
+                  setCropError(null);
+                }}
+              >
+                Reset crop
+              </Button>
+              <Button className="min-h-11" variant="secondary" disabled={cropSaving} onClick={() => setCropItem(null)}>
                 Cancel
               </Button>
-              <Button onClick={saveCrop}>Save crop</Button>
+              <Button className="min-h-11" disabled={cropSaving} onClick={() => void saveCrop()}>
+                {cropSaving ? "Saving crop…" : "Save crop"}
+              </Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
