@@ -1,0 +1,109 @@
+# INACTIVE PROPOSAL. Requires explicit approval before installing under .github/workflows.
+# Install only on qa/crop-browser-acceptance; remove after focused acceptance.
+name: Temporary focused crop browser acceptance
+on:
+  push:
+    branches: [qa/crop-browser-acceptance]
+    paths: [.github/workflows/crop-browser-acceptance.yml]
+permissions:
+  contents: read
+jobs:
+  crop:
+    if: github.repository == 'alvarovillalbaa/inspiration-canvas' && github.event.repository.private == false && github.ref == 'refs/heads/qa/crop-browser-acceptance'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    env:
+      CI: "true"
+      NEXT_TELEMETRY_DISABLED: "1"
+      DO_NOT_TRACK: "1"
+      ENABLE_AI: "false"
+      ENABLE_EVE_DEV: "false"
+      ENABLE_BLOB_STORAGE: "false"
+      STORAGE_DRIVER: local
+      NEXT_PUBLIC_SUPABASE_URL: ""
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ""
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ""
+      SUPABASE_SERVICE_ROLE_KEY: ""
+      BLOB_READ_WRITE_TOKEN: ""
+      AI_GATEWAY_API_KEY: ""
+      VERCEL_OIDC_TOKEN: ""
+      OPENAI_API_KEY: ""
+      ANTHROPIC_API_KEY: ""
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # reviewed v7.0.1 pin
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # reviewed v7.1.0 pin
+        with:
+          node-version: 24.21.0
+          package-manager-cache: false
+      - name: Verify the reviewed scope and log public source identity
+        run: |
+          node <<'NODE'
+          const fs = require('node:fs');
+          const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8'));
+          if (process.version !== 'v24.21.0' || pkg.packageManager !== 'pnpm@10.24.0') throw new Error('Re-review the changed runtime baseline.');
+          if (!fs.existsSync('tests/e2e/crop.spec.ts')) throw new Error('Focused crop test source is missing.');
+          NODE
+          git rev-parse HEAD
+          sha256sum package.json pnpm-lock.yaml tests/e2e/crop.spec.ts
+      - name: Install locked dependencies in the disposable runner without lifecycle scripts
+        run: |
+          corepack enable
+          corepack prepare pnpm@10.24.0 --activate
+          corepack pnpm install --frozen-lockfile --ignore-scripts
+      - name: Install only Chromium and its Linux dependencies
+        run: corepack pnpm exec playwright install --with-deps chromium
+      - name: Create a runner-only focused Playwright configuration
+        run: |
+          cat > .crop-ci.playwright.config.ts <<'CONFIG'
+          import { defineConfig, devices } from '@playwright/test';
+
+          const baseURL = 'http://127.0.0.1:3100';
+          export default defineConfig({
+            testDir: './tests/e2e',
+            testMatch: 'crop.spec.ts',
+            forbidOnly: true,
+            fullyParallel: false,
+            workers: 1,
+            retries: 0,
+            timeout: 45_000,
+            globalTimeout: 300_000,
+            expect: { timeout: 10_000 },
+            reporter: 'line',
+            outputDir: 'test-results/crop-ci',
+            use: {
+              baseURL,
+              trace: 'off',
+              screenshot: 'off',
+              video: 'off',
+              serviceWorkers: 'block',
+            },
+            projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
+            webServer: {
+              command: 'corepack pnpm dev --hostname 127.0.0.1 --port 3100',
+              url: baseURL,
+              reuseExistingServer: false,
+              timeout: 120_000,
+              env: {
+                NODE_ENV: 'development',
+                ENABLE_AI: 'false',
+                ENABLE_EVE_DEV: 'false',
+                ENABLE_BLOB_STORAGE: 'false',
+                STORAGE_DRIVER: 'local',
+                NEXT_TELEMETRY_DISABLED: '1',
+                NEXT_PUBLIC_SUPABASE_URL: '',
+                NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: '',
+                NEXT_PUBLIC_SUPABASE_ANON_KEY: '',
+                SUPABASE_SERVICE_ROLE_KEY: '',
+                BLOB_READ_WRITE_TOKEN: '',
+                AI_GATEWAY_API_KEY: '',
+                VERCEL_OIDC_TOKEN: '',
+                OPENAI_API_KEY: '',
+                ANTHROPIC_API_KEY: '',
+              },
+            },
+          });
+          CONFIG
+      - name: Run only the crop desktop and mobile cases
+        run: corepack pnpm exec playwright test --config .crop-ci.playwright.config.ts --project chromium

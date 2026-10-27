@@ -56,4 +56,16 @@ The temporary workflow used pinned official checkout/setup-node actions, Node 24
 - Final [run 40508065207](https://github.com/alvarovillalbaa/inspiration-canvas/actions/runs/40508065207), head `bcb832ae8369fbe545e38de64f20821f222f662b`, job `122202416642`, succeeded. Native Vitest reported one test file and **22 tests passed**. Frozen installation accepted the generated lockfile. No backend test or browser ran.
 - GitHub connector log readback recovered only `package.json` and `pnpm-lock.yaml` in the generated diff. Local bytes match its SHA-256 checksums: manifest `eea461091c0232b871d9da2d25052792efa19c9ca532a51372c6053c0b8ec588`; lock `3552cda6d3d13cb82f99f29c3d09b1b3228a2d2117d5dd521229600ba039c751`. YAML readback confirms the queue-to-OIDC dependency remains 3.7.0.
 
-The temporary active workflow has been removed after successful readback. The non-executing template remains as review/provenance evidence. Supported-runtime deployment outcome is recorded after the candidate's hosted build reaches a terminal state; native test success alone does not prove Eve runtime/provider behavior or visual crop acceptance.
+The temporary active workflow has been removed after successful readback. The non-executing template remains as review/provenance evidence. Native test success alone does not prove Eve runtime/provider behavior or visual crop acceptance.
+
+## Supported production publication
+
+Application source [`6cac55a00bc1114f19a2bcac46aad13f2d418a99`](https://github.com/alvarovillalbaa/inspiration-canvas/commit/6cac55a00bc1114f19a2bcac46aad13f2d418a99) reached `READY` in preview deployment `dpl_DGRyYLVx9Um6YLtL6qfooDQMSZpr`. Hosted output recorded compilation success, TypeScript completion and generated pages, followed by successful deployment; the old Eve security refusal was resolved. Main was then fast-forwarded to this exact reviewed commit.
+
+Production deployment `dpl_D6q7yny2S83mT51dVhvYJHye72A3` also reached **READY**, targeting main at that same source commit and the existing project/team. Authenticated GitHub main readback matched the local commit and tree `c30f51111a0fa6a7eeb689ce6ba9c7167ba399e7`.
+
+The public [production page](https://inspiration-canvas.vercel.app) returned HTTP 200 and referenced this deployment in its script URLs. Its actual page bundle returned 200 and contained the new crop title, resize-handle label, separate move control and save-timeout text. This verifies delivery of the repair; it does not exercise its events or browser persistence.
+
+A deployment-scoped five-minute error/fatal log count query after the homepage fetch returned no groups. This is a narrow, low-traffic observation, not a claim of ongoing monitoring or complete runtime health. No drain or monitoring configuration was changed. No model/provider or signed-in backend flow was invoked.
+
+The crop repair is now deployed. Focused visual/browser acceptance remains separate and requires the new app-specific browser approval. The current Chrome file-chooser restriction is unchanged; a disposable CI browser proposal can exercise authored fixtures without touching the owner's browser or production data.
