@@ -2,7 +2,7 @@
 
 Last updated: 2026-10-27
 
-**Status: proposal only; awaiting owner approval.** Neither this document nor the [inactive workflow example](crop-browser-ci.yml.example) installs CI or runs a browser. The supplied AGENTS.md §7 requires approval for browser checks, and §14 requires approval for temporary CI changes. Earlier dependency-upgrade or another application's browser approval does not cover this run.
+**Status: owner approved “Approve crop browser checks” on 27 October 2026.** The [workflow example](crop-browser-ci.yml.example) remains inactive documentation; its temporary installation and actual run evidence are recorded in the crop receipt. The supplied AGENTS.md §7 requires approval for browser checks, and §14 requires approval for temporary CI changes. Earlier dependency-upgrade or another application's browser approval did not cover this run.
 
 ## Proposed scope
 

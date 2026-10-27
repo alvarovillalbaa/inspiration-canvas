@@ -62,7 +62,7 @@ jobs:
           const baseURL = 'http://127.0.0.1:3100';
           export default defineConfig({
             testDir: './tests/e2e',
-            testMatch: 'crop.spec.ts',
+            testMatch: '**/crop.spec.ts',
             forbidOnly: true,
             fullyParallel: false,
             workers: 1,
