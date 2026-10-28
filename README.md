@@ -4,6 +4,11 @@
 
 The first screen is the product canvas. There is no landing page.
 
+Media stay visually clear along their bottom edge. Names remain in the existing
+Info and inline-comment surfaces, and each media item's accessible name identifies
+it. Processing state is available in its accessible description and the Info panel;
+skipped analysis is labelled separately from failure.
+
 ## Stack
 
 - Next.js App Router, TypeScript, Tailwind CSS, shadcn/ui, Geist

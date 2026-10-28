@@ -251,6 +251,17 @@ function mediaLabel(item: MediaItem) {
   return item.title?.trim() || item.fileName;
 }
 
+function mediaAnalysisLabel(item: MediaItem) {
+  switch (item.analysisStatus) {
+    case "pending": return "Analysis pending";
+    case "processing": return "Analyzing media";
+    case "complete": return "Analysis complete";
+    case "failed": return "Analysis failed";
+    case "skipped": return "Analysis skipped";
+    default: return "Analysis status unavailable";
+  }
+}
+
 function splitTags(value: string) {
   return [
     ...new Set(
@@ -1123,6 +1134,11 @@ export function InspirationCanvas() {
               <div className="truncate text-xs text-muted-foreground">
                 {infoItem ? mediaLabel(infoItem) : "No media selected"}
               </div>
+              {infoItem ? (
+                <p role="status" aria-live="polite" className="text-xs text-muted-foreground">
+                  {mediaAnalysisLabel(infoItem)}
+                </p>
+              ) : null}
             </div>
             <Button
               aria-label="Close info"
@@ -1449,6 +1465,9 @@ export function InspirationCanvas() {
             <div
               role="button"
               tabIndex={0}
+              aria-label={mediaLabel(item)}
+              aria-describedby={`media-description-${item.id}`}
+              aria-pressed={selected}
               data-testid="media-item"
               data-media-id={item.id}
               onClick={(event) => selectItem(item, event)}
@@ -1465,6 +1484,9 @@ export function InspirationCanvas() {
                 selected ? "border-primary ring-2 ring-primary/35" : "border-border",
               )}
             >
+              <span id={`media-description-${item.id}`} className="sr-only">
+                {item.description ? `${item.description} ` : ""}{mediaAnalysisLabel(item)}
+              </span>
               <div className="pointer-events-none absolute inset-0 overflow-hidden rounded-md">
                 {isVideo(item) ? (
                   <video
@@ -1502,16 +1524,6 @@ export function InspirationCanvas() {
                     )}
                   </span>
                 )}
-                <div className="absolute inset-x-0 bottom-0 flex items-center justify-between gap-2 bg-background/80 px-2 py-1 text-[11px] text-muted-foreground backdrop-blur-sm">
-                  <span className="truncate">{mediaLabel(item)}</span>
-                  {item.analysisStatus === "processing" || item.analysisStatus === "pending" ? (
-                    <Activity className="size-3" />
-                  ) : item.analysisStatus === "complete" ? (
-                    <Check className="size-3 text-primary" />
-                  ) : (
-                    <X className="size-3 text-destructive" />
-                  )}
-                </div>
               </div>
               {selected ? (
                 <DropdownMenu>

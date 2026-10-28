@@ -128,7 +128,9 @@ test("uploads media, edits it, comments, previews, and degrades AI clearly", asy
   await infoPanel.getByLabel("Category", { exact: true }).fill("Interface references");
   await infoPanel.getByLabel("Tags", { exact: true }).fill("contrast, compact");
   await infoPanel.getByRole("button", { name: "Save info" }).click();
-  await expect(item.locator("span.truncate", { hasText: "Contrast study" }).first()).toBeVisible();
+  await expect(item).toHaveAccessibleName("Contrast study");
+  await expect(item).toHaveAccessibleDescription(/Analysis |Analyzing media/);
+  await expect(infoPanel.getByRole("status")).toHaveText(/Analysis |Analyzing media/);
   await page.getByRole("button", { name: "Close info" }).click();
 
   await item.getByRole("button", { name: "Media actions" }).click();
