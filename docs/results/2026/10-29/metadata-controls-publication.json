@@ -1,0 +1,77 @@
+{
+  "schema_version": 1,
+  "source_commit": "8214dc48832bfcb1e6718b17b9f208d1b603f4e0",
+  "source_tree": "f6df9bcc129569c4e538750abf939bc79fbc38a2",
+  "repository": "alvarovillalbaa/inspiration-canvas",
+  "branch": "main",
+  "remote_readback": {
+    "ref_matches": true,
+    "tree_truncated": false,
+    "leaf_identities_matched": 1019,
+    "canonical_sorted_leaf_manifest_sha256": "1450eced5f6691a56f309f42719233512e207c239f2606e96c00513f1c0ea1c8",
+    "actions_runs": 0,
+    "local_checkout_at_source": "clean"
+  },
+  "source_inventory": {
+    "application_inputs": 175,
+    "protected_baseline_files": 1011,
+    "browser_cases": 8,
+    "desktop": 6,
+    "narrow_touch": 2,
+    "execution": "unrun",
+    "approval": "pending; requested once against this source"
+  },
+  "deployment": {
+    "id": "dpl_43gUtUrtq8pzCzKidvC8QGPJ3FGa",
+    "state": "READY",
+    "source_commit": "8214dc48832bfcb1e6718b17b9f208d1b603f4e0",
+    "target": "production",
+    "canonical_alias": "inspiration-canvas.vercel.app",
+    "alias_matches": true,
+    "inspector_url": "https://vercel.com/my-team-4f230354/inspiration-canvas/43gUtUrtq8pzCzKidvC8QGPJ3FGa",
+    "observed_build_events": [
+      "Compiled successfully in 18.9s",
+      "Finished TypeScript in 8.7s",
+      "Generated 13/13 static pages",
+      "Build completed in 60s",
+      "Deployment completed"
+    ],
+    "log_read": "Bounded connector result; 44 older array items omitted. These selected events were present.",
+    "browser_execution": false
+  },
+  "delivery": {
+    "homepage_connected_get": 200,
+    "independent_unauthenticated_head": 200,
+    "client_connected_get": 200,
+    "client_url": "https://inspiration-canvas.vercel.app/_next/static/chunks/app/page-0623db159437344e.js?dpl=dpl_43gUtUrtq8pzCzKidvC8QGPJ3FGa",
+    "chunk_bytes": 90284,
+    "chunk_sha256": "f6c6330c4c8c07094873d30bbf8e3e7106ded33f7e91a8989788bb6f52471cf9",
+    "html_bytes": 24320,
+    "html_sha256": "37d99d3d2f80a0dd4c5b4163edbe6aaa2ccd5af3336b3fd8b7e524efa6c1c908",
+    "syntax": "passed",
+    "markers": {
+      "creation": true,
+      "tag_search": true,
+      "save_error": true,
+      "escape_fence": true
+    },
+    "events_executed": false
+  },
+  "static_checks": {
+    "typescript": "5.9.3",
+    "app_and_fixture_syntax_files": 3,
+    "local_import_targets": 29,
+    "yaml": "system Ruby Psych",
+    "workflow_shell_blocks": 8,
+    "embedded_node_blocks": 3,
+    "runner_config_syntax": true,
+    "whitespace": "passed",
+    "targeted_lint": "could not start locally: TypeScript ESLint parser absent; no install"
+  },
+  "limits": [
+    "No browser/keyboard/touch/storage event acceptance run.",
+    "No signed-in/server metadata write, backend/domain test, model/provider call, migration or production configuration change.",
+    "No new dependency version, account or paid service.",
+    "Existing PostgreSQL migration and other application/provider acceptance remain open."
+  ]
+}

@@ -1,6 +1,7 @@
 # Searchable media metadata controls
 
-29 October 2026. Source prepared and statically checked; browser checks unrun.
+29 October 2026. Source published; static and hosted build checks passed.
+The eight browser cases remain unrun, pending their separate approval.
 Starting source: cab74d32a86e962529d4669181f2704107970272, clean locally and
 matched by connected GitHub main before editing.
 
@@ -69,3 +70,29 @@ database, Auth/security, dependency, production-config or paid-service change
 has been made. Existing SQLite/Convex/PostgreSQL direction, signed-in persistence
 and provider behavior remain separately unfinished; metadata controls do not
 complete the app or the full portfolio objective.
+
+Source and the complete check proposal were published at
+[`8214dc48832bfcb1e6718b17b9f208d1b603f4e0`](https://github.com/alvarovillalbaa/inspiration-canvas/commit/8214dc48832bfcb1e6718b17b9f208d1b603f4e0).
+Connected GitHub ref/tree readback matched all 1,019 leaf paths, modes, types
+and blob SHAs without truncation. Local main was clean and Actions count zero.
+The [publication record](metadata-controls-publication.json) retains the tree
+identity digest, source/deployment and delivery limits. One approval request
+links that exact published eight-case/fifteen-minute temporary-CI proposal.
+No active workflow was installed and no check was started from that request.
+
+Production deployment
+[`dpl_43gUtUrtq8pzCzKidvC8QGPJ3FGa`](https://vercel.com/my-team-4f230354/inspiration-canvas/43gUtUrtq8pzCzKidvC8QGPJ3FGa)
+reached READY at 8214dc4 and owns the canonical alias. Bounded build logs record
+successful compilation (18.9 seconds), TypeScript (8.7 seconds), all thirteen
+static pages and completed deployment. The connector omitted 44 older log
+items; no complete-log audit is claimed. Connected homepage/client GETs returned
+200; independent unauthenticated HEAD also returned 200 and named this deployment
+in its preload links.
+
+The delivered page client is 90,284 UTF-8 bytes, SHA-256
+`f6c6330c4c8c07094873d30bbf8e3e7106ded33f7e91a8989788bb6f52471cf9`.
+It passed JavaScript syntax compilation without execution and contains creation,
+tag-search, save-error and Escape-fence code. These are actual build/type/delivery
+results; keyboard, touch, chip actions, save/reload and failure/retry behavior
+remain unverified until browser execution. This evidence-only follow-up changes
+none of the 175 sealed application inputs.
