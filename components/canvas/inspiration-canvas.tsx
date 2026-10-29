@@ -62,6 +62,10 @@ import {
 import { Suggestion, Suggestions } from "@/components/ai-elements/suggestion";
 import { CropEditor } from "@/components/canvas/crop-editor";
 import { CroppedImage } from "@/components/canvas/cropped-image";
+import {
+  MetadataCombobox,
+  MetadataTagsCombobox,
+} from "@/components/canvas/metadata-combobox";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import {
   AlertDialog,
@@ -151,7 +155,7 @@ type InfoDraft = {
   title: string;
   category: string;
   subcategory: string;
-  tags: string;
+  tags: string[];
   description: string;
 };
 
@@ -202,7 +206,7 @@ const EMPTY_INFO_DRAFT: InfoDraft = {
   title: "",
   category: "",
   subcategory: "",
-  tags: "",
+  tags: [],
   description: "",
 };
 
@@ -262,23 +266,12 @@ function mediaAnalysisLabel(item: MediaItem) {
   }
 }
 
-function splitTags(value: string) {
-  return [
-    ...new Set(
-      value
-        .split(",")
-        .map((tag) => tag.trim())
-        .filter(Boolean),
-    ),
-  ];
-}
-
 function infoDraftFromItem(item: MediaItem): InfoDraft {
   return {
     title: item.title || "",
     category: item.category || "",
     subcategory: item.subcategory || "",
-    tags: item.tagsJson.join(", "),
+    tags: [...item.tagsJson],
     description: item.description || "",
   };
 }
@@ -339,6 +332,9 @@ export function InspirationCanvas() {
   const [sidePanel, setSidePanel] = useState<SidePanel>(null);
   const [infoItemId, setInfoItemId] = useState<string | null>(null);
   const [infoDraft, setInfoDraft] = useState<InfoDraft>(EMPTY_INFO_DRAFT);
+  const [infoSaving, setInfoSaving] = useState(false);
+  const [infoError, setInfoError] = useState<{ id: string; message: string } | null>(null);
+  const infoSaveController = useRef<AbortController | null>(null);
   const [curatorInput, setCuratorInput] = useState("");
   const [groupBy, setGroupBy] = useState<GroupByMode>("none");
   const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(new Set());
@@ -359,14 +355,11 @@ export function InspirationCanvas() {
     () => items.filter((item) => selectedIds.has(item.id)),
     [items, selectedIds],
   );
-  const primarySelected = selectedItems[0] || null;
   const isAuthenticated = authState === "authenticated";
   const canAuthenticate = useMemo(() => Boolean(createBrowserSupabaseClient()), []);
   const infoItem = useMemo(
-    () =>
-      (infoItemId ? items.find((item) => item.id === infoItemId) : null) ||
-      primarySelected,
-    [infoItemId, items, primarySelected],
+    () => (infoItemId ? items.find((item) => item.id === infoItemId) : null) || null,
+    [infoItemId, items],
   );
   const existingCategories = useMemo(
     () => [...new Set(items.map((item) => item.category).filter(Boolean) as string[])],
@@ -376,6 +369,11 @@ export function InspirationCanvas() {
     () => [...new Set(items.flatMap((item) => item.tagsJson))].sort(),
     [items],
   );
+  const existingSubcategories = useMemo(
+    () => [...new Set(items.map((item) => item.subcategory).filter(Boolean) as string[])],
+    [items],
+  );
+  useEffect(() => () => { infoSaveController.current?.abort(); }, []);
   const groupSections = useMemo(() => {
     if (groupBy === "none") return [];
     const sections = new Map<string, MediaItem[]>();
@@ -985,31 +983,36 @@ export function InspirationCanvas() {
     setSelectedIds(new Set([item.id]));
     setInfoItemId(item.id);
     setInfoDraft(infoDraftFromItem(item));
+    setInfoError(null);
     setSidePanel("info");
     void loadComments(item.id);
   }
 
   async function saveInfo() {
-    if (!infoItem) return;
-    await patchMedia(infoItem.id, {
-      title: infoDraft.title.trim() || null,
-      category: infoDraft.category.trim() || null,
-      subcategory: infoDraft.subcategory.trim() || null,
-      tagsJson: splitTags(infoDraft.tags),
-      description: infoDraft.description.trim() || null,
-    });
-  }
-
-  function addCategoryToDraft(category: string) {
-    setInfoDraft((current) => ({ ...current, category }));
-  }
-
-  function addTagToDraft(tag: string) {
-    setInfoDraft((current) => {
-      const tags = splitTags(current.tags);
-      if (!tags.includes(tag)) tags.push(tag);
-      return { ...current, tags: tags.join(", ") };
-    });
+    if (!infoItem || infoSaveController.current) return;
+    const id = infoItem.id;
+    const controller = new AbortController();
+    infoSaveController.current = controller;
+    setInfoSaving(true);
+    setInfoError(null);
+    const timeout = window.setTimeout(() => controller.abort(), 30_000);
+    try {
+      await patchMedia(id, {
+        title: infoDraft.title.trim() || null,
+        category: infoDraft.category.trim() || null,
+        subcategory: infoDraft.subcategory.trim() || null,
+        tagsJson: [...new Set(infoDraft.tags.map((tag) => tag.trim()).filter(Boolean))],
+        description: infoDraft.description.trim() || null,
+      }, controller.signal);
+    } catch (error) {
+      setInfoError({ id, message: controller.signal.aborted
+        ? "Saving info did not finish. Your draft is still available; retry to confirm it was saved."
+        : error instanceof Error ? error.message : "Could not save info. Your draft is still available." });
+    } finally {
+      window.clearTimeout(timeout);
+      if (infoSaveController.current === controller) infoSaveController.current = null;
+      setInfoSaving(false);
+    }
   }
 
   function toggleGroup(groupId: string) {
@@ -1127,7 +1130,7 @@ export function InspirationCanvas() {
   function renderSidePanel() {
     if (sidePanel === "info") {
       return (
-        <aside className="flex h-[100dvh] w-[390px] shrink-0 flex-col border-l border-border bg-background">
+        <aside className="flex h-[100dvh] w-[390px] max-w-full shrink-0 flex-col border-l border-border bg-background">
           <div className="flex items-center justify-between gap-3 border-b border-border p-4">
             <div className="min-w-0">
               <div className="text-sm font-medium">Media info</div>
@@ -1163,80 +1166,32 @@ export function InspirationCanvas() {
                     placeholder="Reference title"
                   />
                 </label>
-                <label className="space-y-1 text-sm">
-                  <span className="text-muted-foreground">Category</span>
-                  <Input
-                    value={infoDraft.category}
-                    onChange={(event) =>
-                      setInfoDraft((current) => ({ ...current, category: event.target.value }))
-                    }
-                    placeholder="Create or choose a category"
-                    list="media-categories"
-                  />
-                  <datalist id="media-categories">
-                    {existingCategories.map((category) => (
-                      <option key={category} value={category} />
-                    ))}
-                  </datalist>
-                </label>
-                {existingCategories.length > 0 ? (
-                  <div className="flex flex-wrap gap-2">
-                    {existingCategories.slice(0, 8).map((category) => (
-                      <Button
-                        key={category}
-                        type="button"
-                        size="sm"
-                        variant="outline"
-                        className="h-7 rounded-md px-2 text-xs"
-                        onClick={() => addCategoryToDraft(category)}
-                      >
-                        {category}
-                      </Button>
-                    ))}
-                  </div>
-                ) : null}
-                <label className="space-y-1 text-sm">
-                  <span className="text-muted-foreground">Subcategory</span>
-                  <Input
-                    value={infoDraft.subcategory}
-                    onChange={(event) =>
-                      setInfoDraft((current) => ({ ...current, subcategory: event.target.value }))
-                    }
-                    placeholder="Optional subcategory"
-                  />
-                </label>
-                <label className="space-y-1 text-sm">
-                  <span className="text-muted-foreground">Tags</span>
-                  <Input
-                    value={infoDraft.tags}
-                    onChange={(event) =>
-                      setInfoDraft((current) => ({ ...current, tags: event.target.value }))
-                    }
-                    placeholder="Comma-separated tags"
-                    list="media-tags"
-                  />
-                  <datalist id="media-tags">
-                    {existingTags.map((tag) => (
-                      <option key={tag} value={tag} />
-                    ))}
-                  </datalist>
-                </label>
-                {existingTags.length > 0 ? (
-                  <div className="flex flex-wrap gap-2">
-                    {existingTags.slice(0, 14).map((tag) => (
-                      <Button
-                        key={tag}
-                        type="button"
-                        size="sm"
-                        variant="outline"
-                        className="h-7 rounded-md px-2 text-xs"
-                        onClick={() => addTagToDraft(tag)}
-                      >
-                        {tag}
-                      </Button>
-                    ))}
-                  </div>
-                ) : null}
+                <MetadataCombobox
+                  key={`category:${infoItem.id}`}
+                  id="media-category"
+                  label="Category"
+                  value={infoDraft.category}
+                  options={existingCategories}
+                  onValueChange={(category) => setInfoDraft((current) => ({ ...current, category }))}
+                  placeholder="Choose or create a category"
+                />
+                <MetadataCombobox
+                  key={`subcategory:${infoItem.id}`}
+                  id="media-subcategory"
+                  label="Subcategory"
+                  value={infoDraft.subcategory}
+                  options={existingSubcategories}
+                  onValueChange={(subcategory) => setInfoDraft((current) => ({ ...current, subcategory }))}
+                  placeholder="Choose or create a subcategory"
+                />
+                <MetadataTagsCombobox
+                  key={`tags:${infoItem.id}`}
+                  id="media-tags"
+                  label="Tags"
+                  value={infoDraft.tags}
+                  options={existingTags}
+                  onValueChange={(tags) => setInfoDraft((current) => ({ ...current, tags }))}
+                />
                 <label className="space-y-1 text-sm">
                   <span className="text-muted-foreground">Description</span>
                   <Textarea
@@ -1254,8 +1209,14 @@ export function InspirationCanvas() {
             <div className="p-4 text-sm text-muted-foreground">Select media to edit its metadata.</div>
           )}
           <div className="border-t border-border p-4">
-            <Button className="w-full" onClick={() => void saveInfo()} disabled={!infoItem}>
-              Save info
+            {infoError && infoError.id === infoItem?.id ? (
+              <Alert variant="destructive" className="mb-3">
+                <AlertTitle>Info not saved</AlertTitle>
+                <AlertDescription>{infoError.message}</AlertDescription>
+              </Alert>
+            ) : null}
+            <Button className="w-full" onClick={() => void saveInfo()} disabled={!infoItem || infoSaving}>
+              {infoSaving ? "Saving info…" : "Save info"}
             </Button>
           </div>
         </aside>

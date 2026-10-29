@@ -9,6 +9,13 @@ Info and inline-comment surfaces, and each media item's accessible name identifi
 it. Processing state is available in its accessible description and the Info panel;
 skipped analysis is labelled separately from failure.
 
+Media Info provides searchable category/subcategory comboboxes and removable
+tag chips. Choose an existing value or select the “Create” option for a new one.
+Unselected search text is not metadata. “Save info” applies the draft; a failed
+save keeps it available for retry. Existing comma-containing tags remain single
+tags. See the [metadata-control receipt](docs/results/2026/10-29/metadata-controls.md)
+for source, build and the separately pending browser-check boundaries.
+
 ## Stack
 
 - Next.js App Router, TypeScript, Tailwind CSS, shadcn/ui, Geist

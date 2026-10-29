@@ -1,0 +1,169 @@
+# INACTIVE PROPOSAL. Requires explicit approval before installing under .github/workflows.
+# Install only on qa/metadata-combobox-checks; remove after focused acceptance.
+name: Temporary focused metadata combobox checks
+on:
+  push:
+    branches: [qa/metadata-combobox-checks]
+    paths: [.github/workflows/metadata-combobox-checks.yml]
+permissions:
+  contents: read
+jobs:
+  metadata:
+    if: github.repository == 'alvarovillalbaa/inspiration-canvas' && github.event.repository.private == false && github.ref == 'refs/heads/qa/metadata-combobox-checks'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    env:
+      SOURCE_COMMIT: APPROVED_SOURCE_COMMIT
+      CI: "true"
+      NEXT_TELEMETRY_DISABLED: "1"
+      DO_NOT_TRACK: "1"
+      ENABLE_AI: "false"
+      ENABLE_EVE_DEV: "false"
+      ENABLE_BLOB_STORAGE: "false"
+      STORAGE_DRIVER: local
+      NEXT_PUBLIC_SUPABASE_URL: ""
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ""
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ""
+      SUPABASE_SERVICE_ROLE_KEY: ""
+      BLOB_READ_WRITE_TOKEN: ""
+      AI_GATEWAY_API_KEY: ""
+      VERCEL_OIDC_TOKEN: ""
+      OPENAI_API_KEY: ""
+      ANTHROPIC_API_KEY: ""
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # reviewed v7.0.1 pin
+        with:
+          ref: ${{ env.SOURCE_COMMIT }}
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # reviewed v7.1.0 pin
+        with:
+          node-version: 24.21.0
+          package-manager-cache: false
+      - name: Verify the reviewed scope and log public source identity
+        run: |
+          [[ "$SOURCE_COMMIT" =~ ^[0-9a-f]{40}$ ]]
+          test "$(git rev-parse HEAD)" = "$SOURCE_COMMIT"
+          node <<'NODE'
+          const fs = require('node:fs');
+          const crypto = require('node:crypto');
+          const seal = JSON.parse(fs.readFileSync('docs/results/2026/10-29/metadata-controls-inventory.json', 'utf8'));
+          const tracked = require('node:child_process').execFileSync('git', ['ls-files', '-z'], { encoding: 'utf8' }).split('\0');
+          const inputs = tracked.filter(path => path && !seal.excluded_prefixes.some(prefix => path.startsWith(prefix))).sort();
+          if (JSON.stringify(inputs) !== JSON.stringify(seal.source_files.map(entry => entry.path).sort())) throw new Error('Application source file set changed.');
+          for (const entry of seal.source_files) {
+            const bytes = fs.readFileSync(entry.path);
+            if (bytes.length !== entry.bytes || crypto.createHash('sha256').update(bytes).digest('hex') !== entry.sha256) throw new Error('Source seal mismatch: ' + entry.path);
+          }
+          if (seal.case_names.length !== 8 || new Set(seal.case_names).size !== 8) throw new Error('Expected exactly eight authored cases.');
+          const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8'));
+          if (process.version !== 'v24.21.0' || pkg.packageManager !== 'pnpm@10.24.0') throw new Error('Re-review the changed runtime baseline.');
+          if (!fs.existsSync('tests/e2e/metadata.spec.ts')) throw new Error('Focused metadata test source is missing.');
+          NODE
+          git rev-parse HEAD
+          sha256sum package.json pnpm-lock.yaml tests/e2e/metadata.spec.ts
+      - name: Install locked dependencies in the disposable runner without lifecycle scripts
+        run: |
+          corepack enable
+          corepack prepare pnpm@10.24.0 --activate
+          corepack pnpm install --frozen-lockfile --ignore-scripts
+      - name: Lint only the new control and focused fixture
+        run: corepack pnpm exec eslint --no-cache components/canvas/metadata-combobox.tsx tests/e2e/metadata.spec.ts
+      - name: Install only Chromium and its Linux dependencies
+        run: corepack pnpm exec playwright install --with-deps chromium
+      - name: Create a runner-only focused Playwright configuration
+        run: |
+          cat > .metadata-ci.playwright.config.ts <<'CONFIG'
+          import { defineConfig, devices } from '@playwright/test';
+
+          const baseURL = 'http://127.0.0.1:3100';
+          export default defineConfig({
+            testDir: './tests/e2e',
+            testMatch: '**/metadata.spec.ts',
+            forbidOnly: true,
+            fullyParallel: false,
+            workers: 1,
+            retries: 0,
+            timeout: 45_000,
+            globalTimeout: 420_000,
+            expect: { timeout: 10_000 },
+            reporter: [['list'], ['json', { outputFile: 'metadata-ci-report.json' }]],
+            outputDir: 'test-results/metadata-ci',
+            use: {
+              baseURL,
+              trace: 'off',
+              screenshot: 'off',
+              video: 'off',
+              serviceWorkers: 'block',
+            },
+            projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
+            webServer: {
+              command: 'corepack pnpm dev --hostname 127.0.0.1 --port 3100',
+              url: baseURL,
+              reuseExistingServer: false,
+              timeout: 120_000,
+              env: {
+                NODE_ENV: 'development',
+                ENABLE_AI: 'false',
+                ENABLE_EVE_DEV: 'false',
+                ENABLE_BLOB_STORAGE: 'false',
+                STORAGE_DRIVER: 'local',
+                NEXT_TELEMETRY_DISABLED: '1',
+                NEXT_PUBLIC_SUPABASE_URL: '',
+                NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: '',
+                NEXT_PUBLIC_SUPABASE_ANON_KEY: '',
+                SUPABASE_SERVICE_ROLE_KEY: '',
+                BLOB_READ_WRITE_TOKEN: '',
+                AI_GATEWAY_API_KEY: '',
+                VERCEL_OIDC_TOKEN: '',
+                OPENAI_API_KEY: '',
+                ANTHROPIC_API_KEY: '',
+              },
+            },
+          });
+          CONFIG
+      - name: Run only the metadata desktop and narrow cases
+        run: corepack pnpm exec playwright test --config .metadata-ci.playwright.config.ts --project chromium
+      - name: Verify exact results and unchanged source
+        if: always()
+        run: |
+          node <<'NODE'
+          const fs = require('node:fs');
+          const crypto = require('node:crypto');
+          const seal = JSON.parse(fs.readFileSync('docs/results/2026/10-29/metadata-controls-inventory.json', 'utf8'));
+          for (const entry of seal.source_files) {
+            const bytes = fs.readFileSync(entry.path);
+            if (bytes.length !== entry.bytes || crypto.createHash('sha256').update(bytes).digest('hex') !== entry.sha256) throw new Error('Source changed: ' + entry.path);
+          }
+          const path = 'metadata-ci-report.json';
+          if (!fs.existsSync(path) || fs.statSync(path).size > 1048576) throw new Error('Focused JSON report missing or exceeds 1 MiB.');
+          const report = JSON.parse(fs.readFileSync(path, 'utf8'));
+          const cases = [];
+          function visit(suite) {
+            for (const spec of suite.specs || []) for (const test of spec.tests || []) {
+              cases.push({ name: spec.title, project: test.projectName, expected: test.expectedStatus,
+                results: test.results.map(result => result.status) });
+            }
+            for (const child of suite.suites || []) visit(child);
+          }
+          visit(report);
+          process.stdout.write('METADATA_RESULT ' + JSON.stringify({ source: process.env.SOURCE_COMMIT, stats: report.stats, cases, errors: report.errors }) + '\n');
+          const names = cases.map(item => item.name).sort();
+          if (JSON.stringify(names) !== JSON.stringify([...seal.case_names].sort()) || new Set(names).size !== 8) throw new Error('Unexpected case set.');
+          if (report.errors.length || report.stats.expected !== 8 || report.stats.unexpected || report.stats.flaky || report.stats.skipped) throw new Error('Not all eight cases passed.');
+          if (!cases.every(item => item.project === 'chromium' && item.expected === 'passed' && item.results.length === 1 && item.results[0] === 'passed')) throw new Error('Missing, retried or unsuccessful result.');
+          NODE
+      - name: Show bounded context from only the disposable browser on failure
+        if: failure()
+        run: |
+          node <<'NODE'
+          const fs = require('node:fs');
+          const path = require('node:path');
+          const root = 'test-results/metadata-ci';
+          if (fs.existsSync(root)) {
+            const files = fs.readdirSync(root, { recursive: true }).filter(name => name.endsWith('error-context.md')).slice(0, 8);
+            for (const file of files) {
+              process.stdout.write('METADATA_FAILURE_CONTEXT ' + file + '\n');
+              process.stdout.write(fs.readFileSync(path.join(root, file), 'utf8').split('\n').slice(0, 120).join('\n') + '\n');
+            }
+          }
+          NODE
