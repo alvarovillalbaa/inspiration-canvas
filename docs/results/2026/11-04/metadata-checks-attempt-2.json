@@ -1,0 +1,2213 @@
+{
+  "schemaVersion": 1,
+  "kind": "inspiration-metadata-checks-attempt-2",
+  "sourceCommit": "92f530734cbd74e9515c4f6df9d2afebe6ca0e64",
+  "sourceTree": "cc58d2d33c1f4c9856821a45887402301e853ae8",
+  "activationCommit": "1fb9bfacbfb575873660a2a641adebdf1c72f147",
+  "activationTree": "a158f175f2682cdf10a23ac0163dbe63cfbe3d01",
+  "run": {
+    "id": 41929633168,
+    "url": "https://github.com/alvarovillalbaa/inspiration-canvas/actions/runs/41929633168",
+    "status": "completed",
+    "conclusion": "failure",
+    "event": "create",
+    "headSha": "1fb9bfacbfb575873660a2a641adebdf1c72f147"
+  },
+  "job": {
+    "id": 126922939227,
+    "name": "metadata",
+    "status": "completed",
+    "conclusion": "failure",
+    "startedAt": "2026-11-04T22:56:52Z",
+    "completedAt": "2026-11-04T23:04:05Z"
+  },
+  "controller": {
+    "schemaVersion": "inspiration.metadata-checks.v2",
+    "sourceCommit": "92f530734cbd74e9515c4f6df9d2afebe6ca0e64",
+    "status": "failed",
+    "startedAtUtc": "2026-11-04T22:57:01.915Z",
+    "runtime": {
+      "node": "v24.21.0",
+      "platform": "linux",
+      "architecture": "x64",
+      "executableSha256": "7fde7b8afa198da66257f42ee2001d874c7355631e6d1579a5fb5ef1f246df4c",
+      "corepackCliSha256": "3655bc798f300951f2070fee411b337d626b0c3ae80c2d24c46ccac4595d4bf9",
+      "pnpm": "10.24.0"
+    },
+    "limits": {
+      "workSeconds": 780,
+      "cleanupSeconds": 60,
+      "finalStdoutSeconds": 2,
+      "jobMinutes": 15,
+      "streamBytes": 524288,
+      "reportBytes": 262144,
+      "playwrightReportBytes": 1048576,
+      "playwrightGzipBytes": 131072,
+      "termToKillSeconds": 3,
+      "drainAfterKillSeconds": 3
+    },
+    "scope": {
+      "file": "tests/e2e/metadata.spec.ts",
+      "cases": 8,
+      "desktop": 6,
+      "narrowTouch": 2,
+      "workers": 1,
+      "retries": 0,
+      "caseTimeoutMs": 45000,
+      "globalTimeoutMs": 420000,
+      "serverStartupTimeoutMs": 120000,
+      "port": 3100
+    },
+    "commands": [
+      {
+        "label": "before_head",
+        "args": [
+          "git",
+          "rev-parse",
+          "HEAD"
+        ],
+        "allowedExits": [
+          0
+        ],
+        "exitCode": 0,
+        "signal": null,
+        "stop": null,
+        "spawned": true,
+        "exitObserved": true,
+        "closeObserved": true,
+        "originalProcessGroupAbsent": true,
+        "termSent": false,
+        "killSent": false,
+        "streams": [
+          {
+            "name": "stdout",
+            "observedBytes": 41,
+            "capturedBytes": 41,
+            "observedSha256": "d21d98e163d7ec880f12c2fff82074b2bf595a4d51d450997dcb798e67f71038",
+            "capturedSha256": "d21d98e163d7ec880f12c2fff82074b2bf595a4d51d450997dcb798e67f71038",
+            "complete": true
+          },
+          {
+            "name": "stderr",
+            "observedBytes": 0,
+            "capturedBytes": 0,
+            "observedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "capturedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "complete": true
+          }
+        ]
+      },
+      {
+        "label": "before_seal",
+        "args": [
+          "git",
+          "show",
+          "HEAD:docs/results/2026/11-04/metadata-checks-source-attempt-2.json"
+        ],
+        "allowedExits": [
+          0
+        ],
+        "exitCode": 0,
+        "signal": null,
+        "stop": null,
+        "spawned": true,
+        "exitObserved": true,
+        "closeObserved": true,
+        "originalProcessGroupAbsent": true,
+        "termSent": false,
+        "killSent": false,
+        "streams": [
+          {
+            "name": "stdout",
+            "observedBytes": 45966,
+            "capturedBytes": 45966,
+            "observedSha256": "524360563dab5340d17c617e4ef15a00e924cba95472321dc423b18114fa808e",
+            "capturedSha256": "524360563dab5340d17c617e4ef15a00e924cba95472321dc423b18114fa808e",
+            "complete": true
+          },
+          {
+            "name": "stderr",
+            "observedBytes": 0,
+            "capturedBytes": 0,
+            "observedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "capturedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "complete": true
+          }
+        ]
+      },
+      {
+        "label": "before_index",
+        "args": [
+          "git",
+          "ls-files",
+          "--stage",
+          "-z"
+        ],
+        "allowedExits": [
+          0
+        ],
+        "exitCode": 0,
+        "signal": null,
+        "stop": null,
+        "spawned": true,
+        "exitObserved": true,
+        "closeObserved": true,
+        "originalProcessGroupAbsent": true,
+        "termSent": false,
+        "killSent": false,
+        "streams": [
+          {
+            "name": "stdout",
+            "observedBytes": 112276,
+            "capturedBytes": 112276,
+            "observedSha256": "27df1226f06f8cff741941cc6d5de0b6fd3ec28df3dc9201e3db6b40d15a35ff",
+            "capturedSha256": "27df1226f06f8cff741941cc6d5de0b6fd3ec28df3dc9201e3db6b40d15a35ff",
+            "complete": true
+          },
+          {
+            "name": "stderr",
+            "observedBytes": 0,
+            "capturedBytes": 0,
+            "observedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "capturedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "complete": true
+          }
+        ]
+      },
+      {
+        "label": "before_tree",
+        "args": [
+          "git",
+          "ls-tree",
+          "-r",
+          "-z",
+          "HEAD"
+        ],
+        "allowedExits": [
+          0
+        ],
+        "exitCode": 0,
+        "signal": null,
+        "stop": null,
+        "spawned": true,
+        "exitObserved": true,
+        "closeObserved": true,
+        "originalProcessGroupAbsent": true,
+        "termSent": false,
+        "killSent": false,
+        "streams": [
+          {
+            "name": "stdout",
+            "observedBytes": 115357,
+            "capturedBytes": 115357,
+            "observedSha256": "594a7a8bd5e6706abbc64773e5c1946ce78c4db65bdf4ab33f0bc1f908791d7f",
+            "capturedSha256": "594a7a8bd5e6706abbc64773e5c1946ce78c4db65bdf4ab33f0bc1f908791d7f",
+            "complete": true
+          },
+          {
+            "name": "stderr",
+            "observedBytes": 0,
+            "capturedBytes": 0,
+            "observedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "capturedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "complete": true
+          }
+        ]
+      },
+      {
+        "label": "before_status",
+        "args": [
+          "git",
+          "status",
+          "--porcelain=v1",
+          "-z",
+          "--untracked-files=all"
+        ],
+        "allowedExits": [
+          0
+        ],
+        "exitCode": 0,
+        "signal": null,
+        "stop": null,
+        "spawned": true,
+        "exitObserved": true,
+        "closeObserved": true,
+        "originalProcessGroupAbsent": true,
+        "termSent": false,
+        "killSent": false,
+        "streams": [
+          {
+            "name": "stdout",
+            "observedBytes": 0,
+            "capturedBytes": 0,
+            "observedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "capturedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "complete": true
+          },
+          {
+            "name": "stderr",
+            "observedBytes": 0,
+            "capturedBytes": 0,
+            "observedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "capturedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "complete": true
+          }
+        ]
+      },
+      {
+        "label": "before_working",
+        "args": [
+          "git",
+          "-c",
+          "core.filemode=true",
+          "diff",
+          "--no-ext-diff",
+          "--no-textconv",
+          "--quiet",
+          "--exit-code",
+          "HEAD",
+          "--"
+        ],
+        "allowedExits": [
+          0
+        ],
+        "exitCode": 0,
+        "signal": null,
+        "stop": null,
+        "spawned": true,
+        "exitObserved": true,
+        "closeObserved": true,
+        "originalProcessGroupAbsent": true,
+        "termSent": false,
+        "killSent": false,
+        "streams": [
+          {
+            "name": "stdout",
+            "observedBytes": 0,
+            "capturedBytes": 0,
+            "observedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "capturedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "complete": true
+          },
+          {
+            "name": "stderr",
+            "observedBytes": 0,
+            "capturedBytes": 0,
+            "observedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "capturedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "complete": true
+          }
+        ]
+      },
+      {
+        "label": "before_ignored",
+        "args": [
+          "git",
+          "status",
+          "--porcelain=v1",
+          "-z",
+          "--ignored=matching",
+          "--untracked-files=normal"
+        ],
+        "allowedExits": [
+          0
+        ],
+        "exitCode": 0,
+        "signal": null,
+        "stop": null,
+        "spawned": true,
+        "exitObserved": true,
+        "closeObserved": true,
+        "originalProcessGroupAbsent": true,
+        "termSent": false,
+        "killSent": false,
+        "streams": [
+          {
+            "name": "stdout",
+            "observedBytes": 0,
+            "capturedBytes": 0,
+            "observedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "capturedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "complete": true
+          },
+          {
+            "name": "stderr",
+            "observedBytes": 0,
+            "capturedBytes": 0,
+            "observedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "capturedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "complete": true
+          }
+        ]
+      },
+      {
+        "label": "prepare_pnpm",
+        "args": [
+          "[node]",
+          "/opt/hostedtoolcache/node/24.21.0/x64/lib/node_modules/corepack/dist/corepack.js",
+          "prepare",
+          "pnpm@10.24.0",
+          "--activate"
+        ],
+        "allowedExits": [
+          0
+        ],
+        "exitCode": 0,
+        "signal": null,
+        "stop": null,
+        "spawned": true,
+        "exitObserved": true,
+        "closeObserved": true,
+        "originalProcessGroupAbsent": true,
+        "termSent": false,
+        "killSent": false,
+        "streams": [
+          {
+            "name": "stdout",
+            "observedBytes": 51,
+            "capturedBytes": 51,
+            "observedSha256": "715c13fae36966c37c2ece18b08dab40260e459a8f5161a6560cfdca93d41f4c",
+            "capturedSha256": "715c13fae36966c37c2ece18b08dab40260e459a8f5161a6560cfdca93d41f4c",
+            "complete": true,
+            "head": "Preparing pnpm@10.24.0 for immediate activation...\n",
+            "tail": "Preparing pnpm@10.24.0 for immediate activation...\n"
+          },
+          {
+            "name": "stderr",
+            "observedBytes": 0,
+            "capturedBytes": 0,
+            "observedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "capturedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "complete": true,
+            "head": "",
+            "tail": ""
+          }
+        ]
+      },
+      {
+        "label": "pnpm_version",
+        "args": [
+          "[node]",
+          "/opt/hostedtoolcache/node/24.21.0/x64/lib/node_modules/corepack/dist/corepack.js",
+          "pnpm",
+          "--version"
+        ],
+        "allowedExits": [
+          0
+        ],
+        "exitCode": 0,
+        "signal": null,
+        "stop": null,
+        "spawned": true,
+        "exitObserved": true,
+        "closeObserved": true,
+        "originalProcessGroupAbsent": true,
+        "termSent": false,
+        "killSent": false,
+        "streams": [
+          {
+            "name": "stdout",
+            "observedBytes": 8,
+            "capturedBytes": 8,
+            "observedSha256": "d57d8c9c1f2bf0cd42f130efec6786ebacc3a3e25d8695ad1ca56216de38faa4",
+            "capturedSha256": "d57d8c9c1f2bf0cd42f130efec6786ebacc3a3e25d8695ad1ca56216de38faa4",
+            "complete": true,
+            "head": "10.24.0\n",
+            "tail": "10.24.0\n"
+          },
+          {
+            "name": "stderr",
+            "observedBytes": 0,
+            "capturedBytes": 0,
+            "observedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "capturedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "complete": true,
+            "head": "",
+            "tail": ""
+          }
+        ]
+      },
+      {
+        "label": "install",
+        "args": [
+          "[node]",
+          "/opt/hostedtoolcache/node/24.21.0/x64/lib/node_modules/corepack/dist/corepack.js",
+          "pnpm",
+          "install",
+          "--frozen-lockfile",
+          "--ignore-scripts",
+          "--store-dir",
+          "[scratch]/pnpm/store"
+        ],
+        "allowedExits": [
+          0
+        ],
+        "exitCode": 0,
+        "signal": null,
+        "stop": null,
+        "spawned": true,
+        "exitObserved": true,
+        "closeObserved": true,
+        "originalProcessGroupAbsent": true,
+        "termSent": false,
+        "killSent": false,
+        "streams": [
+          {
+            "name": "stdout",
+            "observedBytes": 2263,
+            "capturedBytes": 2263,
+            "observedSha256": "67a2c0c9a7448041d5bd0003f37e10f046cdf88626f288156ab3f117a05ac5d8",
+            "capturedSha256": "67a2c0c9a7448041d5bd0003f37e10f046cdf88626f288156ab3f117a05ac5d8",
+            "complete": true,
+            "head": "Lockfile is up to date, resolution step is skipped\nProgress: resolved 1, reused 0, downloaded 0, added 0\nPackages: +1386\n++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\nProgress: resolved 1386, reused 0, downloaded 51, added 16\nProgress: resolved 1386, reused 0, downloaded 290, added 266\nProgress: resolved 1386, reused 0, downloaded 371, added 329\nProgress: resolved 1386, reused 0, downloaded 445, added 365\nProgress: resolved 1386, reused 0, downloaded 499, added",
+            "tail": "10.5.3\n+ react-zoom-pan-pinch 4.0.3\n+ recharts 3.9.0\n+ shadcn 4.11.0\n+ sharp 0.34.5\n+ shiki 4.3.1\n+ sonner 2.0.7\n+ streamdown 2.5.0\n+ tailwind-merge 3.6.0\n+ tw-animate-css 1.4.0\n+ use-stick-to-bottom 1.1.6\n+ vaul 1.1.2\n+ workflow 4.5.0\n+ zod 4.4.3\n\ndevDependencies:\n+ @playwright/test 1.61.1\n+ @tailwindcss/postcss 4.3.1\n+ @testing-library/jest-dom 6.9.1\n+ @testing-library/react 16.3.2\n+ @types/node 20.19.43\n+ @types/react 19.2.17\n+ @types/react-dom 19.2.3\n+ @vitest/browser 4.1.9\n+ dotenv 17.4.2\n+ drizzle-kit 0.31.10\n+ eslint 9.39.4\n+ eslint-config-next 16.2.9\n+ jsdom 28.1.0\n+ playwright 1.61.1\n+ tailwindcss 4.3.1\n+ tsx 4.22.4\n+ typescript 5.9.3\n+ vitest 4.1.9\n\nDone in 11s using pnpm v10.24.0\n"
+          },
+          {
+            "name": "stderr",
+            "observedBytes": 0,
+            "capturedBytes": 0,
+            "observedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "capturedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "complete": true,
+            "head": "",
+            "tail": ""
+          }
+        ]
+      },
+      {
+        "label": "after_install_ignored",
+        "args": [
+          "git",
+          "status",
+          "--porcelain=v1",
+          "-z",
+          "--ignored=matching",
+          "--untracked-files=normal"
+        ],
+        "allowedExits": [
+          0
+        ],
+        "exitCode": 0,
+        "signal": null,
+        "stop": null,
+        "spawned": true,
+        "exitObserved": true,
+        "closeObserved": true,
+        "originalProcessGroupAbsent": true,
+        "termSent": false,
+        "killSent": false,
+        "streams": [
+          {
+            "name": "stdout",
+            "observedBytes": 17,
+            "capturedBytes": 17,
+            "observedSha256": "585c81200a41fe87505db2ccf942ebccd9144967bcc79cfc7ebd795a9982a00a",
+            "capturedSha256": "585c81200a41fe87505db2ccf942ebccd9144967bcc79cfc7ebd795a9982a00a",
+            "complete": true
+          },
+          {
+            "name": "stderr",
+            "observedBytes": 0,
+            "capturedBytes": 0,
+            "observedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "capturedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "complete": true
+          }
+        ]
+      },
+      {
+        "label": "after_install_head",
+        "args": [
+          "git",
+          "rev-parse",
+          "HEAD"
+        ],
+        "allowedExits": [
+          0
+        ],
+        "exitCode": 0,
+        "signal": null,
+        "stop": null,
+        "spawned": true,
+        "exitObserved": true,
+        "closeObserved": true,
+        "originalProcessGroupAbsent": true,
+        "termSent": false,
+        "killSent": false,
+        "streams": [
+          {
+            "name": "stdout",
+            "observedBytes": 41,
+            "capturedBytes": 41,
+            "observedSha256": "d21d98e163d7ec880f12c2fff82074b2bf595a4d51d450997dcb798e67f71038",
+            "capturedSha256": "d21d98e163d7ec880f12c2fff82074b2bf595a4d51d450997dcb798e67f71038",
+            "complete": true
+          },
+          {
+            "name": "stderr",
+            "observedBytes": 0,
+            "capturedBytes": 0,
+            "observedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "capturedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "complete": true
+          }
+        ]
+      },
+      {
+        "label": "after_install_seal",
+        "args": [
+          "git",
+          "show",
+          "HEAD:docs/results/2026/11-04/metadata-checks-source-attempt-2.json"
+        ],
+        "allowedExits": [
+          0
+        ],
+        "exitCode": 0,
+        "signal": null,
+        "stop": null,
+        "spawned": true,
+        "exitObserved": true,
+        "closeObserved": true,
+        "originalProcessGroupAbsent": true,
+        "termSent": false,
+        "killSent": false,
+        "streams": [
+          {
+            "name": "stdout",
+            "observedBytes": 45966,
+            "capturedBytes": 45966,
+            "observedSha256": "524360563dab5340d17c617e4ef15a00e924cba95472321dc423b18114fa808e",
+            "capturedSha256": "524360563dab5340d17c617e4ef15a00e924cba95472321dc423b18114fa808e",
+            "complete": true
+          },
+          {
+            "name": "stderr",
+            "observedBytes": 0,
+            "capturedBytes": 0,
+            "observedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "capturedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "complete": true
+          }
+        ]
+      },
+      {
+        "label": "after_install_index",
+        "args": [
+          "git",
+          "ls-files",
+          "--stage",
+          "-z"
+        ],
+        "allowedExits": [
+          0
+        ],
+        "exitCode": 0,
+        "signal": null,
+        "stop": null,
+        "spawned": true,
+        "exitObserved": true,
+        "closeObserved": true,
+        "originalProcessGroupAbsent": true,
+        "termSent": false,
+        "killSent": false,
+        "streams": [
+          {
+            "name": "stdout",
+            "observedBytes": 112276,
+            "capturedBytes": 112276,
+            "observedSha256": "27df1226f06f8cff741941cc6d5de0b6fd3ec28df3dc9201e3db6b40d15a35ff",
+            "capturedSha256": "27df1226f06f8cff741941cc6d5de0b6fd3ec28df3dc9201e3db6b40d15a35ff",
+            "complete": true
+          },
+          {
+            "name": "stderr",
+            "observedBytes": 0,
+            "capturedBytes": 0,
+            "observedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "capturedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "complete": true
+          }
+        ]
+      },
+      {
+        "label": "after_install_tree",
+        "args": [
+          "git",
+          "ls-tree",
+          "-r",
+          "-z",
+          "HEAD"
+        ],
+        "allowedExits": [
+          0
+        ],
+        "exitCode": 0,
+        "signal": null,
+        "stop": null,
+        "spawned": true,
+        "exitObserved": true,
+        "closeObserved": true,
+        "originalProcessGroupAbsent": true,
+        "termSent": false,
+        "killSent": false,
+        "streams": [
+          {
+            "name": "stdout",
+            "observedBytes": 115357,
+            "capturedBytes": 115357,
+            "observedSha256": "594a7a8bd5e6706abbc64773e5c1946ce78c4db65bdf4ab33f0bc1f908791d7f",
+            "capturedSha256": "594a7a8bd5e6706abbc64773e5c1946ce78c4db65bdf4ab33f0bc1f908791d7f",
+            "complete": true
+          },
+          {
+            "name": "stderr",
+            "observedBytes": 0,
+            "capturedBytes": 0,
+            "observedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "capturedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "complete": true
+          }
+        ]
+      },
+      {
+        "label": "after_install_status",
+        "args": [
+          "git",
+          "status",
+          "--porcelain=v1",
+          "-z",
+          "--untracked-files=all"
+        ],
+        "allowedExits": [
+          0
+        ],
+        "exitCode": 0,
+        "signal": null,
+        "stop": null,
+        "spawned": true,
+        "exitObserved": true,
+        "closeObserved": true,
+        "originalProcessGroupAbsent": true,
+        "termSent": false,
+        "killSent": false,
+        "streams": [
+          {
+            "name": "stdout",
+            "observedBytes": 0,
+            "capturedBytes": 0,
+            "observedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "capturedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "complete": true
+          },
+          {
+            "name": "stderr",
+            "observedBytes": 0,
+            "capturedBytes": 0,
+            "observedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "capturedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "complete": true
+          }
+        ]
+      },
+      {
+        "label": "after_install_working",
+        "args": [
+          "git",
+          "-c",
+          "core.filemode=true",
+          "diff",
+          "--no-ext-diff",
+          "--no-textconv",
+          "--quiet",
+          "--exit-code",
+          "HEAD",
+          "--"
+        ],
+        "allowedExits": [
+          0
+        ],
+        "exitCode": 0,
+        "signal": null,
+        "stop": null,
+        "spawned": true,
+        "exitObserved": true,
+        "closeObserved": true,
+        "originalProcessGroupAbsent": true,
+        "termSent": false,
+        "killSent": false,
+        "streams": [
+          {
+            "name": "stdout",
+            "observedBytes": 0,
+            "capturedBytes": 0,
+            "observedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "capturedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "complete": true
+          },
+          {
+            "name": "stderr",
+            "observedBytes": 0,
+            "capturedBytes": 0,
+            "observedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "capturedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "complete": true
+          }
+        ]
+      },
+      {
+        "label": "focused_lint",
+        "args": [
+          "[node]",
+          "/opt/hostedtoolcache/node/24.21.0/x64/lib/node_modules/corepack/dist/corepack.js",
+          "pnpm",
+          "exec",
+          "eslint",
+          "--no-cache",
+          "components/canvas/metadata-combobox.tsx",
+          "tests/e2e/metadata.spec.ts"
+        ],
+        "allowedExits": [
+          0
+        ],
+        "exitCode": 0,
+        "signal": null,
+        "stop": null,
+        "spawned": true,
+        "exitObserved": true,
+        "closeObserved": true,
+        "originalProcessGroupAbsent": true,
+        "termSent": false,
+        "killSent": false,
+        "streams": [
+          {
+            "name": "stdout",
+            "observedBytes": 0,
+            "capturedBytes": 0,
+            "observedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "capturedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "complete": true,
+            "head": "",
+            "tail": ""
+          },
+          {
+            "name": "stderr",
+            "observedBytes": 0,
+            "capturedBytes": 0,
+            "observedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "capturedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "complete": true,
+            "head": "",
+            "tail": ""
+          }
+        ]
+      },
+      {
+        "label": "after_lint_ignored",
+        "args": [
+          "git",
+          "status",
+          "--porcelain=v1",
+          "-z",
+          "--ignored=matching",
+          "--untracked-files=normal"
+        ],
+        "allowedExits": [
+          0
+        ],
+        "exitCode": 0,
+        "signal": null,
+        "stop": null,
+        "spawned": true,
+        "exitObserved": true,
+        "closeObserved": true,
+        "originalProcessGroupAbsent": true,
+        "termSent": false,
+        "killSent": false,
+        "streams": [
+          {
+            "name": "stdout",
+            "observedBytes": 17,
+            "capturedBytes": 17,
+            "observedSha256": "585c81200a41fe87505db2ccf942ebccd9144967bcc79cfc7ebd795a9982a00a",
+            "capturedSha256": "585c81200a41fe87505db2ccf942ebccd9144967bcc79cfc7ebd795a9982a00a",
+            "complete": true
+          },
+          {
+            "name": "stderr",
+            "observedBytes": 0,
+            "capturedBytes": 0,
+            "observedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "capturedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "complete": true
+          }
+        ]
+      },
+      {
+        "label": "after_lint_head",
+        "args": [
+          "git",
+          "rev-parse",
+          "HEAD"
+        ],
+        "allowedExits": [
+          0
+        ],
+        "exitCode": 0,
+        "signal": null,
+        "stop": null,
+        "spawned": true,
+        "exitObserved": true,
+        "closeObserved": true,
+        "originalProcessGroupAbsent": true,
+        "termSent": false,
+        "killSent": false,
+        "streams": [
+          {
+            "name": "stdout",
+            "observedBytes": 41,
+            "capturedBytes": 41,
+            "observedSha256": "d21d98e163d7ec880f12c2fff82074b2bf595a4d51d450997dcb798e67f71038",
+            "capturedSha256": "d21d98e163d7ec880f12c2fff82074b2bf595a4d51d450997dcb798e67f71038",
+            "complete": true
+          },
+          {
+            "name": "stderr",
+            "observedBytes": 0,
+            "capturedBytes": 0,
+            "observedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "capturedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "complete": true
+          }
+        ]
+      },
+      {
+        "label": "after_lint_seal",
+        "args": [
+          "git",
+          "show",
+          "HEAD:docs/results/2026/11-04/metadata-checks-source-attempt-2.json"
+        ],
+        "allowedExits": [
+          0
+        ],
+        "exitCode": 0,
+        "signal": null,
+        "stop": null,
+        "spawned": true,
+        "exitObserved": true,
+        "closeObserved": true,
+        "originalProcessGroupAbsent": true,
+        "termSent": false,
+        "killSent": false,
+        "streams": [
+          {
+            "name": "stdout",
+            "observedBytes": 45966,
+            "capturedBytes": 45966,
+            "observedSha256": "524360563dab5340d17c617e4ef15a00e924cba95472321dc423b18114fa808e",
+            "capturedSha256": "524360563dab5340d17c617e4ef15a00e924cba95472321dc423b18114fa808e",
+            "complete": true
+          },
+          {
+            "name": "stderr",
+            "observedBytes": 0,
+            "capturedBytes": 0,
+            "observedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "capturedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "complete": true
+          }
+        ]
+      },
+      {
+        "label": "after_lint_index",
+        "args": [
+          "git",
+          "ls-files",
+          "--stage",
+          "-z"
+        ],
+        "allowedExits": [
+          0
+        ],
+        "exitCode": 0,
+        "signal": null,
+        "stop": null,
+        "spawned": true,
+        "exitObserved": true,
+        "closeObserved": true,
+        "originalProcessGroupAbsent": true,
+        "termSent": false,
+        "killSent": false,
+        "streams": [
+          {
+            "name": "stdout",
+            "observedBytes": 112276,
+            "capturedBytes": 112276,
+            "observedSha256": "27df1226f06f8cff741941cc6d5de0b6fd3ec28df3dc9201e3db6b40d15a35ff",
+            "capturedSha256": "27df1226f06f8cff741941cc6d5de0b6fd3ec28df3dc9201e3db6b40d15a35ff",
+            "complete": true
+          },
+          {
+            "name": "stderr",
+            "observedBytes": 0,
+            "capturedBytes": 0,
+            "observedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "capturedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "complete": true
+          }
+        ]
+      },
+      {
+        "label": "after_lint_tree",
+        "args": [
+          "git",
+          "ls-tree",
+          "-r",
+          "-z",
+          "HEAD"
+        ],
+        "allowedExits": [
+          0
+        ],
+        "exitCode": 0,
+        "signal": null,
+        "stop": null,
+        "spawned": true,
+        "exitObserved": true,
+        "closeObserved": true,
+        "originalProcessGroupAbsent": true,
+        "termSent": false,
+        "killSent": false,
+        "streams": [
+          {
+            "name": "stdout",
+            "observedBytes": 115357,
+            "capturedBytes": 115357,
+            "observedSha256": "594a7a8bd5e6706abbc64773e5c1946ce78c4db65bdf4ab33f0bc1f908791d7f",
+            "capturedSha256": "594a7a8bd5e6706abbc64773e5c1946ce78c4db65bdf4ab33f0bc1f908791d7f",
+            "complete": true
+          },
+          {
+            "name": "stderr",
+            "observedBytes": 0,
+            "capturedBytes": 0,
+            "observedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "capturedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "complete": true
+          }
+        ]
+      },
+      {
+        "label": "after_lint_status",
+        "args": [
+          "git",
+          "status",
+          "--porcelain=v1",
+          "-z",
+          "--untracked-files=all"
+        ],
+        "allowedExits": [
+          0
+        ],
+        "exitCode": 0,
+        "signal": null,
+        "stop": null,
+        "spawned": true,
+        "exitObserved": true,
+        "closeObserved": true,
+        "originalProcessGroupAbsent": true,
+        "termSent": false,
+        "killSent": false,
+        "streams": [
+          {
+            "name": "stdout",
+            "observedBytes": 0,
+            "capturedBytes": 0,
+            "observedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "capturedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "complete": true
+          },
+          {
+            "name": "stderr",
+            "observedBytes": 0,
+            "capturedBytes": 0,
+            "observedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "capturedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "complete": true
+          }
+        ]
+      },
+      {
+        "label": "after_lint_working",
+        "args": [
+          "git",
+          "-c",
+          "core.filemode=true",
+          "diff",
+          "--no-ext-diff",
+          "--no-textconv",
+          "--quiet",
+          "--exit-code",
+          "HEAD",
+          "--"
+        ],
+        "allowedExits": [
+          0
+        ],
+        "exitCode": 0,
+        "signal": null,
+        "stop": null,
+        "spawned": true,
+        "exitObserved": true,
+        "closeObserved": true,
+        "originalProcessGroupAbsent": true,
+        "termSent": false,
+        "killSent": false,
+        "streams": [
+          {
+            "name": "stdout",
+            "observedBytes": 0,
+            "capturedBytes": 0,
+            "observedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "capturedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "complete": true
+          },
+          {
+            "name": "stderr",
+            "observedBytes": 0,
+            "capturedBytes": 0,
+            "observedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "capturedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "complete": true
+          }
+        ]
+      },
+      {
+        "label": "install_chromium",
+        "args": [
+          "[node]",
+          "/opt/hostedtoolcache/node/24.21.0/x64/lib/node_modules/corepack/dist/corepack.js",
+          "pnpm",
+          "exec",
+          "playwright",
+          "install",
+          "--with-deps",
+          "chromium"
+        ],
+        "allowedExits": [
+          0
+        ],
+        "exitCode": 0,
+        "signal": null,
+        "stop": null,
+        "spawned": true,
+        "exitObserved": true,
+        "closeObserved": true,
+        "originalProcessGroupAbsent": true,
+        "termSent": false,
+        "killSent": false,
+        "streams": [
+          {
+            "name": "stdout",
+            "observedBytes": 15828,
+            "capturedBytes": 15828,
+            "observedSha256": "003b97c9e8b330272a2084c0002a228f7e1cacd70cf79ea45f22a3bd87c469ca",
+            "capturedSha256": "003b97c9e8b330272a2084c0002a228f7e1cacd70cf79ea45f22a3bd87c469ca",
+            "complete": true,
+            "head": "Installing dependencies...\nSwitching to root user to install dependencies...\nGet:1 file:/etc/apt/apt-mirrors.txt Mirrorlist [144 B]\nHit:2 http://azure.archive.ubuntu.com/ubuntu noble InRelease\nGet:6 https://packages.microsoft.com/ubuntu/24.04/prod noble InRelease [3600 B]\nGet:3 http://azure.archive.ubuntu.com/ubuntu noble-updates InRelease [126 kB]\nGet:4 http://azure.archive.ubuntu.com/ubuntu noble-backports InRelease [126 kB]\nGet:5 http://azure.archive.ubuntu.com/ubuntu noble-security InRelease",
+            "tail": "0% of 114.2 MiB\n|■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■        |  90% of 114.2 MiB\n|■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■| 100% of 114.2 MiB\nChrome Headless Shell 149.0.7827.55 (playwright chromium-headless-shell v1228) downloaded to [scratch]/browsers/chromium_headless_shell-1228\n"
+          },
+          {
+            "name": "stderr",
+            "observedBytes": 237,
+            "capturedBytes": 237,
+            "observedSha256": "3b419c69ff321ee6851fa5489a2bb0c9a2ef093815a709dbd05391f89767267f",
+            "capturedSha256": "3b419c69ff321ee6851fa5489a2bb0c9a2ef093815a709dbd05391f89767267f",
+            "complete": true,
+            "head": "\nRunning kernel seems to be up-to-date.\n\nNo services need to be restarted.\n\nNo containers need to be restarted.\n\nNo user sessions are running outdated binaries.\n\nNo VM guests are running outdated hypervisor (qemu) binaries on this host.\n",
+            "tail": "\nRunning kernel seems to be up-to-date.\n\nNo services need to be restarted.\n\nNo containers need to be restarted.\n\nNo user sessions are running outdated binaries.\n\nNo VM guests are running outdated hypervisor (qemu) binaries on this host.\n"
+          }
+        ]
+      },
+      {
+        "label": "after_chromium_ignored",
+        "args": [
+          "git",
+          "status",
+          "--porcelain=v1",
+          "-z",
+          "--ignored=matching",
+          "--untracked-files=normal"
+        ],
+        "allowedExits": [
+          0
+        ],
+        "exitCode": 0,
+        "signal": null,
+        "stop": null,
+        "spawned": true,
+        "exitObserved": true,
+        "closeObserved": true,
+        "originalProcessGroupAbsent": true,
+        "termSent": false,
+        "killSent": false,
+        "streams": [
+          {
+            "name": "stdout",
+            "observedBytes": 17,
+            "capturedBytes": 17,
+            "observedSha256": "585c81200a41fe87505db2ccf942ebccd9144967bcc79cfc7ebd795a9982a00a",
+            "capturedSha256": "585c81200a41fe87505db2ccf942ebccd9144967bcc79cfc7ebd795a9982a00a",
+            "complete": true
+          },
+          {
+            "name": "stderr",
+            "observedBytes": 0,
+            "capturedBytes": 0,
+            "observedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "capturedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "complete": true
+          }
+        ]
+      },
+      {
+        "label": "after_chromium_head",
+        "args": [
+          "git",
+          "rev-parse",
+          "HEAD"
+        ],
+        "allowedExits": [
+          0
+        ],
+        "exitCode": 0,
+        "signal": null,
+        "stop": null,
+        "spawned": true,
+        "exitObserved": true,
+        "closeObserved": true,
+        "originalProcessGroupAbsent": true,
+        "termSent": false,
+        "killSent": false,
+        "streams": [
+          {
+            "name": "stdout",
+            "observedBytes": 41,
+            "capturedBytes": 41,
+            "observedSha256": "d21d98e163d7ec880f12c2fff82074b2bf595a4d51d450997dcb798e67f71038",
+            "capturedSha256": "d21d98e163d7ec880f12c2fff82074b2bf595a4d51d450997dcb798e67f71038",
+            "complete": true
+          },
+          {
+            "name": "stderr",
+            "observedBytes": 0,
+            "capturedBytes": 0,
+            "observedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "capturedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "complete": true
+          }
+        ]
+      },
+      {
+        "label": "after_chromium_seal",
+        "args": [
+          "git",
+          "show",
+          "HEAD:docs/results/2026/11-04/metadata-checks-source-attempt-2.json"
+        ],
+        "allowedExits": [
+          0
+        ],
+        "exitCode": 0,
+        "signal": null,
+        "stop": null,
+        "spawned": true,
+        "exitObserved": true,
+        "closeObserved": true,
+        "originalProcessGroupAbsent": true,
+        "termSent": false,
+        "killSent": false,
+        "streams": [
+          {
+            "name": "stdout",
+            "observedBytes": 45966,
+            "capturedBytes": 45966,
+            "observedSha256": "524360563dab5340d17c617e4ef15a00e924cba95472321dc423b18114fa808e",
+            "capturedSha256": "524360563dab5340d17c617e4ef15a00e924cba95472321dc423b18114fa808e",
+            "complete": true
+          },
+          {
+            "name": "stderr",
+            "observedBytes": 0,
+            "capturedBytes": 0,
+            "observedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "capturedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "complete": true
+          }
+        ]
+      },
+      {
+        "label": "after_chromium_index",
+        "args": [
+          "git",
+          "ls-files",
+          "--stage",
+          "-z"
+        ],
+        "allowedExits": [
+          0
+        ],
+        "exitCode": 0,
+        "signal": null,
+        "stop": null,
+        "spawned": true,
+        "exitObserved": true,
+        "closeObserved": true,
+        "originalProcessGroupAbsent": true,
+        "termSent": false,
+        "killSent": false,
+        "streams": [
+          {
+            "name": "stdout",
+            "observedBytes": 112276,
+            "capturedBytes": 112276,
+            "observedSha256": "27df1226f06f8cff741941cc6d5de0b6fd3ec28df3dc9201e3db6b40d15a35ff",
+            "capturedSha256": "27df1226f06f8cff741941cc6d5de0b6fd3ec28df3dc9201e3db6b40d15a35ff",
+            "complete": true
+          },
+          {
+            "name": "stderr",
+            "observedBytes": 0,
+            "capturedBytes": 0,
+            "observedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "capturedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "complete": true
+          }
+        ]
+      },
+      {
+        "label": "after_chromium_tree",
+        "args": [
+          "git",
+          "ls-tree",
+          "-r",
+          "-z",
+          "HEAD"
+        ],
+        "allowedExits": [
+          0
+        ],
+        "exitCode": 0,
+        "signal": null,
+        "stop": null,
+        "spawned": true,
+        "exitObserved": true,
+        "closeObserved": true,
+        "originalProcessGroupAbsent": true,
+        "termSent": false,
+        "killSent": false,
+        "streams": [
+          {
+            "name": "stdout",
+            "observedBytes": 115357,
+            "capturedBytes": 115357,
+            "observedSha256": "594a7a8bd5e6706abbc64773e5c1946ce78c4db65bdf4ab33f0bc1f908791d7f",
+            "capturedSha256": "594a7a8bd5e6706abbc64773e5c1946ce78c4db65bdf4ab33f0bc1f908791d7f",
+            "complete": true
+          },
+          {
+            "name": "stderr",
+            "observedBytes": 0,
+            "capturedBytes": 0,
+            "observedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "capturedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "complete": true
+          }
+        ]
+      },
+      {
+        "label": "after_chromium_status",
+        "args": [
+          "git",
+          "status",
+          "--porcelain=v1",
+          "-z",
+          "--untracked-files=all"
+        ],
+        "allowedExits": [
+          0
+        ],
+        "exitCode": 0,
+        "signal": null,
+        "stop": null,
+        "spawned": true,
+        "exitObserved": true,
+        "closeObserved": true,
+        "originalProcessGroupAbsent": true,
+        "termSent": false,
+        "killSent": false,
+        "streams": [
+          {
+            "name": "stdout",
+            "observedBytes": 0,
+            "capturedBytes": 0,
+            "observedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "capturedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "complete": true
+          },
+          {
+            "name": "stderr",
+            "observedBytes": 0,
+            "capturedBytes": 0,
+            "observedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "capturedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "complete": true
+          }
+        ]
+      },
+      {
+        "label": "after_chromium_working",
+        "args": [
+          "git",
+          "-c",
+          "core.filemode=true",
+          "diff",
+          "--no-ext-diff",
+          "--no-textconv",
+          "--quiet",
+          "--exit-code",
+          "HEAD",
+          "--"
+        ],
+        "allowedExits": [
+          0
+        ],
+        "exitCode": 0,
+        "signal": null,
+        "stop": null,
+        "spawned": true,
+        "exitObserved": true,
+        "closeObserved": true,
+        "originalProcessGroupAbsent": true,
+        "termSent": false,
+        "killSent": false,
+        "streams": [
+          {
+            "name": "stdout",
+            "observedBytes": 0,
+            "capturedBytes": 0,
+            "observedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "capturedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "complete": true
+          },
+          {
+            "name": "stderr",
+            "observedBytes": 0,
+            "capturedBytes": 0,
+            "observedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "capturedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "complete": true
+          }
+        ]
+      },
+      {
+        "label": "metadata_browser",
+        "args": [
+          "[node]",
+          "/opt/hostedtoolcache/node/24.21.0/x64/lib/node_modules/corepack/dist/corepack.js",
+          "pnpm",
+          "exec",
+          "playwright",
+          "test",
+          "--config",
+          ".metadata-v2.playwright.config.ts",
+          "--project",
+          "chromium"
+        ],
+        "allowedExits": [
+          0,
+          1
+        ],
+        "exitCode": 1,
+        "signal": null,
+        "stop": null,
+        "spawned": true,
+        "exitObserved": true,
+        "closeObserved": true,
+        "originalProcessGroupAbsent": true,
+        "termSent": false,
+        "killSent": false,
+        "streams": [
+          {
+            "name": "stdout",
+            "observedBytes": 14048,
+            "capturedBytes": 14048,
+            "observedSha256": "21c9063b02c5d7cdcb7be3de43db5c35e3f71084426e7450748d6c2fa65c1339",
+            "capturedSha256": "21c9063b02c5d7cdcb7be3de43db5c35e3f71084426e7450748d6c2fa65c1339",
+            "complete": true,
+            "head": "\nRunning 8 tests using 1 worker\n\n  ✘  1 [chromium] › tests/e2e/metadata.spec.ts:231:3 › anonymous metadata desktop › creates and reuses all three metadata fields only after explicit Save info and reload (45.0s)\n  ✘  2 [chromium] › tests/e2e/metadata.spec.ts:259:3 › anonymous metadata desktop › filters existing category and subcategory with keyboard selection without autosaving (45.0s)\n  ✘  3 [chromium] › tests/e2e/metadata.spec.ts:281:3 › anonymous metadata desktop › keep",
+            "tail": "mpty array \n    [chromium] › tests/e2e/metadata.spec.ts:330:3 › anonymous metadata desktop › discards canceled searches and unsaved choices when opening another media item \n    [chromium] › tests/e2e/metadata.spec.ts:377:3 › anonymous metadata desktop › retains metadata drafts after local storage failure and saves the same draft on retry \n    [chromium] › tests/e2e/metadata.spec.ts:421:3 › anonymous metadata narrow touch › creates and reuses metadata with narrow touch controls and persists after reload \n    [chromium] › tests/e2e/metadata.spec.ts:449:3 › anonymous metadata narrow touch › removes chips and clears fields with usable narrow touch popups and no overflow \n"
+          },
+          {
+            "name": "stderr",
+            "observedBytes": 2426,
+            "capturedBytes": 2426,
+            "observedSha256": "5cb1fe1de3be09fbfef2b85a9bc9c22b70a57e4fb80ad7465ac3e9d879a0fc2c",
+            "capturedSha256": "5cb1fe1de3be09fbfef2b85a9bc9c22b70a57e4fb80ad7465ac3e9d879a0fc2c",
+            "complete": true,
+            "head": "[WebServer] (node:3063) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.\n[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)\n[WebServer] (node:3076) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.\n[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)\n[WebServer] (node:3093) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.\n[WebServer] (Use `node ",
+            "tail": "ngs ...` to show where the warning was created)\n(node:3519) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.\n(Use `node --trace-warnings ...` to show where the warning was created)\n(node:3605) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.\n(Use `node --trace-warnings ...` to show where the warning was created)\n(node:3716) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.\n(Use `node --trace-warnings ...` to show where the warning was created)\n(node:3819) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.\n(Use `node --trace-warnings ...` to show where the warning was created)\n"
+          }
+        ]
+      },
+      {
+        "label": "after_ignored",
+        "args": [
+          "git",
+          "status",
+          "--porcelain=v1",
+          "-z",
+          "--ignored=matching",
+          "--untracked-files=normal"
+        ],
+        "allowedExits": [
+          0
+        ],
+        "exitCode": 0,
+        "signal": null,
+        "stop": null,
+        "spawned": true,
+        "exitObserved": true,
+        "closeObserved": true,
+        "originalProcessGroupAbsent": true,
+        "termSent": false,
+        "killSent": false,
+        "streams": [
+          {
+            "name": "stdout",
+            "observedBytes": 109,
+            "capturedBytes": 109,
+            "observedSha256": "bc0331a39e2de7f5553d81fb8b85b85a063d84b8086fb2fef01b1584fa19ac76",
+            "capturedSha256": "bc0331a39e2de7f5553d81fb8b85b85a063d84b8086fb2fef01b1584fa19ac76",
+            "complete": true
+          },
+          {
+            "name": "stderr",
+            "observedBytes": 0,
+            "capturedBytes": 0,
+            "observedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "capturedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "complete": true
+          }
+        ]
+      },
+      {
+        "label": "after_output_cleanup_head",
+        "args": [
+          "git",
+          "rev-parse",
+          "HEAD"
+        ],
+        "allowedExits": [
+          0
+        ],
+        "exitCode": 0,
+        "signal": null,
+        "stop": null,
+        "spawned": true,
+        "exitObserved": true,
+        "closeObserved": true,
+        "originalProcessGroupAbsent": true,
+        "termSent": false,
+        "killSent": false,
+        "streams": [
+          {
+            "name": "stdout",
+            "observedBytes": 41,
+            "capturedBytes": 41,
+            "observedSha256": "d21d98e163d7ec880f12c2fff82074b2bf595a4d51d450997dcb798e67f71038",
+            "capturedSha256": "d21d98e163d7ec880f12c2fff82074b2bf595a4d51d450997dcb798e67f71038",
+            "complete": true
+          },
+          {
+            "name": "stderr",
+            "observedBytes": 0,
+            "capturedBytes": 0,
+            "observedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "capturedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "complete": true
+          }
+        ]
+      },
+      {
+        "label": "after_output_cleanup_seal",
+        "args": [
+          "git",
+          "show",
+          "HEAD:docs/results/2026/11-04/metadata-checks-source-attempt-2.json"
+        ],
+        "allowedExits": [
+          0
+        ],
+        "exitCode": 0,
+        "signal": null,
+        "stop": null,
+        "spawned": true,
+        "exitObserved": true,
+        "closeObserved": true,
+        "originalProcessGroupAbsent": true,
+        "termSent": false,
+        "killSent": false,
+        "streams": [
+          {
+            "name": "stdout",
+            "observedBytes": 45966,
+            "capturedBytes": 45966,
+            "observedSha256": "524360563dab5340d17c617e4ef15a00e924cba95472321dc423b18114fa808e",
+            "capturedSha256": "524360563dab5340d17c617e4ef15a00e924cba95472321dc423b18114fa808e",
+            "complete": true
+          },
+          {
+            "name": "stderr",
+            "observedBytes": 0,
+            "capturedBytes": 0,
+            "observedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "capturedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "complete": true
+          }
+        ]
+      },
+      {
+        "label": "after_output_cleanup_index",
+        "args": [
+          "git",
+          "ls-files",
+          "--stage",
+          "-z"
+        ],
+        "allowedExits": [
+          0
+        ],
+        "exitCode": 0,
+        "signal": null,
+        "stop": null,
+        "spawned": true,
+        "exitObserved": true,
+        "closeObserved": true,
+        "originalProcessGroupAbsent": true,
+        "termSent": false,
+        "killSent": false,
+        "streams": [
+          {
+            "name": "stdout",
+            "observedBytes": 112276,
+            "capturedBytes": 112276,
+            "observedSha256": "27df1226f06f8cff741941cc6d5de0b6fd3ec28df3dc9201e3db6b40d15a35ff",
+            "capturedSha256": "27df1226f06f8cff741941cc6d5de0b6fd3ec28df3dc9201e3db6b40d15a35ff",
+            "complete": true
+          },
+          {
+            "name": "stderr",
+            "observedBytes": 0,
+            "capturedBytes": 0,
+            "observedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "capturedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "complete": true
+          }
+        ]
+      },
+      {
+        "label": "after_output_cleanup_tree",
+        "args": [
+          "git",
+          "ls-tree",
+          "-r",
+          "-z",
+          "HEAD"
+        ],
+        "allowedExits": [
+          0
+        ],
+        "exitCode": 0,
+        "signal": null,
+        "stop": null,
+        "spawned": true,
+        "exitObserved": true,
+        "closeObserved": true,
+        "originalProcessGroupAbsent": true,
+        "termSent": false,
+        "killSent": false,
+        "streams": [
+          {
+            "name": "stdout",
+            "observedBytes": 115357,
+            "capturedBytes": 115357,
+            "observedSha256": "594a7a8bd5e6706abbc64773e5c1946ce78c4db65bdf4ab33f0bc1f908791d7f",
+            "capturedSha256": "594a7a8bd5e6706abbc64773e5c1946ce78c4db65bdf4ab33f0bc1f908791d7f",
+            "complete": true
+          },
+          {
+            "name": "stderr",
+            "observedBytes": 0,
+            "capturedBytes": 0,
+            "observedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "capturedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "complete": true
+          }
+        ]
+      },
+      {
+        "label": "after_output_cleanup_status",
+        "args": [
+          "git",
+          "status",
+          "--porcelain=v1",
+          "-z",
+          "--untracked-files=all"
+        ],
+        "allowedExits": [
+          0
+        ],
+        "exitCode": 0,
+        "signal": null,
+        "stop": null,
+        "spawned": true,
+        "exitObserved": true,
+        "closeObserved": true,
+        "originalProcessGroupAbsent": true,
+        "termSent": false,
+        "killSent": false,
+        "streams": [
+          {
+            "name": "stdout",
+            "observedBytes": 0,
+            "capturedBytes": 0,
+            "observedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "capturedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "complete": true
+          },
+          {
+            "name": "stderr",
+            "observedBytes": 0,
+            "capturedBytes": 0,
+            "observedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "capturedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "complete": true
+          }
+        ]
+      },
+      {
+        "label": "after_output_cleanup_working",
+        "args": [
+          "git",
+          "-c",
+          "core.filemode=true",
+          "diff",
+          "--no-ext-diff",
+          "--no-textconv",
+          "--quiet",
+          "--exit-code",
+          "HEAD",
+          "--"
+        ],
+        "allowedExits": [
+          0
+        ],
+        "exitCode": 0,
+        "signal": null,
+        "stop": null,
+        "spawned": true,
+        "exitObserved": true,
+        "closeObserved": true,
+        "originalProcessGroupAbsent": true,
+        "termSent": false,
+        "killSent": false,
+        "streams": [
+          {
+            "name": "stdout",
+            "observedBytes": 0,
+            "capturedBytes": 0,
+            "observedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "capturedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "complete": true
+          },
+          {
+            "name": "stderr",
+            "observedBytes": 0,
+            "capturedBytes": 0,
+            "observedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "capturedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "complete": true
+          }
+        ]
+      },
+      {
+        "label": "final_ignored",
+        "args": [
+          "git",
+          "status",
+          "--porcelain=v1",
+          "-z",
+          "--ignored=matching",
+          "--untracked-files=all"
+        ],
+        "allowedExits": [
+          0
+        ],
+        "exitCode": 0,
+        "signal": null,
+        "stop": null,
+        "spawned": true,
+        "exitObserved": true,
+        "closeObserved": true,
+        "originalProcessGroupAbsent": true,
+        "termSent": false,
+        "killSent": false,
+        "streams": [
+          {
+            "name": "stdout",
+            "observedBytes": 36,
+            "capturedBytes": 36,
+            "observedSha256": "73126d384c005cd351094892e8c954e4fd95e29833906a376b420638ba4d8652",
+            "capturedSha256": "73126d384c005cd351094892e8c954e4fd95e29833906a376b420638ba4d8652",
+            "complete": true
+          },
+          {
+            "name": "stderr",
+            "observedBytes": 0,
+            "capturedBytes": 0,
+            "observedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "capturedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "complete": true
+          }
+        ]
+      }
+    ],
+    "guards": [
+      {
+        "label": "before",
+        "passed": true,
+        "inputFiles": 178,
+        "inputBytes": 1351537,
+        "trackedFiles": 1027,
+        "fullIndexMatchesHead": true,
+        "fullWorkingBytesMatchHead": true,
+        "historicalFiles": 175,
+        "historicalChanged": [
+          "AGENTS.md",
+          "README.md",
+          "tests/e2e/metadata.spec.ts"
+        ],
+        "historicalInventorySha256": "115d3b0d38806c0ca05024a6f02d13ed04cd8fc54326e7dcd3ac90eb1662906e"
+      },
+      {
+        "label": "after_install",
+        "passed": true,
+        "inputFiles": 178,
+        "inputBytes": 1351537,
+        "trackedFiles": 1027,
+        "fullIndexMatchesHead": true,
+        "fullWorkingBytesMatchHead": true,
+        "historicalFiles": 175,
+        "historicalChanged": [
+          "AGENTS.md",
+          "README.md",
+          "tests/e2e/metadata.spec.ts"
+        ],
+        "historicalInventorySha256": "115d3b0d38806c0ca05024a6f02d13ed04cd8fc54326e7dcd3ac90eb1662906e"
+      },
+      {
+        "label": "after_lint",
+        "passed": true,
+        "inputFiles": 178,
+        "inputBytes": 1351537,
+        "trackedFiles": 1027,
+        "fullIndexMatchesHead": true,
+        "fullWorkingBytesMatchHead": true,
+        "historicalFiles": 175,
+        "historicalChanged": [
+          "AGENTS.md",
+          "README.md",
+          "tests/e2e/metadata.spec.ts"
+        ],
+        "historicalInventorySha256": "115d3b0d38806c0ca05024a6f02d13ed04cd8fc54326e7dcd3ac90eb1662906e"
+      },
+      {
+        "label": "after_chromium",
+        "passed": true,
+        "inputFiles": 178,
+        "inputBytes": 1351537,
+        "trackedFiles": 1027,
+        "fullIndexMatchesHead": true,
+        "fullWorkingBytesMatchHead": true,
+        "historicalFiles": 175,
+        "historicalChanged": [
+          "AGENTS.md",
+          "README.md",
+          "tests/e2e/metadata.spec.ts"
+        ],
+        "historicalInventorySha256": "115d3b0d38806c0ca05024a6f02d13ed04cd8fc54326e7dcd3ac90eb1662906e"
+      },
+      {
+        "label": "after_output_cleanup",
+        "passed": true,
+        "inputFiles": 178,
+        "inputBytes": 1351537,
+        "trackedFiles": 1027,
+        "fullIndexMatchesHead": true,
+        "fullWorkingBytesMatchHead": true,
+        "historicalFiles": 175,
+        "historicalChanged": [
+          "AGENTS.md",
+          "README.md",
+          "tests/e2e/metadata.spec.ts"
+        ],
+        "historicalInventorySha256": "115d3b0d38806c0ca05024a6f02d13ed04cd8fc54326e7dcd3ac90eb1662906e"
+      }
+    ],
+    "generated": [
+      {
+        "path": "node_modules",
+        "dev": 66305,
+        "ino": 9444986,
+        "directory": true,
+        "preAbsent": true,
+        "removed": true
+      },
+      {
+        "path": ".next",
+        "dev": 66305,
+        "ino": 9702443,
+        "directory": true,
+        "preAbsent": true,
+        "removed": true
+      },
+      {
+        "path": "next-env.d.ts",
+        "dev": 66305,
+        "ino": 9177260,
+        "directory": false,
+        "preAbsent": true,
+        "removed": true
+      },
+      {
+        "path": "app/.well-known/workflow",
+        "dev": 66305,
+        "ino": 9702425,
+        "directory": true,
+        "preAbsent": true,
+        "removed": true
+      }
+    ],
+    "errors": [
+      "playwright_totals_failed",
+      "unexpected_ignored_output",
+      "generated_output_remaining"
+    ],
+    "proofLimits": [
+      "Full application browser checks use authored PNGs and fresh anonymous browser contexts; no crop cases, accounts, AI or live database.",
+      "The unchanged test fixture blocks non-read HTTP methods; it does not establish loopback-only reads or WebSocket isolation.",
+      "Playwright owns its web server/browser contexts. Normal runner exit, original process-group absence and port closure are observed; escaped descendant sessions are not independently inventoried.",
+      "Userspace deadlines do not interrupt blocked kernel filesystem calls. Executable hashes do not inventory dynamic libraries."
+    ],
+    "sealSha256": "524360563dab5340d17c617e4ef15a00e924cba95472321dc423b18114fa808e",
+    "portUnboundBefore": true,
+    "generatedConfigSha256": "e3a523259ea46c113b5eab60df34282be332ee3a29f1a22987ef7f8a725d97f3",
+    "generatedConfigRemoved": true,
+    "browser": {
+      "raw": {
+        "encoding": "gzip-base64",
+        "bytes": 32509,
+        "sha256": "73c3f6e04aae0db06f95a222289818e77076a4c562e15b7363c7887417a99cf5",
+        "compressedBytes": 3950,
+        "data": "H4sIAAAAAAAAA+1d73LbOJL/nqdAsa7K9lYg8Z9EibtJnZNodn2b2Cnbk7m5eM4Lki2JYwrgAaBsncdV8xb35e7rvci9yTzJFUCRIvXPTmwnKYdKVRICjUYDDXb3rwFB188QMkJGh/HI8NH1M4QQMggfTQ0ffdRPCBltlsr2mAkJkWQsCUk4hjZlEbRtt2VbLbN91XXbQUx1ofG8bDdmE2jzjFLg7UvGL9oxFWnMiYwZxSGhUyLWFSku5xMWZQmIdiul6aSdJmR2yePRWP6z1epaLatOtKhuh0nc+lUshJAg5OIJ4/lgy5LWBCSJiCR4arcWfFo5XUuKauOUs18hrPALx5xN4mxi6IJf8vL5hP4QJ2D4nz8Nd5XM4IzJNzG/T19qlkQb7EJ7xpDEyRH9ISEXs1NVZ/hoSBIBRTXjQRwd0WRm+EjyrCzPkmT2nnCSJJAstRklLCDJCcgsNXxEsySpVZwC4RG7pGvr4gmwTBo+cm3TNM2ikoNidX1TeT6gU+CyzmRCrn4gcZJxUOMoWhfTWy58tfRDmZHkJ8YvgCtaS1cU/FMOAvgUjjKZamkMklySWamI+fIQlZen4IyQwXSrjYo6lzBJ26XOwzGEFwIfvhXk3b+087ZtDiJLKktSKR9SIHJAwrESt1YheVwd8KZBbxl4ZfCaKo6U7OWir9RQMoFNdWpxPfD6LPkejCjjquePvyzVvCNSz8nH6jD/9KdyhlsihVC9RWV9jcNixXVM05xX3NRe8//IYpBLi5xDyrgEXul4IYCRxBVjhPQSfbbUd4X6V8Fohbqmr3xBbDYxW1dTxZjoPha6LqSpjTMf00nCLgtTUL4vE3Jl+KizsLZjDmLMErVOHPWmmrUXSIwJj+rvpiQjUVGfkaURkXBCSSrGTHdmTGIhYlrY7IKCZTyEdyDHTC/KVKt7TjIFLmKmTImRu4ui4nKxwIsSCE7UO82rwwrZZEKo5rvzad5vB92xQRIHdR8WMg4pCS/aUSxk+dT6Vewg5QJRBFOEseKr3jVk2V7LbJktC2Gs1IMcyzQXjinjyvwaYylTv90uif06FYdMwOAqFjKmo3IaKuu59iZYFduLkAF0WrMixuHRm8H54PCD6jiCKSQsnQCtLnhjcLj/6u3gfP9A0eh+1tQOPgzO3ww+bCN59fbo1fnJ6dHx/l8Ha+nmdedvjg8+DI4VScJCklRJDgf/enp+Ong7eDc4Pf75/M3BiWL9Ri+aFbr3P756e/D6/OTH9/uv9k8G5z8ev1WEt9Lp55O/aaH/Pvj5Tm32D48O1xGXBCeD4w8Hrwfnx0fruerZOR7svzn/6fjgdHB+evT3weEy0f7B+V/3Twc/7f98vv/+YB2bD4Pj14O350cHb16vZ3H0fnC4f7Cp+f7h6d+Oj94fvK4R1Cyp+lvbBkNksYSF47xerD6Zm7gVs12uw2F8G0XIkmxCq57QSGIKtQLVSNT8yLJMaNkGl7IRyuhswjKBChlQBOJCsrQyH3eRtCqabfdqxeUgurXiUu5KYV3OuqwhByJBIEIjpF9/gUiSIGW4YSH+MIYkEojRZIbIUAJHcJUmcRhLdEKmgGI6ZHMWCSNRbQC6P3axbEgWotQtfrVm7l4+LlWsjget8dHL7DQNoZRJHUqs71MTwVUKoYToRBKZidybCAGrw0KVKO9gUyy0Snq4OTiqEBfB3brxb5oDtHBqBzSCq3q0tyzNPC6/nVKUE6HmODrK5FqRNW2U5aFargbb3kgInDO+FHcukUxACDLSc3WWmaYVfHSsiQo60FzXiA1zZU8EgqsQIIKoVZD210/sYkzhxedz3sD4ZvtwN2sTbdHow8zFRuYbZb5FIuVB55reRlcxdPcO91ej9c2yo5qVtDq3UM7NrOW5W+i2TFVdRQOlbR/pKWK8NYyTxEe3a4u+VsY3YSP/jM5VZ08QwuiSxComQ0PGC6a7O0TEEezsKe4S+O41GhPhoxHIV7NjlsDuTpBJyejOc3SNVJDoo53XCRO5ud55juCKhDLH6+hmD93stSptQzYJWMCuaq2JhBHjs5W2haz25IyqPwhZno1+QwiFjAqJYppmEr1AKaGQVHo5M4puzoxFP9rbLHfx55yro7kSNR+IhDKeEgm7mv1zJFkWjhXhS6XGCqGu10rYnZIkg5yZ+vy2pMN/z3vpVGRnqVqKWvgR1GTPa6qS/+O1dqfoj9//+5+udVctyePJ7t7NH7//zz82DKlbkTR3Pbs5572WZK/gQyziIIHdgtzT5PEQ7ebjrbX8UZAggUPCObt8z9Is3VVSF+MlEuX+/oMSDe0+/PvoW57rW529sr9H6MJ2un5niznbULPW16PcFUR53LA+HihogPPtNCrFMrvNkXKpslfKRtim3cWWhU331Lb9jud3rJZl2v+22bfeJXrJCaUk4VihrXt4nCKHEyQsvIAIU5BKgfiS6zh4qykMGZVA5ekszSPiVEWLWvL2UhpjTeOARWoajZ8s88XDu61iWNohYy3o1eZ4Zt1oVIP2hPALnZ/c2jIlcnzv/N6CqkQWeF6ELTfyApzH4ljF4lgZd0xohPNYHBdRZrs24NYk+oxXaG35Our1gfUijsxoEWSvSrHMbxUY5HnHruVaruv2SRCETj/0vKhr4q5nWY4bQtgL3WEUQWfY6azCkTshL1RFX461UlXGFk6tZmldboZeudtW7j9PuKBw7l41khJZUD5fxnKMLmAWMMIjJCCBUPskVa5iCZJJJsh0kRSrdNcgr6+FvFZWzEKaL4C8rH6DvCrDbZBXg7wa5NUgrwZ53Qd5dd2niLx6vuO1TM9skFeDvO6OvNyORWxcxOJ4HovjRSz+nSEvm4DnEdcJnSAyrf7Qdu3eQyCvzkoge2/kdQGQCqTgDwqJACyAiljGU9DIS+/24ySWwEmCLsdxAojDhCmdaoIIomz+VtHRAo6tGUMDvr4W+Nq87/RFwFdvI2EDvpY/DfhqwNc3Db5OyUg0wKsBXl8RePU6ftd9esir79t2y+13G+TVIK+7Iy8zHIZdTCNcC8TxIhD/zpBXv+u6AB27C16/T/q26wXBQyCv3sPveaXqJLaQAoUJEA5Ruef1vLrh9VzDLI3PiNCnw3UBoQgmqZwhwjmZNWjr20FbToO2No2pQVvbZW7Q1vLnO0dbzVZXg7i+PuJyLPPJbXU5vmn6ptfq2/0GcDWA6+6Aq2cRz8WYCKxicX24kFCsY3GsY/HvDHANQ+gEQRT2o37g9N2+G4H5AIDLMVfih3sDrigWIeGR2uiiISSgjg8SHo7nX/nKqCBTBcPGLA5BoMsxUMRSoPleF5Nj4GgCUUxQLGE11m0wV5X0i2Iu96tiLqf5Yld1uA3m+lqYa/M3DIvRzDGXZW2h+1zMFSZxePFgoEvH/YrXQbS7o60uVlZ3Z69FaLRbQrKP2k3P66MXZ4by8tjuAbidjotdS/3lmID7kdvBbqfvhV7Qt3p278z4ZWevDqQWsihp5n0gDoIlyjFIhv4SxVMkSRArc/LizDDPDMRZAi/OjBz7nRlIS6SsiSoNFf6LzgxEeEywuiVFgBJTu4mCWKleC78YZ8knYVKxyYMIPAGaYcnj0Qh4wTQhASQvzgySyTFTeURxGctwjIS+BqJg9HlTlPcQgQh5HEAUzEoh8zINm/CnMAwTIsSLMyPPUGPKqDpRkhB95ETE/wlYXZSD2BT4MGGXeJqjMcRZRiOI8CRCAeMRcBSMsHLnSE9MAkOJxJhE7BKLCWKZVGs9Zy850Wda1LvGEsbFnAPO/zkzXv7x+//+pR3F05cblgNGRKpB5l9NUOtcY2FGNy4fG/3ff9XWMySg4IFaRAGg+aieI6AKP0b51xyk+v9GlkqMgkssEGXythYYaYR0Z6EXb6BtTsRXHNvnshAhZ0mixIqpZGgaw6UC7lQbnq0tI7VQyuZbSZUNeJkvFzTkbJIXlEtIJe+lujEgphJ4CKkUKGX6AcFUIcQH01dVY5a5TWU99zF09hBKu4fWPkVtj6q3z1BcRXOdFc3lCT2zXyae5ub/HdBsD13rWsuc59LabfRKXfCDslR9x01o05mQFAUz5Ngojy5QGl9BIv6M5BjQMOYqRai8qUCSpbnx5DAhMVV+OlUuq6WzepY172We15uolJxqmXv73WuUuz0fnRn61iSVnEtZbm19dI2ufNR7jmY+6qGbIgOH1uQB5588HWjlqcwbBImAYrxOTZJFKrIUqZKPVPTubfS11GLhvRepxTPjncZ6uSqFqqpnE2v96dybAosH6vqPR0n0WZZv24+b6HMc33aeYqav47Scfq/J9DWZvk/I9EEUAsbzDBCeZ4DwIkb/zjJ9tmP2wLWiwCUdx+t2hhDAQ2T6nJWX+t6ZPg5S+7LFnVOcDKWY39ekrztDQjJORoCG+fWXebRCpiC0jxTqIjndCjGae/cm4fftJPw2bi433yduEn7bZX5KCb/mkEVzyKI5ZPE0Dln07Kd4yMLynV6r57gN9Gqg1yfc5ORA38RTEFiOAatYHOtYHDOK9Xr8zqCXZZHAtdye1es60dAJzH7kPQT08rw7Q6/K02LCKqv1ztf/Um3Gc7d2jzuAXetL3QFcSq6vnqqKr3yp5CzJycvz/DnKbK7//dZAY3ejZ/kioHFz9w1oXP40oPERT4msGP3l0eQW1us+AmaUJP02joh07L7rWb0OjsJgiN3Q6uKg4/RwRDy73zVJaEdufkSktRV71jaJ7gAhFYTT/yo0RsSMhmiY0fwOwxL6ScJHIH30Nh/DHASiF7nf0FuAL9EcYq1gpryxmundEhJu2G7TH40O5wBMb7jV2OT7fDkjr4d+Qzf6f/18FBoNFWI/CvTyur7t7X2pLTbXt6xHhXmu7fqW9/Rwnu2rX3DpNIfpG5z3CTivD27XwkKfoi/CZ6zD5+/zxl4SBL1+L3AcCEin13e9Xj98AJzn2g//7WV9CxQIFI7jNMc/+mvMovh9FA2WMp24q2OmVCXw8haUlef8Gpz07eCkjfHhl8FJm7tvcNLyp8FJDU56XJxkBsNOP+hH2Bt2bOwS0sM9uwe4C0E3CLuuN+wHDU5qcNJD46SO/SRxkuOb/Va35zQ4qcFJd8dJgWs6IVbGC+fhs0ZMlOHyazLfF04KLeh2QtdyuwBWzyHO0CUPgZPcu9+vW3mq7Ic9q5aoJz2sSiSXP6spWvxY8C0/heR4Lc8tN9Cr0bLjebZlttzeXOwShlR+yltcxGlaK6loRR3OzwuH6ufMFZH62dFnN/8P/aMMFv1+AAA="
+      },
+      "cases": [
+        {
+          "name": "creates and reuses all three metadata fields only after explicit Save info and reload",
+          "project": "chromium",
+          "expected": "passed",
+          "attempts": [
+            {
+              "status": "timedOut",
+              "retry": 0,
+              "durationMs": 45022,
+              "errors": [
+                "Test timeout of 45000ms exceeded.",
+                "Error: locator.fill: Test timeout of 45000ms exceeded.\nCall log:\n  - waiting for locator('aside').filter({ has: getByRole('button', { name: 'Close info', exact: true }) }).getByRole('combobox', { name: 'Category', exact: true })\n\n\n  172 |   const input = panel.getByRole(\"combobox\", { name: field, exact: true });\n  173 |   await activate(input, touch);\n> 174 |   await input.fill(value);\n      |               ^\n  175 |   const option = page.getByRole(\"option\", { name: `Create “${value.trim()}”`, exact: true });\n  176 |   await expect(option).toBeVisible();\n  177 |   if (touch) await expectUsableNarrowPopup(page);\n    at createValue ([repository]/tests/e2e/metadata.spec.ts:174:15)\n    at [repository]/tests/e2e/metadata.spec.ts:236:5"
+              ]
+            }
+          ],
+          "blockedWrites": {
+            "bytes": 2,
+            "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+            "empty": true
+          }
+        },
+        {
+          "name": "filters existing category and subcategory with keyboard selection without autosaving",
+          "project": "chromium",
+          "expected": "passed",
+          "attempts": [
+            {
+              "status": "timedOut",
+              "retry": 0,
+              "durationMs": 45019,
+              "errors": [
+                "Test timeout of 45000ms exceeded.",
+                "Error: locator.fill: Test timeout of 45000ms exceeded.\nCall log:\n  - waiting for locator('aside').filter({ has: getByRole('button', { name: 'Close info', exact: true }) }).getByRole('combobox', { name: 'Category', exact: true })\n\n\n  172 |   const input = panel.getByRole(\"combobox\", { name: field, exact: true });\n  173 |   await activate(input, touch);\n> 174 |   await input.fill(value);\n      |               ^\n  175 |   const option = page.getByRole(\"option\", { name: `Create “${value.trim()}”`, exact: true });\n  176 |   await expect(option).toBeVisible();\n  177 |   if (touch) await expectUsableNarrowPopup(page);\n    at createValue ([repository]/tests/e2e/metadata.spec.ts:174:15)\n    at [repository]/tests/e2e/metadata.spec.ts:264:5"
+              ]
+            }
+          ],
+          "blockedWrites": {
+            "bytes": 2,
+            "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+            "empty": true
+          }
+        },
+        {
+          "name": "keeps tags case-sensitive and comma-literal while removing and deduplicating selections",
+          "project": "chromium",
+          "expected": "passed",
+          "attempts": [
+            {
+              "status": "timedOut",
+              "retry": 0,
+              "durationMs": 45018,
+              "errors": [
+                "Test timeout of 45000ms exceeded.",
+                "Error: locator.fill: Test timeout of 45000ms exceeded.\nCall log:\n  - waiting for locator('aside').filter({ has: getByRole('button', { name: 'Close info', exact: true }) }).getByRole('combobox', { name: 'Tags', exact: true })\n\n\n  172 |   const input = panel.getByRole(\"combobox\", { name: field, exact: true });\n  173 |   await activate(input, touch);\n> 174 |   await input.fill(value);\n      |               ^\n  175 |   const option = page.getByRole(\"option\", { name: `Create “${value.trim()}”`, exact: true });\n  176 |   await expect(option).toBeVisible();\n  177 |   if (touch) await expectUsableNarrowPopup(page);\n    at createValue ([repository]/tests/e2e/metadata.spec.ts:174:15)\n    at [repository]/tests/e2e/metadata.spec.ts:285:64"
+              ]
+            }
+          ],
+          "blockedWrites": {
+            "bytes": 2,
+            "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+            "empty": true
+          }
+        },
+        {
+          "name": "persists cleared category, subcategory, and tags as null and an empty array",
+          "project": "chromium",
+          "expected": "passed",
+          "attempts": [
+            {
+              "status": "timedOut",
+              "retry": 0,
+              "durationMs": 45018,
+              "errors": [
+                "Test timeout of 45000ms exceeded.",
+                "Error: locator.fill: Test timeout of 45000ms exceeded.\nCall log:\n  - waiting for locator('aside').filter({ has: getByRole('button', { name: 'Close info', exact: true }) }).getByRole('combobox', { name: 'Category', exact: true })\n\n\n  172 |   const input = panel.getByRole(\"combobox\", { name: field, exact: true });\n  173 |   await activate(input, touch);\n> 174 |   await input.fill(value);\n      |               ^\n  175 |   const option = page.getByRole(\"option\", { name: `Create “${value.trim()}”`, exact: true });\n  176 |   await expect(option).toBeVisible();\n  177 |   if (touch) await expectUsableNarrowPopup(page);\n    at createValue ([repository]/tests/e2e/metadata.spec.ts:174:15)\n    at [repository]/tests/e2e/metadata.spec.ts:310:5"
+              ]
+            }
+          ],
+          "blockedWrites": {
+            "bytes": 2,
+            "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+            "empty": true
+          }
+        },
+        {
+          "name": "discards canceled searches and unsaved choices when opening another media item",
+          "project": "chromium",
+          "expected": "passed",
+          "attempts": [
+            {
+              "status": "timedOut",
+              "retry": 0,
+              "durationMs": 45032,
+              "errors": [
+                "Test timeout of 45000ms exceeded.",
+                "Error: locator.click: Test timeout of 45000ms exceeded.\nCall log:\n  - waiting for getByTestId('media-item').and(locator('[data-media-id=\"temp-28ee4554-4154-430e-9d45-4597c7b91828\"]'))\n    - locator resolved to <div tabindex=\"0\" role=\"button\" data-state=\"closed\" aria-pressed=\"false\" data-testid=\"media-item\" data-slot=\"context-menu-trigger\" aria-label=\"authored switch source\" data-media-id=\"temp-28ee4554-4154-430e-9d45-4597c7b91828\" aria-describedby=\"media-description-temp-28ee4554-4154-430e-9d45-4597c7b91828\" class=\"select-none relative size-full overflow-visible rounded-md border bg-card text-left shadow-sm outline-none transition-colors border-border\">…</div>\n  - attempting click action\n    2 × waiting for element to be visible, enabled and stable\n      - element is not stable\n    - retrying click action\n    - waiting 20ms\n    2 × waiting for element to be visible, enabled and stable\n      - element is visible, enabled and stable\n      - scrolling into view if needed\n      - done scrolling\n      - <div></div> from <div>…</div> subtree intercepts pointer events\n    - retrying click action\n      - waiting 100ms\n    84 × waiting for element to be visible, enabled and stable\n       - element is visible, enabled and stable\n       - scrolling into view if needed\n       - done scrolling\n       - <div></div> from <div>…</div> subtree intercepts pointer events\n     - retrying click action\n       - waiting 500ms\n\n\n  109 |   if (contextMenu) {\n  110 |     // Batch uploads overlap by 32 canvas pixels; the first item's top-left remains exposed.\n> 111 |     await image.item.cli"
+              ]
+            }
+          ],
+          "blockedWrites": {
+            "bytes": 2,
+            "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+            "empty": true
+          }
+        },
+        {
+          "name": "retains metadata drafts after local storage failure and saves the same draft on retry",
+          "project": "chromium",
+          "expected": "passed",
+          "attempts": [
+            {
+              "status": "timedOut",
+              "retry": 0,
+              "durationMs": 45019,
+              "errors": [
+                "Test timeout of 45000ms exceeded.",
+                "Error: locator.fill: Test timeout of 45000ms exceeded.\nCall log:\n  - waiting for locator('aside').filter({ has: getByRole('button', { name: 'Close info', exact: true }) }).getByRole('combobox', { name: 'Category', exact: true })\n\n\n  172 |   const input = panel.getByRole(\"combobox\", { name: field, exact: true });\n  173 |   await activate(input, touch);\n> 174 |   await input.fill(value);\n      |               ^\n  175 |   const option = page.getByRole(\"option\", { name: `Create “${value.trim()}”`, exact: true });\n  176 |   await expect(option).toBeVisible();\n  177 |   if (touch) await expectUsableNarrowPopup(page);\n    at createValue ([repository]/tests/e2e/metadata.spec.ts:174:15)\n    at [repository]/tests/e2e/metadata.spec.ts:382:5"
+              ]
+            }
+          ],
+          "blockedWrites": {
+            "bytes": 2,
+            "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+            "empty": true
+          }
+        },
+        {
+          "name": "creates and reuses metadata with narrow touch controls and persists after reload",
+          "project": "chromium",
+          "expected": "passed",
+          "attempts": [
+            {
+              "status": "timedOut",
+              "retry": 0,
+              "durationMs": 45016,
+              "errors": [
+                "Test timeout of 45000ms exceeded.",
+                "Error: locator.tap: Test timeout of 45000ms exceeded.\nCall log:\n  - waiting for getByTestId('media-item').and(locator('[data-media-id=\"temp-52947185-dcbf-4c16-b538-da72960ac2d4\"]')).getByRole('button', { name: 'Media actions', exact: true })\n\n\n  74 |\n  75 | async function activate(target: Locator, touch = false) {\n> 76 |   if (touch) await target.tap();\n     |                           ^\n  77 |   else await target.click();\n  78 | }\n  79 |\n    at activate ([repository]/tests/e2e/metadata.spec.ts:76:27)\n    at openInfo ([repository]/tests/e2e/metadata.spec.ts:114:11)\n    at [repository]/tests/e2e/metadata.spec.ts:424:17"
+              ]
+            }
+          ],
+          "blockedWrites": {
+            "bytes": 2,
+            "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+            "empty": true
+          }
+        },
+        {
+          "name": "removes chips and clears fields with usable narrow touch popups and no overflow",
+          "project": "chromium",
+          "expected": "passed",
+          "attempts": [
+            {
+              "status": "timedOut",
+              "retry": 0,
+              "durationMs": 45017,
+              "errors": [
+                "Test timeout of 45000ms exceeded.",
+                "Error: locator.tap: Test timeout of 45000ms exceeded.\nCall log:\n  - waiting for getByTestId('media-item').and(locator('[data-media-id=\"temp-0bf59b9d-7f52-4aa8-828e-6eb6bc647f9b\"]')).getByRole('button', { name: 'Media actions', exact: true })\n\n\n  74 |\n  75 | async function activate(target: Locator, touch = false) {\n> 76 |   if (touch) await target.tap();\n     |                           ^\n  77 |   else await target.click();\n  78 | }\n  79 |\n    at activate ([repository]/tests/e2e/metadata.spec.ts:76:27)\n    at openInfo ([repository]/tests/e2e/metadata.spec.ts:114:11)\n    at [repository]/tests/e2e/metadata.spec.ts:452:17"
+              ]
+            }
+          ],
+          "blockedWrites": {
+            "bytes": 2,
+            "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+            "empty": true
+          }
+        }
+      ],
+      "accepted": false,
+      "stats": {
+        "expected": 0,
+        "unexpected": 8,
+        "flaky": 0,
+        "skipped": 0,
+        "durationMs": 377210.489
+      },
+      "globalErrorCount": 0,
+      "globalErrors": [],
+      "normalFrameworkResult": true
+    },
+    "playwrightOutput": {
+      "frameworkCreatedLeaf": true,
+      "directory": true,
+      "symlink": false,
+      "dev": 66305,
+      "ino": 9702727
+    },
+    "failureContexts": [
+      {
+        "path": "metadata-anonymous-metadat-0cfc6-nd-deduplicating-selections-chromium/error-context.md",
+        "bytes": 15539,
+        "retainedPrefixBytes": 8192,
+        "prefixSha256": "833ddcc7e3da507b25ab3320a19dd8e563869e5cc0c6512a9d76ba1d5eece9f5",
+        "truncated": true,
+        "text": "# Instructions\n\n- Following Playwright test failed.\n- Explain why, be concise, respect Playwright best practices.\n- Provide a snippet of code with the fix, if possible.\n\n# Test info\n\n- Name: metadata.spec.ts >> anonymous metadata desktop >> keeps tags case-sensitive and comma-literal while removing and deduplicating selections\n- Location: tests/e2e/metadata.spec.ts:281:3\n\n# Error details\n\n```\nTest timeout of 45000ms exceeded.\n```\n\n```\nError: locator.fill: Test timeout of 45000ms exceeded.\nCall log:\n  - waiting for locator('aside').filter({ has: getByRole('button', { name: 'Close info', exact: true }) }).getByRole('combobox', { name: 'Tags', exact: true })\n\n```\n\n# Page snapshot\n\n```yaml\n- generic [ref=e1]:\n  - generic [ref=e2]:\n    - generic [ref=e3]:\n      - button [pressed] [ref=e8]:\n        - generic [ref=e9]: Analysis skipped\n        - generic:\n          - generic:\n            - img\n        - button [ref=e10]:\n          - img\n        - generic [ref=e11]:\n          - generic [ref=e12]:\n            - generic [ref=e13]:\n              - generic [ref=e14]: Comments\n              - generic [ref=e15]: authored tag literals\n            - button [ref=e16]:\n              - img\n          - generic [ref=e21]: No comments yet.\n          - generic [ref=e22]:\n            - textbox [ref=e23]:\n              - /placeholder: Add a note...\n            - button [disabled]: Add comment\n      - generic [ref=e32]:\n        - generic [ref=e33]:\n          - generic [ref=e34]: Untitled inspiration canvas\n          - generic [ref=e35]: 1 media / 1 selected\n        - button [ref=e36]:\n          - img\n          - text: Sign in\n      - generic [ref=e38]:\n        - button [ref=e39]:\n          - img\n        - button [ref=e40]:\n          - img\n        - generic [ref=e41]: 200%\n        - button [ref=e42]:\n          - img\n        - button [ref=e43]:\n          - img\n        - button [ref=e44]:\n          - img\n        - button [disabled]:\n          - img\n        - button [ref=e45]:\n          - img\n        - button [ref=e46]:\n          - img\n        - button [ref=e47]:\n          - img\n        - button [ref=e48]:\n          - img\n    - complementary [ref=e49]:\n      - generic [ref=e50]:\n        - generic [ref=e51]:\n          - generic [ref=e52]: Media info\n          - generic [ref=e53]: authored tag literals\n          - status [ref=e54]: Analysis skipped\n        - button [ref=e55]:\n          - img\n      - generic [ref=e59]:\n        - generic [ref=e60]:\n          - text: Title\n          - textbox [ref=e61]:\n            - /placeholder: Reference title\n            - text: authored tag literals\n        - generic [ref=e62]:\n          - text: Category\n          - group [ref=e63]:\n            - combobox [ref=e64]\n            - group [ref=e65]\n            - button [ref=e66]:\n              - img\n          - textbox [ref=e67]\n        - generic [ref=e68]:\n          - text: Subcategory\n          - group [ref=e69]:\n            - combobox [ref=e70]\n            - group [ref=e71]\n            - button [ref=e72]:\n              - img\n          - textbox [ref=e73]\n        - generic [ref=e74]:\n          - text: Tags\n          - generic [ref=e75]:\n            - button \"Dismiss\" [ref=e76]\n            - combobox \"Tags\" [expanded] [active] [ref=e77]\n            - button [expanded] [ref=e78]:\n              - img\n          - textbox [ref=e79]\n        - generic [ref=e80]:\n          - text: Description\n          - textbox [ref=e81]:\n            - /placeholder: What makes this reference useful?\n      - button [ref=e83]: Save info\n  - button \"Open Next.js Dev Tools\" [ref=e89] [cursor=pointer]:\n    - img [ref=e90]\n  - alert [ref=e93]\n  - generic:\n    - generic [ref=e94]:\n      - status [ref=e95]: Type to create a value.\n      - listbox\n    - button \"Dismiss\" [ref=e96]\n```\n\n# Test source\n\n```ts\n  74  | \n  75  | async function activate(target: Locator, touch = false) {\n  76  |   if (touch) await target.tap();\n  77  |   else await target.click();\n  78  | }\n  79  | \n  80  | async function startCanvas(page: Page, touch = false) {\n  81  |   await page.goto(\"/\");\n  82  |   await expect(page.getByText(\"Untitled inspiration canvas\", { exact: true })).toBeVisible();\n  83  |   await activate(page.getByRole(\"button\", { name: \"Keep temporary\", exact: true }), touch);\n  84  |   await expect(page.getByRole(\"button\", { name: \"Upload\", exact: true })).toBeVisible();\n  85  | }\n  86  | \n  87  | async function uploadImages(page: Page, names: string[], touch = false): Promise<UploadedImage[]> {\n  88  |   const before = await page.getByTestId(\"media-item\").count();\n  89  |   await page.getByTestId(\"media-upload-input\").setInputFiles(names.map(name => ({\n  90  |     name: `${name}.png`, mimeType: \"image/png\", buffer: authoredPng(),\n  91  |   })));\n  92  |   await expect(page.getByTestId(\"media-item\")).toHaveCount(before + names.length);\n  93  |   const uploaded: UploadedImage[] = [];\n  94  |   for (let index = 0; index < names.length; index++) {\n  95  |     const id = await page.getByTestId(\"media-item\").nth(before + index).getAttribute(\"data-media-id\");\n  96  |     expect(id).toMatch(/^temp-/);\n  97  |     uploaded.push({ id: id!, item: page.getByTestId(\"media-item\").and(page.locator(`[data-media-id=\"${id}\"]`)) });\n  98  |   }\n  99  |   await activate(page.getByRole(\"button\", { name: \"Fit view\", exact: true }), touch);\n  100 |   for (const { item } of uploaded) await expect(item).toBeVisible();\n  101 |   return uploaded;\n  102 | }\n  103 | \n  104 | function infoPanel(page: Page) {\n  105 |   return page.locator(\"aside\").filter({ has: page.getByRole(\"button\", { name: \"Close info\", exact: true }) });\n  106 | }\n  107 | \n  108 | async function openInfo(page: Page, image: UploadedImage, touch = false, contextMenu = false) {\n  109 |   if (contextMenu) {\n  110 |     // Batch uploads overlap by 32 canvas pixels; the first item's top-left remains exposed.\n  111 |     await image.item.click({ button: \"right\", position: { x: 8, y: 8 } });\n  112 |   } else {\n  113 |     await activate(image.item, touch);\n  114 |     await activate(image.item.getByRole(\"button\", { name: \"Media actions\", exact: true }), touch);\n  115 |   }\n  116 |   await activate(page.getByRole(\"menuitem\", { name: \"Info\", exact: true }), touch);\n  117 |   const panel = infoPanel(page);\n  118 |   await expect(panel).toBeVisible();\n  119 |   for (const name of [\"Category\", \"Subcategory\", \"Tags\"] as const) {\n  120 |     await expect(panel.getByRole(\"combobox\", { name, exact: true })).toBeVisible();\n  121 |   }\n  122 |   return panel;\n  123 | }\n  124 | \n  125 | async function closeInfo(page: Page, touch = false) {\n  126 |   await activate(infoPanel(page).getByRole(\"button\", { name: \"Close info\", exact: true }), touch);\n  127 |   await expect(infoPanel(page)).toHaveCount(0);\n  128 | }\n  129 | \n  130 | async function persistedMetadata(page: Page, id: string): Promise<Metadata> {\n  131 |   return page.evaluate(({ key, id }) => {\n  132 |     const state = JSON.parse(localStorage.getItem(key)!);\n  133 |     const item = state.mediaItems.find((entry: { id: string }) => entry.id === id);\n  134 |     if (!item) throw new Error(\"The authored temporary image was not persisted.\");\n  135 |     return { category: item.category, subcategory: item.subcategory, tagsJson: item.tagsJson };\n  136 |   }, { key: STATE_KEY, id });\n  137 | }\n  138 | \n  139 | async function expectMetadataDraft(panel: Locator, expected: Metadata) {\n  140 |   await expect(panel.getByRole(\"combobox\", { name: \"Category\", exact: true })).toHaveValue(expected.category ?? \"\");\n  141 |   await expect(panel.getByRole(\"combobox\", { name: \"Subcategory\", exact: true })).toHaveValue(expected.subcategory ?? \"\");\n  142 |   await expect(panel.getByRole(\"button\", { name: /^Remove .+ from tags$/ })).toHaveCount(expected.tagsJson.length);\n  143 |   for (const tag of expected.tagsJson) {\n  144 |     await expect(panel.getByRole(\"button\", { name: `Remove ${tag} from tags`, exact: true })).toHaveCount(1);\n  145 |   }\n  146 | }\n  147 | \n  148 | async function expectNarrowPage(page: Page) {\n  149 |   expect(await page.evaluate(() => ({\n  150 |     viewport: innerWidth,\n  151 |     documentOverflow: document.documentElement.scrollWidth > innerW"
+      },
+      {
+        "path": "metadata-anonymous-metadat-13e90-ves-the-same-draft-on-retry-chromium/error-context.md",
+        "bytes": 15548,
+        "retainedPrefixBytes": 8192,
+        "prefixSha256": "4ff9e3a82bbbab73151a3f2c2439572a4116242d52f69259c536f0b8dfcd3584",
+        "truncated": true,
+        "text": "# Instructions\n\n- Following Playwright test failed.\n- Explain why, be concise, respect Playwright best practices.\n- Provide a snippet of code with the fix, if possible.\n\n# Test info\n\n- Name: metadata.spec.ts >> anonymous metadata desktop >> retains metadata drafts after local storage failure and saves the same draft on retry\n- Location: tests/e2e/metadata.spec.ts:377:3\n\n# Error details\n\n```\nTest timeout of 45000ms exceeded.\n```\n\n```\nError: locator.fill: Test timeout of 45000ms exceeded.\nCall log:\n  - waiting for locator('aside').filter({ has: getByRole('button', { name: 'Close info', exact: true }) }).getByRole('combobox', { name: 'Category', exact: true })\n\n```\n\n# Page snapshot\n\n```yaml\n- generic [ref=e1]:\n  - generic [ref=e2]:\n    - generic [ref=e3]:\n      - button [pressed] [ref=e8]:\n        - generic [ref=e9]: Analysis skipped\n        - generic:\n          - generic:\n            - img\n        - button [ref=e10]:\n          - img\n        - generic [ref=e11]:\n          - generic [ref=e12]:\n            - generic [ref=e13]:\n              - generic [ref=e14]: Comments\n              - generic [ref=e15]: authored storage retry\n            - button [ref=e16]:\n              - img\n          - generic [ref=e21]: No comments yet.\n          - generic [ref=e22]:\n            - textbox [ref=e23]:\n              - /placeholder: Add a note...\n            - button [disabled]: Add comment\n      - generic [ref=e32]:\n        - generic [ref=e33]:\n          - generic [ref=e34]: Untitled inspiration canvas\n          - generic [ref=e35]: 1 media / 1 selected\n        - button [ref=e36]:\n          - img\n          - text: Sign in\n      - generic [ref=e38]:\n        - button [ref=e39]:\n          - img\n        - button [ref=e40]:\n          - img\n        - generic [ref=e41]: 200%\n        - button [ref=e42]:\n          - img\n        - button [ref=e43]:\n          - img\n        - button [ref=e44]:\n          - img\n        - button [disabled]:\n          - img\n        - button [ref=e45]:\n          - img\n        - button [ref=e46]:\n          - img\n        - button [ref=e47]:\n          - img\n        - button [ref=e48]:\n          - img\n    - complementary [ref=e49]:\n      - generic [ref=e50]:\n        - generic [ref=e51]:\n          - generic [ref=e52]: Media info\n          - generic [ref=e53]: authored storage retry\n          - status [ref=e54]: Analysis skipped\n        - button [ref=e55]:\n          - img\n      - generic [ref=e59]:\n        - generic [ref=e60]:\n          - text: Title\n          - textbox [ref=e61]:\n            - /placeholder: Reference title\n            - text: authored storage retry\n        - generic [ref=e62]:\n          - text: Category\n          - group [ref=e63]:\n            - button \"Dismiss\" [ref=e64]\n            - combobox \"Category\" [expanded] [active] [ref=e65]\n            - group [ref=e66]\n            - button [expanded] [ref=e67]:\n              - img\n          - textbox [ref=e68]\n        - generic [ref=e69]:\n          - text: Subcategory\n          - group [ref=e70]:\n            - combobox [ref=e71]\n            - group [ref=e72]\n            - button [ref=e73]:\n              - img\n          - textbox [ref=e74]\n        - generic [ref=e75]:\n          - text: Tags\n          - generic [ref=e76]:\n            - combobox [ref=e77]\n            - button [ref=e78]:\n              - img\n          - textbox [ref=e79]\n        - generic [ref=e80]:\n          - text: Description\n          - textbox [ref=e81]:\n            - /placeholder: What makes this reference useful?\n      - button [ref=e83]: Save info\n  - button \"Open Next.js Dev Tools\" [ref=e89] [cursor=pointer]:\n    - img [ref=e90]\n  - alert [ref=e93]\n  - generic:\n    - generic [ref=e94]:\n      - status [ref=e95]: Type to create a value.\n      - listbox\n    - button \"Dismiss\" [ref=e96]\n```\n\n# Test source\n\n```ts\n  74  | \n  75  | async function activate(target: Locator, touch = false) {\n  76  |   if (touch) await target.tap();\n  77  |   else await target.click();\n  78  | }\n  79  | \n  80  | async function startCanvas(page: Page, touch = false) {\n  81  |   await page.goto(\"/\");\n  82  |   await expect(page.getByText(\"Untitled inspiration canvas\", { exact: true })).toBeVisible();\n  83  |   await activate(page.getByRole(\"button\", { name: \"Keep temporary\", exact: true }), touch);\n  84  |   await expect(page.getByRole(\"button\", { name: \"Upload\", exact: true })).toBeVisible();\n  85  | }\n  86  | \n  87  | async function uploadImages(page: Page, names: string[], touch = false): Promise<UploadedImage[]> {\n  88  |   const before = await page.getByTestId(\"media-item\").count();\n  89  |   await page.getByTestId(\"media-upload-input\").setInputFiles(names.map(name => ({\n  90  |     name: `${name}.png`, mimeType: \"image/png\", buffer: authoredPng(),\n  91  |   })));\n  92  |   await expect(page.getByTestId(\"media-item\")).toHaveCount(before + names.length);\n  93  |   const uploaded: UploadedImage[] = [];\n  94  |   for (let index = 0; index < names.length; index++) {\n  95  |     const id = await page.getByTestId(\"media-item\").nth(before + index).getAttribute(\"data-media-id\");\n  96  |     expect(id).toMatch(/^temp-/);\n  97  |     uploaded.push({ id: id!, item: page.getByTestId(\"media-item\").and(page.locator(`[data-media-id=\"${id}\"]`)) });\n  98  |   }\n  99  |   await activate(page.getByRole(\"button\", { name: \"Fit view\", exact: true }), touch);\n  100 |   for (const { item } of uploaded) await expect(item).toBeVisible();\n  101 |   return uploaded;\n  102 | }\n  103 | \n  104 | function infoPanel(page: Page) {\n  105 |   return page.locator(\"aside\").filter({ has: page.getByRole(\"button\", { name: \"Close info\", exact: true }) });\n  106 | }\n  107 | \n  108 | async function openInfo(page: Page, image: UploadedImage, touch = false, contextMenu = false) {\n  109 |   if (contextMenu) {\n  110 |     // Batch uploads overlap by 32 canvas pixels; the first item's top-left remains exposed.\n  111 |     await image.item.click({ button: \"right\", position: { x: 8, y: 8 } });\n  112 |   } else {\n  113 |     await activate(image.item, touch);\n  114 |     await activate(image.item.getByRole(\"button\", { name: \"Media actions\", exact: true }), touch);\n  115 |   }\n  116 |   await activate(page.getByRole(\"menuitem\", { name: \"Info\", exact: true }), touch);\n  117 |   const panel = infoPanel(page);\n  118 |   await expect(panel).toBeVisible();\n  119 |   for (const name of [\"Category\", \"Subcategory\", \"Tags\"] as const) {\n  120 |     await expect(panel.getByRole(\"combobox\", { name, exact: true })).toBeVisible();\n  121 |   }\n  122 |   return panel;\n  123 | }\n  124 | \n  125 | async function closeInfo(page: Page, touch = false) {\n  126 |   await activate(infoPanel(page).getByRole(\"button\", { name: \"Close info\", exact: true }), touch);\n  127 |   await expect(infoPanel(page)).toHaveCount(0);\n  128 | }\n  129 | \n  130 | async function persistedMetadata(page: Page, id: string): Promise<Metadata> {\n  131 |   return page.evaluate(({ key, id }) => {\n  132 |     const state = JSON.parse(localStorage.getItem(key)!);\n  133 |     const item = state.mediaItems.find((entry: { id: string }) => entry.id === id);\n  134 |     if (!item) throw new Error(\"The authored temporary image was not persisted.\");\n  135 |     return { category: item.category, subcategory: item.subcategory, tagsJson: item.tagsJson };\n  136 |   }, { key: STATE_KEY, id });\n  137 | }\n  138 | \n  139 | async function expectMetadataDraft(panel: Locator, expected: Metadata) {\n  140 |   await expect(panel.getByRole(\"combobox\", { name: \"Category\", exact: true })).toHaveValue(expected.category ?? \"\");\n  141 |   await expect(panel.getByRole(\"combobox\", { name: \"Subcategory\", exact: true })).toHaveValue(expected.subcategory ?? \"\");\n  142 |   await expect(panel.getByRole(\"button\", { name: /^Remove .+ from tags$/ })).toHaveCount(expected.tagsJson.length);\n  143 |   for (const tag of expected.tagsJson) {\n  144 |     await expect(panel.getByRole(\"button\", { name: `Remove ${tag} from tags`, exact: true })).toHaveCount(1);\n  145 |   }\n  146 | }\n  147 | \n  148 | async function expectNarrowPage(page: Page) {\n  149 |   expect(await page.evaluate(() => ({\n  150 |     viewport: innerWidth,\n  151 |     documentOverflow: document.documentElement.scrollWidth"
+      },
+      {
+        "path": "metadata-anonymous-metadat-14d7b-plicit-Save-info-and-reload-chromium/error-context.md",
+        "bytes": 15554,
+        "retainedPrefixBytes": 8192,
+        "prefixSha256": "c03b9709cf2ef76f0a8b46782aeaaacaa3e74d5ed3519238dda4dafae76aa9f5",
+        "truncated": true,
+        "text": "# Instructions\n\n- Following Playwright test failed.\n- Explain why, be concise, respect Playwright best practices.\n- Provide a snippet of code with the fix, if possible.\n\n# Test info\n\n- Name: metadata.spec.ts >> anonymous metadata desktop >> creates and reuses all three metadata fields only after explicit Save info and reload\n- Location: tests/e2e/metadata.spec.ts:231:3\n\n# Error details\n\n```\nTest timeout of 45000ms exceeded.\n```\n\n```\nError: locator.fill: Test timeout of 45000ms exceeded.\nCall log:\n  - waiting for locator('aside').filter({ has: getByRole('button', { name: 'Close info', exact: true }) }).getByRole('combobox', { name: 'Category', exact: true })\n\n```\n\n# Page snapshot\n\n```yaml\n- generic [ref=e1]:\n  - generic [ref=e2]:\n    - generic [ref=e3]:\n      - button [pressed] [ref=e8]:\n        - generic [ref=e9]: Analysis skipped\n        - generic:\n          - generic:\n            - img\n        - button [ref=e10]:\n          - img\n        - generic [ref=e11]:\n          - generic [ref=e12]:\n            - generic [ref=e13]:\n              - generic [ref=e14]: Comments\n              - generic [ref=e15]: authored metadata source\n            - button [ref=e16]:\n              - img\n          - generic [ref=e21]: No comments yet.\n          - generic [ref=e22]:\n            - textbox [ref=e23]:\n              - /placeholder: Add a note...\n            - button [disabled]: Add comment\n      - generic [ref=e32]:\n        - generic [ref=e33]:\n          - generic [ref=e34]: Untitled inspiration canvas\n          - generic [ref=e35]: 1 media / 1 selected\n        - button [ref=e36]:\n          - img\n          - text: Sign in\n      - generic [ref=e38]:\n        - button [ref=e39]:\n          - img\n        - button [ref=e40]:\n          - img\n        - generic [ref=e41]: 200%\n        - button [ref=e42]:\n          - img\n        - button [ref=e43]:\n          - img\n        - button [ref=e44]:\n          - img\n        - button [disabled]:\n          - img\n        - button [ref=e45]:\n          - img\n        - button [ref=e46]:\n          - img\n        - button [ref=e47]:\n          - img\n        - button [ref=e48]:\n          - img\n    - complementary [ref=e49]:\n      - generic [ref=e50]:\n        - generic [ref=e51]:\n          - generic [ref=e52]: Media info\n          - generic [ref=e53]: authored metadata source\n          - status [ref=e54]: Analysis skipped\n        - button [ref=e55]:\n          - img\n      - generic [ref=e59]:\n        - generic [ref=e60]:\n          - text: Title\n          - textbox [ref=e61]:\n            - /placeholder: Reference title\n            - text: authored metadata source\n        - generic [ref=e62]:\n          - text: Category\n          - group [ref=e63]:\n            - button \"Dismiss\" [ref=e64]\n            - combobox \"Category\" [expanded] [active] [ref=e65]\n            - group [ref=e66]\n            - button [expanded] [ref=e67]:\n              - img\n          - textbox [ref=e68]\n        - generic [ref=e69]:\n          - text: Subcategory\n          - group [ref=e70]:\n            - combobox [ref=e71]\n            - group [ref=e72]\n            - button [ref=e73]:\n              - img\n          - textbox [ref=e74]\n        - generic [ref=e75]:\n          - text: Tags\n          - generic [ref=e76]:\n            - combobox [ref=e77]\n            - button [ref=e78]:\n              - img\n          - textbox [ref=e79]\n        - generic [ref=e80]:\n          - text: Description\n          - textbox [ref=e81]:\n            - /placeholder: What makes this reference useful?\n      - button [ref=e83]: Save info\n  - button \"Open Next.js Dev Tools\" [ref=e89] [cursor=pointer]:\n    - img [ref=e90]\n  - alert [ref=e93]\n  - generic:\n    - generic [ref=e94]:\n      - status [ref=e95]: Type to create a value.\n      - listbox\n    - button \"Dismiss\" [ref=e96]\n```\n\n# Test source\n\n```ts\n  74  | \n  75  | async function activate(target: Locator, touch = false) {\n  76  |   if (touch) await target.tap();\n  77  |   else await target.click();\n  78  | }\n  79  | \n  80  | async function startCanvas(page: Page, touch = false) {\n  81  |   await page.goto(\"/\");\n  82  |   await expect(page.getByText(\"Untitled inspiration canvas\", { exact: true })).toBeVisible();\n  83  |   await activate(page.getByRole(\"button\", { name: \"Keep temporary\", exact: true }), touch);\n  84  |   await expect(page.getByRole(\"button\", { name: \"Upload\", exact: true })).toBeVisible();\n  85  | }\n  86  | \n  87  | async function uploadImages(page: Page, names: string[], touch = false): Promise<UploadedImage[]> {\n  88  |   const before = await page.getByTestId(\"media-item\").count();\n  89  |   await page.getByTestId(\"media-upload-input\").setInputFiles(names.map(name => ({\n  90  |     name: `${name}.png`, mimeType: \"image/png\", buffer: authoredPng(),\n  91  |   })));\n  92  |   await expect(page.getByTestId(\"media-item\")).toHaveCount(before + names.length);\n  93  |   const uploaded: UploadedImage[] = [];\n  94  |   for (let index = 0; index < names.length; index++) {\n  95  |     const id = await page.getByTestId(\"media-item\").nth(before + index).getAttribute(\"data-media-id\");\n  96  |     expect(id).toMatch(/^temp-/);\n  97  |     uploaded.push({ id: id!, item: page.getByTestId(\"media-item\").and(page.locator(`[data-media-id=\"${id}\"]`)) });\n  98  |   }\n  99  |   await activate(page.getByRole(\"button\", { name: \"Fit view\", exact: true }), touch);\n  100 |   for (const { item } of uploaded) await expect(item).toBeVisible();\n  101 |   return uploaded;\n  102 | }\n  103 | \n  104 | function infoPanel(page: Page) {\n  105 |   return page.locator(\"aside\").filter({ has: page.getByRole(\"button\", { name: \"Close info\", exact: true }) });\n  106 | }\n  107 | \n  108 | async function openInfo(page: Page, image: UploadedImage, touch = false, contextMenu = false) {\n  109 |   if (contextMenu) {\n  110 |     // Batch uploads overlap by 32 canvas pixels; the first item's top-left remains exposed.\n  111 |     await image.item.click({ button: \"right\", position: { x: 8, y: 8 } });\n  112 |   } else {\n  113 |     await activate(image.item, touch);\n  114 |     await activate(image.item.getByRole(\"button\", { name: \"Media actions\", exact: true }), touch);\n  115 |   }\n  116 |   await activate(page.getByRole(\"menuitem\", { name: \"Info\", exact: true }), touch);\n  117 |   const panel = infoPanel(page);\n  118 |   await expect(panel).toBeVisible();\n  119 |   for (const name of [\"Category\", \"Subcategory\", \"Tags\"] as const) {\n  120 |     await expect(panel.getByRole(\"combobox\", { name, exact: true })).toBeVisible();\n  121 |   }\n  122 |   return panel;\n  123 | }\n  124 | \n  125 | async function closeInfo(page: Page, touch = false) {\n  126 |   await activate(infoPanel(page).getByRole(\"button\", { name: \"Close info\", exact: true }), touch);\n  127 |   await expect(infoPanel(page)).toHaveCount(0);\n  128 | }\n  129 | \n  130 | async function persistedMetadata(page: Page, id: string): Promise<Metadata> {\n  131 |   return page.evaluate(({ key, id }) => {\n  132 |     const state = JSON.parse(localStorage.getItem(key)!);\n  133 |     const item = state.mediaItems.find((entry: { id: string }) => entry.id === id);\n  134 |     if (!item) throw new Error(\"The authored temporary image was not persisted.\");\n  135 |     return { category: item.category, subcategory: item.subcategory, tagsJson: item.tagsJson };\n  136 |   }, { key: STATE_KEY, id });\n  137 | }\n  138 | \n  139 | async function expectMetadataDraft(panel: Locator, expected: Metadata) {\n  140 |   await expect(panel.getByRole(\"combobox\", { name: \"Category\", exact: true })).toHaveValue(expected.category ?? \"\");\n  141 |   await expect(panel.getByRole(\"combobox\", { name: \"Subcategory\", exact: true })).toHaveValue(expected.subcategory ?? \"\");\n  142 |   await expect(panel.getByRole(\"button\", { name: /^Remove .+ from tags$/ })).toHaveCount(expected.tagsJson.length);\n  143 |   for (const tag of expected.tagsJson) {\n  144 |     await expect(panel.getByRole(\"button\", { name: `Remove ${tag} from tags`, exact: true })).toHaveCount(1);\n  145 |   }\n  146 | }\n  147 | \n  148 | async function expectNarrowPage(page: Page) {\n  149 |   expect(await page.evaluate(() => ({\n  150 |     viewport: innerWidth,\n  151 |     documentOverflow: document.documentElement.scrol"
+      },
+      {
+        "path": "metadata-anonymous-metadat-451a2-election-without-autosaving-chromium/error-context.md",
+        "bytes": 15553,
+        "retainedPrefixBytes": 8192,
+        "prefixSha256": "1d4f38093006db764695f6d5f9d4f8411e30266cc4f43716df13a777b7d27caa",
+        "truncated": true,
+        "text": "# Instructions\n\n- Following Playwright test failed.\n- Explain why, be concise, respect Playwright best practices.\n- Provide a snippet of code with the fix, if possible.\n\n# Test info\n\n- Name: metadata.spec.ts >> anonymous metadata desktop >> filters existing category and subcategory with keyboard selection without autosaving\n- Location: tests/e2e/metadata.spec.ts:259:3\n\n# Error details\n\n```\nTest timeout of 45000ms exceeded.\n```\n\n```\nError: locator.fill: Test timeout of 45000ms exceeded.\nCall log:\n  - waiting for locator('aside').filter({ has: getByRole('button', { name: 'Close info', exact: true }) }).getByRole('combobox', { name: 'Category', exact: true })\n\n```\n\n# Page snapshot\n\n```yaml\n- generic [ref=e1]:\n  - generic [ref=e2]:\n    - generic [ref=e3]:\n      - button [pressed] [ref=e8]:\n        - generic [ref=e9]: Analysis skipped\n        - generic:\n          - generic:\n            - img\n        - button [ref=e10]:\n          - img\n        - generic [ref=e11]:\n          - generic [ref=e12]:\n            - generic [ref=e13]:\n              - generic [ref=e14]: Comments\n              - generic [ref=e15]: authored keyboard source\n            - button [ref=e16]:\n              - img\n          - generic [ref=e21]: No comments yet.\n          - generic [ref=e22]:\n            - textbox [ref=e23]:\n              - /placeholder: Add a note...\n            - button [disabled]: Add comment\n      - generic [ref=e32]:\n        - generic [ref=e33]:\n          - generic [ref=e34]: Untitled inspiration canvas\n          - generic [ref=e35]: 1 media / 1 selected\n        - button [ref=e36]:\n          - img\n          - text: Sign in\n      - generic [ref=e38]:\n        - button [ref=e39]:\n          - img\n        - button [ref=e40]:\n          - img\n        - generic [ref=e41]: 200%\n        - button [ref=e42]:\n          - img\n        - button [ref=e43]:\n          - img\n        - button [ref=e44]:\n          - img\n        - button [disabled]:\n          - img\n        - button [ref=e45]:\n          - img\n        - button [ref=e46]:\n          - img\n        - button [ref=e47]:\n          - img\n        - button [ref=e48]:\n          - img\n    - complementary [ref=e49]:\n      - generic [ref=e50]:\n        - generic [ref=e51]:\n          - generic [ref=e52]: Media info\n          - generic [ref=e53]: authored keyboard source\n          - status [ref=e54]: Analysis skipped\n        - button [ref=e55]:\n          - img\n      - generic [ref=e59]:\n        - generic [ref=e60]:\n          - text: Title\n          - textbox [ref=e61]:\n            - /placeholder: Reference title\n            - text: authored keyboard source\n        - generic [ref=e62]:\n          - text: Category\n          - group [ref=e63]:\n            - button \"Dismiss\" [ref=e64]\n            - combobox \"Category\" [expanded] [active] [ref=e65]\n            - group [ref=e66]\n            - button [expanded] [ref=e67]:\n              - img\n          - textbox [ref=e68]\n        - generic [ref=e69]:\n          - text: Subcategory\n          - group [ref=e70]:\n            - combobox [ref=e71]\n            - group [ref=e72]\n            - button [ref=e73]:\n              - img\n          - textbox [ref=e74]\n        - generic [ref=e75]:\n          - text: Tags\n          - generic [ref=e76]:\n            - combobox [ref=e77]\n            - button [ref=e78]:\n              - img\n          - textbox [ref=e79]\n        - generic [ref=e80]:\n          - text: Description\n          - textbox [ref=e81]:\n            - /placeholder: What makes this reference useful?\n      - button [ref=e83]: Save info\n  - button \"Open Next.js Dev Tools\" [ref=e89] [cursor=pointer]:\n    - img [ref=e90]\n  - alert [ref=e93]\n  - generic:\n    - generic [ref=e94]:\n      - status [ref=e95]: Type to create a value.\n      - listbox\n    - button \"Dismiss\" [ref=e96]\n```\n\n# Test source\n\n```ts\n  74  | \n  75  | async function activate(target: Locator, touch = false) {\n  76  |   if (touch) await target.tap();\n  77  |   else await target.click();\n  78  | }\n  79  | \n  80  | async function startCanvas(page: Page, touch = false) {\n  81  |   await page.goto(\"/\");\n  82  |   await expect(page.getByText(\"Untitled inspiration canvas\", { exact: true })).toBeVisible();\n  83  |   await activate(page.getByRole(\"button\", { name: \"Keep temporary\", exact: true }), touch);\n  84  |   await expect(page.getByRole(\"button\", { name: \"Upload\", exact: true })).toBeVisible();\n  85  | }\n  86  | \n  87  | async function uploadImages(page: Page, names: string[], touch = false): Promise<UploadedImage[]> {\n  88  |   const before = await page.getByTestId(\"media-item\").count();\n  89  |   await page.getByTestId(\"media-upload-input\").setInputFiles(names.map(name => ({\n  90  |     name: `${name}.png`, mimeType: \"image/png\", buffer: authoredPng(),\n  91  |   })));\n  92  |   await expect(page.getByTestId(\"media-item\")).toHaveCount(before + names.length);\n  93  |   const uploaded: UploadedImage[] = [];\n  94  |   for (let index = 0; index < names.length; index++) {\n  95  |     const id = await page.getByTestId(\"media-item\").nth(before + index).getAttribute(\"data-media-id\");\n  96  |     expect(id).toMatch(/^temp-/);\n  97  |     uploaded.push({ id: id!, item: page.getByTestId(\"media-item\").and(page.locator(`[data-media-id=\"${id}\"]`)) });\n  98  |   }\n  99  |   await activate(page.getByRole(\"button\", { name: \"Fit view\", exact: true }), touch);\n  100 |   for (const { item } of uploaded) await expect(item).toBeVisible();\n  101 |   return uploaded;\n  102 | }\n  103 | \n  104 | function infoPanel(page: Page) {\n  105 |   return page.locator(\"aside\").filter({ has: page.getByRole(\"button\", { name: \"Close info\", exact: true }) });\n  106 | }\n  107 | \n  108 | async function openInfo(page: Page, image: UploadedImage, touch = false, contextMenu = false) {\n  109 |   if (contextMenu) {\n  110 |     // Batch uploads overlap by 32 canvas pixels; the first item's top-left remains exposed.\n  111 |     await image.item.click({ button: \"right\", position: { x: 8, y: 8 } });\n  112 |   } else {\n  113 |     await activate(image.item, touch);\n  114 |     await activate(image.item.getByRole(\"button\", { name: \"Media actions\", exact: true }), touch);\n  115 |   }\n  116 |   await activate(page.getByRole(\"menuitem\", { name: \"Info\", exact: true }), touch);\n  117 |   const panel = infoPanel(page);\n  118 |   await expect(panel).toBeVisible();\n  119 |   for (const name of [\"Category\", \"Subcategory\", \"Tags\"] as const) {\n  120 |     await expect(panel.getByRole(\"combobox\", { name, exact: true })).toBeVisible();\n  121 |   }\n  122 |   return panel;\n  123 | }\n  124 | \n  125 | async function closeInfo(page: Page, touch = false) {\n  126 |   await activate(infoPanel(page).getByRole(\"button\", { name: \"Close info\", exact: true }), touch);\n  127 |   await expect(infoPanel(page)).toHaveCount(0);\n  128 | }\n  129 | \n  130 | async function persistedMetadata(page: Page, id: string): Promise<Metadata> {\n  131 |   return page.evaluate(({ key, id }) => {\n  132 |     const state = JSON.parse(localStorage.getItem(key)!);\n  133 |     const item = state.mediaItems.find((entry: { id: string }) => entry.id === id);\n  134 |     if (!item) throw new Error(\"The authored temporary image was not persisted.\");\n  135 |     return { category: item.category, subcategory: item.subcategory, tagsJson: item.tagsJson };\n  136 |   }, { key: STATE_KEY, id });\n  137 | }\n  138 | \n  139 | async function expectMetadataDraft(panel: Locator, expected: Metadata) {\n  140 |   await expect(panel.getByRole(\"combobox\", { name: \"Category\", exact: true })).toHaveValue(expected.category ?? \"\");\n  141 |   await expect(panel.getByRole(\"combobox\", { name: \"Subcategory\", exact: true })).toHaveValue(expected.subcategory ?? \"\");\n  142 |   await expect(panel.getByRole(\"button\", { name: /^Remove .+ from tags$/ })).toHaveCount(expected.tagsJson.length);\n  143 |   for (const tag of expected.tagsJson) {\n  144 |     await expect(panel.getByRole(\"button\", { name: `Remove ${tag} from tags`, exact: true })).toHaveCount(1);\n  145 |   }\n  146 | }\n  147 | \n  148 | async function expectNarrowPage(page: Page) {\n  149 |   expect(await page.evaluate(() => ({\n  150 |     viewport: innerWidth,\n  151 |     documentOverflow: document.documentElement.scroll"
+      },
+      {
+        "path": "metadata-anonymous-metadat-81a74--as-null-and-an-empty-array-chromium/error-context.md",
+        "bytes": 15547,
+        "retainedPrefixBytes": 8192,
+        "prefixSha256": "01d21e75b5590dcf83dd47fc3a90686d3d2fa703437734bc7cf8577ffc52b2c2",
+        "truncated": true,
+        "text": "# Instructions\n\n- Following Playwright test failed.\n- Explain why, be concise, respect Playwright best practices.\n- Provide a snippet of code with the fix, if possible.\n\n# Test info\n\n- Name: metadata.spec.ts >> anonymous metadata desktop >> persists cleared category, subcategory, and tags as null and an empty array\n- Location: tests/e2e/metadata.spec.ts:305:3\n\n# Error details\n\n```\nTest timeout of 45000ms exceeded.\n```\n\n```\nError: locator.fill: Test timeout of 45000ms exceeded.\nCall log:\n  - waiting for locator('aside').filter({ has: getByRole('button', { name: 'Close info', exact: true }) }).getByRole('combobox', { name: 'Category', exact: true })\n\n```\n\n# Page snapshot\n\n```yaml\n- generic [ref=e1]:\n  - generic [ref=e2]:\n    - generic [ref=e3]:\n      - button [pressed] [ref=e8]:\n        - generic [ref=e9]: Analysis skipped\n        - generic:\n          - generic:\n            - img\n        - button [ref=e10]:\n          - img\n        - generic [ref=e11]:\n          - generic [ref=e12]:\n            - generic [ref=e13]:\n              - generic [ref=e14]: Comments\n              - generic [ref=e15]: authored cleared metadata\n            - button [ref=e16]:\n              - img\n          - generic [ref=e21]: No comments yet.\n          - generic [ref=e22]:\n            - textbox [ref=e23]:\n              - /placeholder: Add a note...\n            - button [disabled]: Add comment\n      - generic [ref=e32]:\n        - generic [ref=e33]:\n          - generic [ref=e34]: Untitled inspiration canvas\n          - generic [ref=e35]: 1 media / 1 selected\n        - button [ref=e36]:\n          - img\n          - text: Sign in\n      - generic [ref=e38]:\n        - button [ref=e39]:\n          - img\n        - button [ref=e40]:\n          - img\n        - generic [ref=e41]: 200%\n        - button [ref=e42]:\n          - img\n        - button [ref=e43]:\n          - img\n        - button [ref=e44]:\n          - img\n        - button [disabled]:\n          - img\n        - button [ref=e45]:\n          - img\n        - button [ref=e46]:\n          - img\n        - button [ref=e47]:\n          - img\n        - button [ref=e48]:\n          - img\n    - complementary [ref=e49]:\n      - generic [ref=e50]:\n        - generic [ref=e51]:\n          - generic [ref=e52]: Media info\n          - generic [ref=e53]: authored cleared metadata\n          - status [ref=e54]: Analysis skipped\n        - button [ref=e55]:\n          - img\n      - generic [ref=e59]:\n        - generic [ref=e60]:\n          - text: Title\n          - textbox [ref=e61]:\n            - /placeholder: Reference title\n            - text: authored cleared metadata\n        - generic [ref=e62]:\n          - text: Category\n          - group [ref=e63]:\n            - button \"Dismiss\" [ref=e64]\n            - combobox \"Category\" [expanded] [active] [ref=e65]\n            - group [ref=e66]\n            - button [expanded] [ref=e67]:\n              - img\n          - textbox [ref=e68]\n        - generic [ref=e69]:\n          - text: Subcategory\n          - group [ref=e70]:\n            - combobox [ref=e71]\n            - group [ref=e72]\n            - button [ref=e73]:\n              - img\n          - textbox [ref=e74]\n        - generic [ref=e75]:\n          - text: Tags\n          - generic [ref=e76]:\n            - combobox [ref=e77]\n            - button [ref=e78]:\n              - img\n          - textbox [ref=e79]\n        - generic [ref=e80]:\n          - text: Description\n          - textbox [ref=e81]:\n            - /placeholder: What makes this reference useful?\n      - button [ref=e83]: Save info\n  - button \"Open Next.js Dev Tools\" [ref=e89] [cursor=pointer]:\n    - img [ref=e90]\n  - alert [ref=e93]\n  - generic:\n    - generic [ref=e94]:\n      - status [ref=e95]: Type to create a value.\n      - listbox\n    - button \"Dismiss\" [ref=e96]\n```\n\n# Test source\n\n```ts\n  74  | \n  75  | async function activate(target: Locator, touch = false) {\n  76  |   if (touch) await target.tap();\n  77  |   else await target.click();\n  78  | }\n  79  | \n  80  | async function startCanvas(page: Page, touch = false) {\n  81  |   await page.goto(\"/\");\n  82  |   await expect(page.getByText(\"Untitled inspiration canvas\", { exact: true })).toBeVisible();\n  83  |   await activate(page.getByRole(\"button\", { name: \"Keep temporary\", exact: true }), touch);\n  84  |   await expect(page.getByRole(\"button\", { name: \"Upload\", exact: true })).toBeVisible();\n  85  | }\n  86  | \n  87  | async function uploadImages(page: Page, names: string[], touch = false): Promise<UploadedImage[]> {\n  88  |   const before = await page.getByTestId(\"media-item\").count();\n  89  |   await page.getByTestId(\"media-upload-input\").setInputFiles(names.map(name => ({\n  90  |     name: `${name}.png`, mimeType: \"image/png\", buffer: authoredPng(),\n  91  |   })));\n  92  |   await expect(page.getByTestId(\"media-item\")).toHaveCount(before + names.length);\n  93  |   const uploaded: UploadedImage[] = [];\n  94  |   for (let index = 0; index < names.length; index++) {\n  95  |     const id = await page.getByTestId(\"media-item\").nth(before + index).getAttribute(\"data-media-id\");\n  96  |     expect(id).toMatch(/^temp-/);\n  97  |     uploaded.push({ id: id!, item: page.getByTestId(\"media-item\").and(page.locator(`[data-media-id=\"${id}\"]`)) });\n  98  |   }\n  99  |   await activate(page.getByRole(\"button\", { name: \"Fit view\", exact: true }), touch);\n  100 |   for (const { item } of uploaded) await expect(item).toBeVisible();\n  101 |   return uploaded;\n  102 | }\n  103 | \n  104 | function infoPanel(page: Page) {\n  105 |   return page.locator(\"aside\").filter({ has: page.getByRole(\"button\", { name: \"Close info\", exact: true }) });\n  106 | }\n  107 | \n  108 | async function openInfo(page: Page, image: UploadedImage, touch = false, contextMenu = false) {\n  109 |   if (contextMenu) {\n  110 |     // Batch uploads overlap by 32 canvas pixels; the first item's top-left remains exposed.\n  111 |     await image.item.click({ button: \"right\", position: { x: 8, y: 8 } });\n  112 |   } else {\n  113 |     await activate(image.item, touch);\n  114 |     await activate(image.item.getByRole(\"button\", { name: \"Media actions\", exact: true }), touch);\n  115 |   }\n  116 |   await activate(page.getByRole(\"menuitem\", { name: \"Info\", exact: true }), touch);\n  117 |   const panel = infoPanel(page);\n  118 |   await expect(panel).toBeVisible();\n  119 |   for (const name of [\"Category\", \"Subcategory\", \"Tags\"] as const) {\n  120 |     await expect(panel.getByRole(\"combobox\", { name, exact: true })).toBeVisible();\n  121 |   }\n  122 |   return panel;\n  123 | }\n  124 | \n  125 | async function closeInfo(page: Page, touch = false) {\n  126 |   await activate(infoPanel(page).getByRole(\"button\", { name: \"Close info\", exact: true }), touch);\n  127 |   await expect(infoPanel(page)).toHaveCount(0);\n  128 | }\n  129 | \n  130 | async function persistedMetadata(page: Page, id: string): Promise<Metadata> {\n  131 |   return page.evaluate(({ key, id }) => {\n  132 |     const state = JSON.parse(localStorage.getItem(key)!);\n  133 |     const item = state.mediaItems.find((entry: { id: string }) => entry.id === id);\n  134 |     if (!item) throw new Error(\"The authored temporary image was not persisted.\");\n  135 |     return { category: item.category, subcategory: item.subcategory, tagsJson: item.tagsJson };\n  136 |   }, { key: STATE_KEY, id });\n  137 | }\n  138 | \n  139 | async function expectMetadataDraft(panel: Locator, expected: Metadata) {\n  140 |   await expect(panel.getByRole(\"combobox\", { name: \"Category\", exact: true })).toHaveValue(expected.category ?? \"\");\n  141 |   await expect(panel.getByRole(\"combobox\", { name: \"Subcategory\", exact: true })).toHaveValue(expected.subcategory ?? \"\");\n  142 |   await expect(panel.getByRole(\"button\", { name: /^Remove .+ from tags$/ })).toHaveCount(expected.tagsJson.length);\n  143 |   for (const tag of expected.tagsJson) {\n  144 |     await expect(panel.getByRole(\"button\", { name: `Remove ${tag} from tags`, exact: true })).toHaveCount(1);\n  145 |   }\n  146 | }\n  147 | \n  148 | async function expectNarrowPage(page: Page) {\n  149 |   expect(await page.evaluate(() => ({\n  150 |     viewport: innerWidth,\n  151 |     documentOverflow: document.documentElement.scrollWidth "
+      },
+      {
+        "path": "metadata-anonymous-metadat-8edce--opening-another-media-item-chromium/error-context.md",
+        "bytes": 14041,
+        "retainedPrefixBytes": 8192,
+        "prefixSha256": "b3536ffc00ba80bc20a086e060d4c0697f93b272e94716911f19746dace1bcfd",
+        "truncated": true,
+        "text": "# Instructions\n\n- Following Playwright test failed.\n- Explain why, be concise, respect Playwright best practices.\n- Provide a snippet of code with the fix, if possible.\n\n# Test info\n\n- Name: metadata.spec.ts >> anonymous metadata desktop >> discards canceled searches and unsaved choices when opening another media item\n- Location: tests/e2e/metadata.spec.ts:330:3\n\n# Error details\n\n```\nTest timeout of 45000ms exceeded.\n```\n\n```\nError: locator.click: Test timeout of 45000ms exceeded.\nCall log:\n  - waiting for getByTestId('media-item').and(locator('[data-media-id=\"temp-28ee4554-4154-430e-9d45-4597c7b91828\"]'))\n    - locator resolved to <div tabindex=\"0\" role=\"button\" data-state=\"closed\" aria-pressed=\"false\" data-testid=\"media-item\" data-slot=\"context-menu-trigger\" aria-label=\"authored switch source\" data-media-id=\"temp-28ee4554-4154-430e-9d45-4597c7b91828\" aria-describedby=\"media-description-temp-28ee4554-4154-430e-9d45-4597c7b91828\" class=\"select-none relative size-full overflow-visible rounded-md border bg-card text-left shadow-sm outline-none transition-colors border-border\">…</div>\n  - attempting click action\n    2 × waiting for element to be visible, enabled and stable\n      - element is not stable\n    - retrying click action\n    - waiting 20ms\n    2 × waiting for element to be visible, enabled and stable\n      - element is visible, enabled and stable\n      - scrolling into view if needed\n      - done scrolling\n      - <div></div> from <div>…</div> subtree intercepts pointer events\n    - retrying click action\n      - waiting 100ms\n    84 × waiting for element to be visible, enabled and stable\n       - element is visible, enabled and stable\n       - scrolling into view if needed\n       - done scrolling\n       - <div></div> from <div>…</div> subtree intercepts pointer events\n     - retrying click action\n       - waiting 500ms\n\n```\n\n# Page snapshot\n\n```yaml\n- generic [ref=e1]:\n  - generic [ref=e3]:\n    - generic [ref=e6]:\n      - button \"authored switch source\" [ref=e8]:\n        - generic [ref=e9]: Analysis skipped\n        - generic:\n          - generic:\n            - img \"authored-switch-source.png\"\n      - button \"authored switch target\" [ref=e19]:\n        - generic [ref=e20]: Analysis skipped\n        - generic:\n          - generic:\n            - img \"authored-switch-target.png\"\n    - generic [ref=e29]:\n      - generic [ref=e30]:\n        - generic [ref=e31]: Untitled inspiration canvas\n        - generic [ref=e32]: 2 media / 0 selected\n      - button \"Sign in\" [ref=e33]:\n        - img\n        - text: Sign in\n    - generic [ref=e35]:\n      - button \"Upload\" [ref=e36]:\n        - img\n      - button \"Zoom out\" [ref=e37]:\n        - img\n      - generic [ref=e38]: 200%\n      - button \"Zoom in\" [ref=e39]:\n        - img\n      - button \"Fit view\" [active] [ref=e40]:\n        - img\n      - button \"Generate taste text\" [disabled]:\n        - img\n      - button \"Generate child media\" [disabled]:\n        - img\n      - button \"Auto-classify\" [disabled]:\n        - img\n      - button \"Group media\" [ref=e41]:\n        - img\n      - button \"Curator\" [ref=e42]:\n        - img\n      - button \"Delete selected\" [disabled]:\n        - img\n  - button \"Open Next.js Dev Tools\" [ref=e48] [cursor=pointer]:\n    - img [ref=e49]\n  - alert [ref=e52]\n```\n\n# Test source\n\n```ts\n  11  | const EMPTY_METADATA: Metadata = { category: null, subcategory: null, tagsJson: [] };\n  12  | \n  13  | const test = base.extend<{ blockWrites: void }>({\n  14  |   blockWrites: [async ({ context }, runFixture, testInfo) => {\n  15  |     const blockedWrites: string[] = [];\n  16  |     // Block before navigation, including unexpected authenticated/API regressions.\n  17  |     await context.route(\"**/*\", async route => {\n  18  |       const request = route.request();\n  19  |       if (![\"GET\", \"HEAD\", \"OPTIONS\"].includes(request.method())) {\n  20  |         blockedWrites.push(`${request.method()} ${new URL(request.url()).pathname}`);\n  21  |         await route.abort(\"blockedbyclient\");\n  22  |       } else await route.continue();\n  23  |     });\n  24  |     try {\n  25  |       await runFixture();\n  26  |     } finally {\n  27  |       await testInfo.attach(\"blocked-network-writes\", {\n  28  |         body: Buffer.from(JSON.stringify(blockedWrites)), contentType: \"application/json\",\n  29  |       });\n  30  |       expect(blockedWrites, \"Anonymous metadata editing must issue no network writes.\").toEqual([]);\n  31  |     }\n  32  |   }, { auto: true }],\n  33  | });\n  34  | \n  35  | test.use({ storageState: { cookies: [], origins: [] }, serviceWorkers: \"block\" });\n  36  | \n  37  | function crc32(bytes: Buffer): number {\n  38  |   let crc = 0xffffffff;\n  39  |   for (const byte of bytes) {\n  40  |     crc ^= byte;\n  41  |     for (let bit = 0; bit < 8; bit++) crc = (crc >>> 1) ^ ((crc & 1) ? 0xedb88320 : 0);\n  42  |   }\n  43  |   return (crc ^ 0xffffffff) >>> 0;\n  44  | }\n  45  | \n  46  | function pngChunk(type: string, data: Buffer): Buffer {\n  47  |   const name = Buffer.from(type, \"ascii\");\n  48  |   const length = Buffer.alloc(4), checksum = Buffer.alloc(4);\n  49  |   length.writeUInt32BE(data.length);\n  50  |   checksum.writeUInt32BE(crc32(Buffer.concat([name, data])));\n  51  |   return Buffer.concat([length, name, data, checksum]);\n  52  | }\n  53  | \n  54  | function authoredPng(): Buffer {\n  55  |   const width = 32, height = 24;\n  56  |   const header = Buffer.alloc(13);\n  57  |   header.writeUInt32BE(width, 0); header.writeUInt32BE(height, 4);\n  58  |   header[8] = 8; header[9] = 6; // RGBA8; each row uses PNG filter 0.\n  59  |   const pixels = Buffer.alloc(height * (1 + width * 4));\n  60  |   for (let y = 0; y < height; y++) {\n  61  |     for (let x = 0; x < width; x++) {\n  62  |       const offset = y * (1 + width * 4) + 1 + x * 4;\n  63  |       pixels[offset] = x < width / 2 ? 220 : 35;\n  64  |       pixels[offset + 1] = Math.round(y * 255 / (height - 1));\n  65  |       pixels[offset + 2] = 170;\n  66  |       pixels[offset + 3] = 255;\n  67  |     }\n  68  |   }\n  69  |   return Buffer.concat([\n  70  |     Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]),\n  71  |     pngChunk(\"IHDR\", header), pngChunk(\"IDAT\", deflateSync(pixels)), pngChunk(\"IEND\", Buffer.alloc(0)),\n  72  |   ]);\n  73  | }\n  74  | \n  75  | async function activate(target: Locator, touch = false) {\n  76  |   if (touch) await target.tap();\n  77  |   else await target.click();\n  78  | }\n  79  | \n  80  | async function startCanvas(page: Page, touch = false) {\n  81  |   await page.goto(\"/\");\n  82  |   await expect(page.getByText(\"Untitled inspiration canvas\", { exact: true })).toBeVisible();\n  83  |   await activate(page.getByRole(\"button\", { name: \"Keep temporary\", exact: true }), touch);\n  84  |   await expect(page.getByRole(\"button\", { name: \"Upload\", exact: true })).toBeVisible();\n  85  | }\n  86  | \n  87  | async function uploadImages(page: Page, names: string[], touch = false): Promise<UploadedImage[]> {\n  88  |   const before = await page.getByTestId(\"media-item\").count();\n  89  |   await page.getByTestId(\"media-upload-input\").setInputFiles(names.map(name => ({\n  90  |     name: `${name}.png`, mimeType: \"image/png\", buffer: authoredPng(),\n  91  |   })));\n  92  |   await expect(page.getByTestId(\"media-item\")).toHaveCount(before + names.length);\n  93  |   const uploaded: UploadedImage[] = [];\n  94  |   for (let index = 0; index < names.length; index++) {\n  95  |     const id = await page.getByTestId(\"media-item\").nth(before + index).getAttribute(\"data-media-id\");\n  96  |     expect(id).toMatch(/^temp-/);\n  97  |     uploaded.push({ id: id!, item: page.getByTestId(\"media-item\").and(page.locator(`[data-media-id=\"${id}\"]`)) });\n  98  |   }\n  99  |   await activate(page.getByRole(\"button\", { name: \"Fit view\", exact: true }), touch);\n  100 |   for (const { item } of uploaded) await expect(item).toBeVisible();\n  101 |   return uploaded;\n  102 | }\n  103 | \n  104 | function infoPanel(page: Page) {\n  105 |   return page.locator(\"aside\").filter({ has: page.getByRole(\"button\", { name: \"Close info\", exact: true }) });\n  106 | }\n  107 | \n  108 | async function openInfo(page: Page, image: UploadedImage, touch = false, contextMenu = false) {"
+      },
+      {
+        "path": "metadata-anonymous-metadat-9e461-s-and-persists-after-reload-chromium/error-context.md",
+        "bytes": 11282,
+        "retainedPrefixBytes": 8192,
+        "prefixSha256": "e2ebf381db6c94cab1f97e6240cc00853a0074058c226f9b583d7a8a46ff40d8",
+        "truncated": true,
+        "text": "# Instructions\n\n- Following Playwright test failed.\n- Explain why, be concise, respect Playwright best practices.\n- Provide a snippet of code with the fix, if possible.\n\n# Test info\n\n- Name: metadata.spec.ts >> anonymous metadata narrow touch >> creates and reuses metadata with narrow touch controls and persists after reload\n- Location: tests/e2e/metadata.spec.ts:421:3\n\n# Error details\n\n```\nTest timeout of 45000ms exceeded.\n```\n\n```\nError: locator.tap: Test timeout of 45000ms exceeded.\nCall log:\n  - waiting for getByTestId('media-item').and(locator('[data-media-id=\"temp-52947185-dcbf-4c16-b538-da72960ac2d4\"]')).getByRole('button', { name: 'Media actions', exact: true })\n\n```\n\n# Page snapshot\n\n```yaml\n- generic [ref=e1]:\n  - generic [ref=e3]:\n    - button \"authored touch source\" [ref=e8]:\n      - generic [ref=e9]: Analysis skipped\n      - generic:\n        - generic:\n          - img \"authored-touch-source.png\"\n    - generic [ref=e18]:\n      - generic [ref=e19]:\n        - generic [ref=e20]: Untitled inspiration canvas\n        - generic [ref=e21]: 1 media / 0 selected\n      - button \"Sign in\" [ref=e22]:\n        - img\n        - text: Sign in\n    - generic [ref=e24]:\n      - button \"Upload\" [ref=e25]:\n        - img\n      - button \"Zoom out\" [ref=e26]:\n        - img\n      - generic [ref=e27]: 55%\n      - button \"Zoom in\" [ref=e28]:\n        - img\n      - button \"Fit view\" [active] [ref=e29]:\n        - img\n      - button \"Generate taste text\" [disabled]:\n        - img\n      - button \"Generate child media\" [disabled]:\n        - img\n      - button \"Auto-classify\" [disabled]:\n        - img\n      - button \"Group media\" [ref=e30]:\n        - img\n      - button \"Curator\" [ref=e31]:\n        - img\n      - button \"Delete selected\" [disabled]:\n        - img\n  - button \"Open Next.js Dev Tools\" [ref=e37] [cursor=pointer]:\n    - img [ref=e38]\n  - alert [ref=e41]\n```\n\n# Test source\n\n```ts\n  1   | import { deflateSync } from \"node:zlib\";\n  2   | \n  3   | import { expect, test as base, type Locator, type Page } from \"@playwright/test\";\n  4   | \n  5   | // Authored acceptance source only: browser/CI execution still requires approval.\n  6   | // Playwright owns each disposable anonymous context; fixtures never seed app state.\n  7   | const STATE_KEY = \"inspiration-canvas:temporary-state\";\n  8   | type Metadata = { category: string | null; subcategory: string | null; tagsJson: string[] };\n  9   | type UploadedImage = { id: string; item: Locator };\n  10  | type Field = \"Category\" | \"Subcategory\" | \"Tags\";\n  11  | const EMPTY_METADATA: Metadata = { category: null, subcategory: null, tagsJson: [] };\n  12  | \n  13  | const test = base.extend<{ blockWrites: void }>({\n  14  |   blockWrites: [async ({ context }, runFixture, testInfo) => {\n  15  |     const blockedWrites: string[] = [];\n  16  |     // Block before navigation, including unexpected authenticated/API regressions.\n  17  |     await context.route(\"**/*\", async route => {\n  18  |       const request = route.request();\n  19  |       if (![\"GET\", \"HEAD\", \"OPTIONS\"].includes(request.method())) {\n  20  |         blockedWrites.push(`${request.method()} ${new URL(request.url()).pathname}`);\n  21  |         await route.abort(\"blockedbyclient\");\n  22  |       } else await route.continue();\n  23  |     });\n  24  |     try {\n  25  |       await runFixture();\n  26  |     } finally {\n  27  |       await testInfo.attach(\"blocked-network-writes\", {\n  28  |         body: Buffer.from(JSON.stringify(blockedWrites)), contentType: \"application/json\",\n  29  |       });\n  30  |       expect(blockedWrites, \"Anonymous metadata editing must issue no network writes.\").toEqual([]);\n  31  |     }\n  32  |   }, { auto: true }],\n  33  | });\n  34  | \n  35  | test.use({ storageState: { cookies: [], origins: [] }, serviceWorkers: \"block\" });\n  36  | \n  37  | function crc32(bytes: Buffer): number {\n  38  |   let crc = 0xffffffff;\n  39  |   for (const byte of bytes) {\n  40  |     crc ^= byte;\n  41  |     for (let bit = 0; bit < 8; bit++) crc = (crc >>> 1) ^ ((crc & 1) ? 0xedb88320 : 0);\n  42  |   }\n  43  |   return (crc ^ 0xffffffff) >>> 0;\n  44  | }\n  45  | \n  46  | function pngChunk(type: string, data: Buffer): Buffer {\n  47  |   const name = Buffer.from(type, \"ascii\");\n  48  |   const length = Buffer.alloc(4), checksum = Buffer.alloc(4);\n  49  |   length.writeUInt32BE(data.length);\n  50  |   checksum.writeUInt32BE(crc32(Buffer.concat([name, data])));\n  51  |   return Buffer.concat([length, name, data, checksum]);\n  52  | }\n  53  | \n  54  | function authoredPng(): Buffer {\n  55  |   const width = 32, height = 24;\n  56  |   const header = Buffer.alloc(13);\n  57  |   header.writeUInt32BE(width, 0); header.writeUInt32BE(height, 4);\n  58  |   header[8] = 8; header[9] = 6; // RGBA8; each row uses PNG filter 0.\n  59  |   const pixels = Buffer.alloc(height * (1 + width * 4));\n  60  |   for (let y = 0; y < height; y++) {\n  61  |     for (let x = 0; x < width; x++) {\n  62  |       const offset = y * (1 + width * 4) + 1 + x * 4;\n  63  |       pixels[offset] = x < width / 2 ? 220 : 35;\n  64  |       pixels[offset + 1] = Math.round(y * 255 / (height - 1));\n  65  |       pixels[offset + 2] = 170;\n  66  |       pixels[offset + 3] = 255;\n  67  |     }\n  68  |   }\n  69  |   return Buffer.concat([\n  70  |     Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]),\n  71  |     pngChunk(\"IHDR\", header), pngChunk(\"IDAT\", deflateSync(pixels)), pngChunk(\"IEND\", Buffer.alloc(0)),\n  72  |   ]);\n  73  | }\n  74  | \n  75  | async function activate(target: Locator, touch = false) {\n> 76  |   if (touch) await target.tap();\n      |                           ^ Error: locator.tap: Test timeout of 45000ms exceeded.\n  77  |   else await target.click();\n  78  | }\n  79  | \n  80  | async function startCanvas(page: Page, touch = false) {\n  81  |   await page.goto(\"/\");\n  82  |   await expect(page.getByText(\"Untitled inspiration canvas\", { exact: true })).toBeVisible();\n  83  |   await activate(page.getByRole(\"button\", { name: \"Keep temporary\", exact: true }), touch);\n  84  |   await expect(page.getByRole(\"button\", { name: \"Upload\", exact: true })).toBeVisible();\n  85  | }\n  86  | \n  87  | async function uploadImages(page: Page, names: string[], touch = false): Promise<UploadedImage[]> {\n  88  |   const before = await page.getByTestId(\"media-item\").count();\n  89  |   await page.getByTestId(\"media-upload-input\").setInputFiles(names.map(name => ({\n  90  |     name: `${name}.png`, mimeType: \"image/png\", buffer: authoredPng(),\n  91  |   })));\n  92  |   await expect(page.getByTestId(\"media-item\")).toHaveCount(before + names.length);\n  93  |   const uploaded: UploadedImage[] = [];\n  94  |   for (let index = 0; index < names.length; index++) {\n  95  |     const id = await page.getByTestId(\"media-item\").nth(before + index).getAttribute(\"data-media-id\");\n  96  |     expect(id).toMatch(/^temp-/);\n  97  |     uploaded.push({ id: id!, item: page.getByTestId(\"media-item\").and(page.locator(`[data-media-id=\"${id}\"]`)) });\n  98  |   }\n  99  |   await activate(page.getByRole(\"button\", { name: \"Fit view\", exact: true }), touch);\n  100 |   for (const { item } of uploaded) await expect(item).toBeVisible();\n  101 |   return uploaded;\n  102 | }\n  103 | \n  104 | function infoPanel(page: Page) {\n  105 |   return page.locator(\"aside\").filter({ has: page.getByRole(\"button\", { name: \"Close info\", exact: true }) });\n  106 | }\n  107 | \n  108 | async function openInfo(page: Page, image: UploadedImage, touch = false, contextMenu = false) {\n  109 |   if (contextMenu) {\n  110 |     // Batch uploads overlap by 32 canvas pixels; the first item's top-left remains exposed.\n  111 |     await image.item.click({ button: \"right\", position: { x: 8, y: 8 } });\n  112 |   } else {\n  113 |     await activate(image.item, touch);\n  114 |     await activate(image.item.getByRole(\"button\", { name: \"Media actions\", exact: true }), touch);\n  115 |   }\n  116 |   await activate(page.getByRole(\"menuitem\", { name: \"Info\", exact: true }), touch);\n  117 |   const panel = infoPanel(page);\n  118 |   await expect(panel).toBeVisible();\n  119 |   for (const name of [\"Category\", \"Subcategory\", \"Tags\"] as const) {\n  120 |     await expect(panel.getByRole("
+      },
+      {
+        "path": "metadata-anonymous-metadat-b403c-ouch-popups-and-no-overflow-chromium/error-context.md",
+        "bytes": 11281,
+        "retainedPrefixBytes": 8192,
+        "prefixSha256": "70fbff5be58b1a643bd0df81af79c03019e10424a4ccf4ea59b3dfa98a2c6c4f",
+        "truncated": true,
+        "text": "# Instructions\n\n- Following Playwright test failed.\n- Explain why, be concise, respect Playwright best practices.\n- Provide a snippet of code with the fix, if possible.\n\n# Test info\n\n- Name: metadata.spec.ts >> anonymous metadata narrow touch >> removes chips and clears fields with usable narrow touch popups and no overflow\n- Location: tests/e2e/metadata.spec.ts:449:3\n\n# Error details\n\n```\nTest timeout of 45000ms exceeded.\n```\n\n```\nError: locator.tap: Test timeout of 45000ms exceeded.\nCall log:\n  - waiting for getByTestId('media-item').and(locator('[data-media-id=\"temp-0bf59b9d-7f52-4aa8-828e-6eb6bc647f9b\"]')).getByRole('button', { name: 'Media actions', exact: true })\n\n```\n\n# Page snapshot\n\n```yaml\n- generic [ref=e1]:\n  - generic [ref=e3]:\n    - button \"authored touch clears\" [ref=e8]:\n      - generic [ref=e9]: Analysis skipped\n      - generic:\n        - generic:\n          - img \"authored-touch-clears.png\"\n    - generic [ref=e18]:\n      - generic [ref=e19]:\n        - generic [ref=e20]: Untitled inspiration canvas\n        - generic [ref=e21]: 1 media / 0 selected\n      - button \"Sign in\" [ref=e22]:\n        - img\n        - text: Sign in\n    - generic [ref=e24]:\n      - button \"Upload\" [ref=e25]:\n        - img\n      - button \"Zoom out\" [ref=e26]:\n        - img\n      - generic [ref=e27]: 55%\n      - button \"Zoom in\" [ref=e28]:\n        - img\n      - button \"Fit view\" [active] [ref=e29]:\n        - img\n      - button \"Generate taste text\" [disabled]:\n        - img\n      - button \"Generate child media\" [disabled]:\n        - img\n      - button \"Auto-classify\" [disabled]:\n        - img\n      - button \"Group media\" [ref=e30]:\n        - img\n      - button \"Curator\" [ref=e31]:\n        - img\n      - button \"Delete selected\" [disabled]:\n        - img\n  - button \"Open Next.js Dev Tools\" [ref=e37] [cursor=pointer]:\n    - img [ref=e38]\n  - alert [ref=e41]\n```\n\n# Test source\n\n```ts\n  1   | import { deflateSync } from \"node:zlib\";\n  2   | \n  3   | import { expect, test as base, type Locator, type Page } from \"@playwright/test\";\n  4   | \n  5   | // Authored acceptance source only: browser/CI execution still requires approval.\n  6   | // Playwright owns each disposable anonymous context; fixtures never seed app state.\n  7   | const STATE_KEY = \"inspiration-canvas:temporary-state\";\n  8   | type Metadata = { category: string | null; subcategory: string | null; tagsJson: string[] };\n  9   | type UploadedImage = { id: string; item: Locator };\n  10  | type Field = \"Category\" | \"Subcategory\" | \"Tags\";\n  11  | const EMPTY_METADATA: Metadata = { category: null, subcategory: null, tagsJson: [] };\n  12  | \n  13  | const test = base.extend<{ blockWrites: void }>({\n  14  |   blockWrites: [async ({ context }, runFixture, testInfo) => {\n  15  |     const blockedWrites: string[] = [];\n  16  |     // Block before navigation, including unexpected authenticated/API regressions.\n  17  |     await context.route(\"**/*\", async route => {\n  18  |       const request = route.request();\n  19  |       if (![\"GET\", \"HEAD\", \"OPTIONS\"].includes(request.method())) {\n  20  |         blockedWrites.push(`${request.method()} ${new URL(request.url()).pathname}`);\n  21  |         await route.abort(\"blockedbyclient\");\n  22  |       } else await route.continue();\n  23  |     });\n  24  |     try {\n  25  |       await runFixture();\n  26  |     } finally {\n  27  |       await testInfo.attach(\"blocked-network-writes\", {\n  28  |         body: Buffer.from(JSON.stringify(blockedWrites)), contentType: \"application/json\",\n  29  |       });\n  30  |       expect(blockedWrites, \"Anonymous metadata editing must issue no network writes.\").toEqual([]);\n  31  |     }\n  32  |   }, { auto: true }],\n  33  | });\n  34  | \n  35  | test.use({ storageState: { cookies: [], origins: [] }, serviceWorkers: \"block\" });\n  36  | \n  37  | function crc32(bytes: Buffer): number {\n  38  |   let crc = 0xffffffff;\n  39  |   for (const byte of bytes) {\n  40  |     crc ^= byte;\n  41  |     for (let bit = 0; bit < 8; bit++) crc = (crc >>> 1) ^ ((crc & 1) ? 0xedb88320 : 0);\n  42  |   }\n  43  |   return (crc ^ 0xffffffff) >>> 0;\n  44  | }\n  45  | \n  46  | function pngChunk(type: string, data: Buffer): Buffer {\n  47  |   const name = Buffer.from(type, \"ascii\");\n  48  |   const length = Buffer.alloc(4), checksum = Buffer.alloc(4);\n  49  |   length.writeUInt32BE(data.length);\n  50  |   checksum.writeUInt32BE(crc32(Buffer.concat([name, data])));\n  51  |   return Buffer.concat([length, name, data, checksum]);\n  52  | }\n  53  | \n  54  | function authoredPng(): Buffer {\n  55  |   const width = 32, height = 24;\n  56  |   const header = Buffer.alloc(13);\n  57  |   header.writeUInt32BE(width, 0); header.writeUInt32BE(height, 4);\n  58  |   header[8] = 8; header[9] = 6; // RGBA8; each row uses PNG filter 0.\n  59  |   const pixels = Buffer.alloc(height * (1 + width * 4));\n  60  |   for (let y = 0; y < height; y++) {\n  61  |     for (let x = 0; x < width; x++) {\n  62  |       const offset = y * (1 + width * 4) + 1 + x * 4;\n  63  |       pixels[offset] = x < width / 2 ? 220 : 35;\n  64  |       pixels[offset + 1] = Math.round(y * 255 / (height - 1));\n  65  |       pixels[offset + 2] = 170;\n  66  |       pixels[offset + 3] = 255;\n  67  |     }\n  68  |   }\n  69  |   return Buffer.concat([\n  70  |     Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]),\n  71  |     pngChunk(\"IHDR\", header), pngChunk(\"IDAT\", deflateSync(pixels)), pngChunk(\"IEND\", Buffer.alloc(0)),\n  72  |   ]);\n  73  | }\n  74  | \n  75  | async function activate(target: Locator, touch = false) {\n> 76  |   if (touch) await target.tap();\n      |                           ^ Error: locator.tap: Test timeout of 45000ms exceeded.\n  77  |   else await target.click();\n  78  | }\n  79  | \n  80  | async function startCanvas(page: Page, touch = false) {\n  81  |   await page.goto(\"/\");\n  82  |   await expect(page.getByText(\"Untitled inspiration canvas\", { exact: true })).toBeVisible();\n  83  |   await activate(page.getByRole(\"button\", { name: \"Keep temporary\", exact: true }), touch);\n  84  |   await expect(page.getByRole(\"button\", { name: \"Upload\", exact: true })).toBeVisible();\n  85  | }\n  86  | \n  87  | async function uploadImages(page: Page, names: string[], touch = false): Promise<UploadedImage[]> {\n  88  |   const before = await page.getByTestId(\"media-item\").count();\n  89  |   await page.getByTestId(\"media-upload-input\").setInputFiles(names.map(name => ({\n  90  |     name: `${name}.png`, mimeType: \"image/png\", buffer: authoredPng(),\n  91  |   })));\n  92  |   await expect(page.getByTestId(\"media-item\")).toHaveCount(before + names.length);\n  93  |   const uploaded: UploadedImage[] = [];\n  94  |   for (let index = 0; index < names.length; index++) {\n  95  |     const id = await page.getByTestId(\"media-item\").nth(before + index).getAttribute(\"data-media-id\");\n  96  |     expect(id).toMatch(/^temp-/);\n  97  |     uploaded.push({ id: id!, item: page.getByTestId(\"media-item\").and(page.locator(`[data-media-id=\"${id}\"]`)) });\n  98  |   }\n  99  |   await activate(page.getByRole(\"button\", { name: \"Fit view\", exact: true }), touch);\n  100 |   for (const { item } of uploaded) await expect(item).toBeVisible();\n  101 |   return uploaded;\n  102 | }\n  103 | \n  104 | function infoPanel(page: Page) {\n  105 |   return page.locator(\"aside\").filter({ has: page.getByRole(\"button\", { name: \"Close info\", exact: true }) });\n  106 | }\n  107 | \n  108 | async function openInfo(page: Page, image: UploadedImage, touch = false, contextMenu = false) {\n  109 |   if (contextMenu) {\n  110 |     // Batch uploads overlap by 32 canvas pixels; the first item's top-left remains exposed.\n  111 |     await image.item.click({ button: \"right\", position: { x: 8, y: 8 } });\n  112 |   } else {\n  113 |     await activate(image.item, touch);\n  114 |     await activate(image.item.getByRole(\"button\", { name: \"Media actions\", exact: true }), touch);\n  115 |   }\n  116 |   await activate(page.getByRole(\"menuitem\", { name: \"Info\", exact: true }), touch);\n  117 |   const panel = infoPanel(page);\n  118 |   await expect(panel).toBeVisible();\n  119 |   for (const name of [\"Category\", \"Subcategory\", \"Tags\"] as const) {\n  120 |     await expect(panel.getByRole(\""
+      }
+    ],
+    "portUnboundAfter": true,
+    "unexpectedDatabaseAbsent": true,
+    "serverUploadsEmpty": true,
+    "playwrightShutdown": "normal_runner_close_and_port_unbound",
+    "cleanup": "unverified",
+    "scratchRetained": true,
+    "interrupted": false,
+    "completedAtUtc": "2026-11-04T23:03:56.454Z"
+  },
+  "classification": {
+    "browserCasesExecuted": 8,
+    "passed": 0,
+    "timedOut": 8,
+    "retries": 0,
+    "metadataAcceptance": false,
+    "cleanup": "unverified",
+    "scratchRetained": true,
+    "observations": [
+      "Five desktop cases lose the named-ancestor scoped combobox locator after its popup opens; snapshots show most surrounding controls hidden from accessibility.",
+      "One desktop case is blocked by an overlay while right-clicking the first of two uploaded media.",
+      "Both touch cases cannot locate Media actions after tapping an item; snapshots show zero selected.",
+      "All eight blocked-network-writes attachments are empty. Normal framework shutdown and port closure were observed.",
+      "Unexpected ignored output prevents final cleanup acceptance; known generated node_modules/.next/next-env/workflow paths were removed, complete tracked source guard passed, owned scratch was retained."
+    ]
+  },
+  "priorAttempt": "docs/results/2026/11-04/metadata-checks-attempt-1.json",
+  "proofLimits": [
+    "Full application browser checks use authored PNGs and fresh anonymous browser contexts; no crop cases, accounts, AI or live database.",
+    "The unchanged test fixture blocks non-read HTTP methods; it does not establish loopback-only reads or WebSocket isolation.",
+    "Playwright owns its web server/browser contexts. Normal runner exit, original process-group absence and port closure are observed; escaped descendant sessions are not independently inventoried.",
+    "Userspace deadlines do not interrupt blocked kernel filesystem calls. Executable hashes do not inventory dynamic libraries."
+  ]
+}
