@@ -1,12 +1,14 @@
 # Execute the prepared metadata browser checks
 
-4 November 2026. The previous portfolio turn made delivery progress. Its next
-ready local recommendation was this packet; current local and connected GitHub
-main both match `62321812c0572b04d04f640395ce1383e2bf2f23`. All 175 original
-prepared application fingerprints still match. No metadata browser execution
-receipt exists. The owner repeatedly approved all necessary work and asked to
-keep going, clearing the historical browser/temporary-CI question. No further
-routine approval is needed for this exact scope.
+4 November 2026. [Attempt 1](../results/2026/11-04/metadata-checks-attempt-1.md)
+failed at focused lint before Chromium installation or any browser case ran.
+React's hook rule interpreted the Playwright fixture callback named `use` as a
+hook inside `try/finally`. Attempt 2 renames only that callback and its call to
+`runFixture`; every scenario name, action and assertion remains unchanged. The
+failure receipt and first QA branch's retirement are preserved at
+`41b01d396de18cf9c8d1f1fc7646d60c8aa0f017`. The owner repeatedly approved all
+necessary work and asked to keep going; no further routine approval is needed
+for this same eight-case scope. Attempt 2 remains unexecuted.
 
 The [original proposal](metadata-combobox-checks.md), inactive workflow,
 [inventory](../results/2026/10-29/metadata-controls-inventory.json) and source/
@@ -38,7 +40,7 @@ setup, seed, migration or hosted upload is part of these anonymous flows.
 Use one standard public Ubuntu 24.04 job, Node 24.21.0/pnpm 10.24.0, capped at
 fifteen minutes. The new inactive example invokes
 `tests/scripts/run-metadata-checks.mjs`. Only `create` of
-`qa/metadata-combobox-20261104` in this exact public repository can activate it;
+`qa/metadata-combobox-20261104-2` in this exact public repository can activate it;
 checkout uses an immutable preparation SHA. Publish source commits with
 `[skip ci]`. Do not activate the historical push example or overwrite another
 branch. Remove the active temporary workflow after the terminal result and
@@ -52,13 +54,14 @@ startup and no screenshots, video or traces. No full Next build or broader
 unit/browser suite is included. Use no secrets, new account, model call or paid
 enrollment. Existing deployment and backend directions stay separate.
 
-A new inventory at `docs/results/2026/11-04/metadata-checks-source.json` covers
+A new inventory at `docs/results/2026/11-04/metadata-checks-source-attempt-2.json` covers
 all current application inputs, excluding `.agents/` and dated results just as
 the old inventory did. Full HEAD/index/mode/working-byte guards additionally
 cover every tracked leaf, including those excluded vendor/result files and the
-new ledger. Only AGENTS/README status text differs in the original 175-input
-set. Do not copy dependency folders, repository histories or old audit trees
-into an evidence bundle.
+new ledger. The original 175-input set differs only in AGENTS/README status text
+and the two-line fixture callback rename in `tests/e2e/metadata.spec.ts`. The
+first source ledger remains immutable. Do not copy dependency folders,
+repository histories or old audit trees into an evidence bundle.
 
 ## Finite work and truthful results
 

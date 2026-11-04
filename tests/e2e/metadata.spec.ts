@@ -11,7 +11,7 @@ type Field = "Category" | "Subcategory" | "Tags";
 const EMPTY_METADATA: Metadata = { category: null, subcategory: null, tagsJson: [] };
 
 const test = base.extend<{ blockWrites: void }>({
-  blockWrites: [async ({ context }, use, testInfo) => {
+  blockWrites: [async ({ context }, runFixture, testInfo) => {
     const blockedWrites: string[] = [];
     // Block before navigation, including unexpected authenticated/API regressions.
     await context.route("**/*", async route => {
@@ -22,7 +22,7 @@ const test = base.extend<{ blockWrites: void }>({
       } else await route.continue();
     });
     try {
-      await use();
+      await runFixture();
     } finally {
       await testInfo.attach("blocked-network-writes", {
         body: Buffer.from(JSON.stringify(blockedWrites)), contentType: "application/json",

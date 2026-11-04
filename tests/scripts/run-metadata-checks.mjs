@@ -5,7 +5,7 @@ import { spawn } from "node:child_process";
 import { createHash, randomUUID } from "node:crypto";
 import { gzipSync } from "node:zlib";
 
-const SEAL = "docs/results/2026/11-04/metadata-checks-source.json";
+const SEAL = "docs/results/2026/11-04/metadata-checks-source-attempt-2.json";
 const OLD = "docs/results/2026/10-29/metadata-controls-inventory.json";
 const OLD_HASH = "115d3b0d38806c0ca05024a6f02d13ed04cd8fc54326e7dcd3ac90eb1662906e";
 const OLD_BLOB = "8bd3d3b5ebfa9dff8a95000c91ef88e26697da31";
@@ -21,7 +21,7 @@ const sourceCommit = process.argv[3];
 need(process.argv.length === 4 && process.argv[2] === "--source-commit" && /^[a-f0-9]{40}$/.test(sourceCommit ?? ""), "source_pin_required");
 need(process.version === "v24.21.0" && process.platform === "linux" && process.env.GITHUB_ACTIONS === "true"
   && process.env.GITHUB_REPOSITORY === "alvarovillalbaa/inspiration-canvas" && process.env.GITHUB_EVENT_NAME === "create"
-  && process.env.GITHUB_REF === "refs/heads/qa/metadata-combobox-20261104"
+  && process.env.GITHUB_REF === "refs/heads/qa/metadata-combobox-20261104-2"
   && process.env.METADATA_PUBLIC_REPOSITORY === "true" && process.env.METADATA_CREATED_REF_TYPE === "branch", "approved_public_ci_required");
 const repo = fs.realpathSync(process.cwd()), parent = fs.realpathSync(process.env.RUNNER_TEMP ?? "");
 need(path.isAbsolute(parent) && fs.statSync(parent).isDirectory(), "runner_temp_invalid");
@@ -138,7 +138,7 @@ async function guard(label, cleanup = false) {
   const raw = read(SEAL, 262144), pinned = (await run(label + "_seal", "git", ["show", "HEAD:" + SEAL], 10, options))[0];
   need(raw.equals(pinned) && (!report.sealSha256 || hash(raw) === report.sealSha256), "seal_changed"); manifest = JSON.parse(raw); report.sealSha256 = hash(raw);
   need(manifest.schemaVersion === 1 && manifest.kind === "inspiration-metadata-checks-source" && manifest.fileCount === manifest.files.length
-    && JSON.stringify(manifest.historicalExceptions) === '["AGENTS.md","README.md"]', "seal_scope_invalid");
+    && JSON.stringify(manifest.historicalExceptions) === '["AGENTS.md","README.md","tests/e2e/metadata.spec.ts"]', "seal_scope_invalid");
   const index = parseGit((await run(label + "_index", "git", ["ls-files", "--stage", "-z"], 10, options))[0], true);
   const tree = parseGit((await run(label + "_tree", "git", ["ls-tree", "-r", "-z", "HEAD"], 10, options))[0], false);
   need(tree.size === manifest.trackedFileCount && index.size === tree.size, "tracked_count_changed");
