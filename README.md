@@ -13,13 +13,16 @@ Media Info provides searchable category/subcategory comboboxes and removable
 tag chips. Choose an existing value or select the “Create” option for a new one.
 Unselected search text is not metadata. “Save info” applies the draft; a failed
 save keeps it available for retry. Existing comma-containing tags remain single
-tags. See the [metadata-control receipt](docs/results/2026/10-29/metadata-controls.md)
-for source, build and the separately pending browser-check boundaries.
-The [current verification scope](docs/proposals/metadata-checks-v2.md) is covered
-by the owner's standing continuation approval: the same eight authored cases,
-with bounded diagnostics, complete checkout guards and owned runner storage.
-They remain unrun until an actual result is recorded; the four completed crop
-cases are separate evidence.
+tags. The [metadata browser receipt](docs/results/2026/11-05/metadata-checks.md)
+records all eight cases passing once against
+`d817a5b99503748b1cbfc0aaaf624962f180a58c`: six desktop and two touch-emulated
+Chromium cases, with no retries, skips, flaky outcomes or global errors.
+Source guards and owned cleanup passed. This checks anonymous browser storage
+with authored images and disabled providers; signed-in/hosted persistence, real
+providers, physical touch and full product completion remain unverified. The
+[scope and earlier failures](docs/proposals/metadata-checks-v2.md),
+[original source/build receipt](docs/results/2026/10-29/metadata-controls.md)
+and four completed crop cases remain separate evidence.
 
 ## Stack
 

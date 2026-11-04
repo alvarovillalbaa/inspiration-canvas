@@ -1,4 +1,28 @@
-# Execute the prepared metadata browser checks
+# Metadata browser checks — eight passed
+
+5 November 2026 local. [Attempt 4's canonical receipt](../results/2026/11-05/metadata-checks.md)
+and [machine result](../results/2026/11-05/metadata-checks.json) record **eight of
+eight passed**, once each, in [run 41933509907](https://github.com/alvarovillalbaa/inspiration-canvas/actions/runs/41933509907),
+job `126936070253`. The immutable checked source was
+`d817a5b99503748b1cbfc0aaaf624962f180a58c`, tree
+`2c914cee9eceedf9171514e087e530f705ff55a2`; activation was
+`2460d0cb9afa2d2365f863206a3f62be7b0aa13f` on the owned QA branch.
+
+The same six desktop and two touch-emulated Chromium cases passed with zero
+retries, skips, flaky outcomes or global errors. All 48 commands exited normally
+with complete bounded capture; six full guards passed over 178 application
+inputs / 1,357,361 bytes and all 1,033 tracked leaves. The port was unbound,
+no application database/upload file appeared, and cleanup passed: five known
+generated roots, including SWC, and the owned scratch root were removed; final
+ignored output was empty. Playwright owns browser shutdown; separately detached
+sessions were not independently inventoried.
+
+This closes the authored anonymous metadata scope, not signed-in persistence,
+hosted providers, physical touch, Safari, assistive technology or the full
+product. Final publication retires the QA-only activation and changes only
+README plus this status document among the 178 checked inputs: the other 176,
+including product, fixtures, controller and lock, remain byte-identical. Reproduce
+the immutable checked source above; earlier failures and inventories stay intact.
 
 5 November 2026. [Attempt 1](../results/2026/11-04/metadata-checks-attempt-1.md)
 failed at focused lint before Chromium installation or any browser case ran.
@@ -25,7 +49,7 @@ failures passed. The remaining tag case showed `Research, notes` in the input
 but only selected `Design`/`design` options. Cleanup remained unverified because
 the generated SWC cache was outside the known-output list. Its failure and
 retirement remain at `7922ef79e9ad7bc1191b2e8433c84564d3521b14`.
-Attempt 4 remains unexecuted; no fixture, assertion or timeout changes are made.
+Attempt 4 passed as recorded above; it changed no fixture, assertion or timeout.
 
 The [original proposal](metadata-combobox-checks.md), inactive workflow,
 [inventory](../results/2026/10-29/metadata-controls-inventory.json) and source/
