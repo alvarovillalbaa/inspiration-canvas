@@ -102,13 +102,13 @@ async function uploadImages(page: Page, names: string[], touch = false): Promise
 }
 
 function infoPanel(page: Page) {
-  return page.locator("aside").filter({ has: page.getByRole("button", { name: "Close info", exact: true }) });
+  return page.getByRole("complementary", { name: "Media info", exact: true });
 }
 
 async function openInfo(page: Page, image: UploadedImage, touch = false, contextMenu = false) {
   if (contextMenu) {
-    // Batch uploads overlap by 32 canvas pixels; the first item's top-left remains exposed.
-    await image.item.click({ button: "right", position: { x: 8, y: 8 } });
+    // At the fitted 2x desktop scale, this exposed point clears the corner resize handle.
+    await image.item.click({ button: "right", position: { x: 24, y: 24 } });
   } else {
     await activate(image.item, touch);
     await activate(image.item.getByRole("button", { name: "Media actions", exact: true }), touch);
@@ -177,8 +177,8 @@ async function createValue(page: Page, panel: Locator, field: Field, value: stri
   if (touch) await expectUsableNarrowPopup(page);
   await activate(option, touch);
   if (field === "Tags") {
-    await expect(panel.getByRole("button", { name: `Remove ${value.trim()} from tags`, exact: true })).toHaveCount(1);
     await input.press("Escape");
+    await expect(panel.getByRole("button", { name: `Remove ${value.trim()} from tags`, exact: true })).toHaveCount(1);
   } else await expect(input).toHaveValue(value.trim());
 }
 

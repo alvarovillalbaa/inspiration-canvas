@@ -1130,7 +1130,7 @@ export function InspirationCanvas() {
   function renderSidePanel() {
     if (sidePanel === "info") {
       return (
-        <aside className="flex h-[100dvh] w-[390px] max-w-full shrink-0 flex-col border-l border-border bg-background">
+        <aside aria-label="Media info" className="flex h-[100dvh] w-[390px] max-w-full shrink-0 flex-col border-l border-border bg-background">
           <div className="flex items-center justify-between gap-3 border-b border-border p-4">
             <div className="min-w-0">
               <div className="text-sm font-medium">Media info</div>
@@ -1385,7 +1385,14 @@ export function InspirationCanvas() {
         resizeHandleClasses={{ bottomRight: "resize-handle-bottom-right" }}
         position={{ x: item.x, y: item.y }}
         size={{ width: item.width, height: item.height }}
-        onDragStart={() => setDraggingItem(true)}
+        onDragStart={(event) => {
+          setDraggingItem(true);
+          // Touch dragging suppresses the compatibility click used for mouse selection.
+          if (event.type === "touchstart") {
+            setSelectedIds((current) => current.has(item.id) ? current : new Set([item.id]));
+            void loadComments(item.id);
+          }
+        }}
         onDragStop={(_, data) => {
           setDraggingItem(false);
           const ids = selectedIds.has(item.id) ? [...selectedIds] : [item.id];

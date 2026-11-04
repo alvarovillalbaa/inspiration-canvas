@@ -5,7 +5,7 @@ import { spawn } from "node:child_process";
 import { createHash, randomUUID } from "node:crypto";
 import { gzipSync } from "node:zlib";
 
-const SEAL = "docs/results/2026/11-04/metadata-checks-source-attempt-2.json";
+const SEAL = "docs/results/2026/11-05/metadata-checks-source-attempt-3.json";
 const OLD = "docs/results/2026/10-29/metadata-controls-inventory.json";
 const OLD_HASH = "115d3b0d38806c0ca05024a6f02d13ed04cd8fc54326e7dcd3ac90eb1662906e";
 const OLD_BLOB = "8bd3d3b5ebfa9dff8a95000c91ef88e26697da31";
@@ -21,7 +21,7 @@ const sourceCommit = process.argv[3];
 need(process.argv.length === 4 && process.argv[2] === "--source-commit" && /^[a-f0-9]{40}$/.test(sourceCommit ?? ""), "source_pin_required");
 need(process.version === "v24.21.0" && process.platform === "linux" && process.env.GITHUB_ACTIONS === "true"
   && process.env.GITHUB_REPOSITORY === "alvarovillalbaa/inspiration-canvas" && process.env.GITHUB_EVENT_NAME === "create"
-  && process.env.GITHUB_REF === "refs/heads/qa/metadata-combobox-20261104-2"
+  && process.env.GITHUB_REF === "refs/heads/qa/metadata-combobox-20261105-3"
   && process.env.METADATA_PUBLIC_REPOSITORY === "true" && process.env.METADATA_CREATED_REF_TYPE === "branch", "approved_public_ci_required");
 const repo = fs.realpathSync(process.cwd()), parent = fs.realpathSync(process.env.RUNNER_TEMP ?? "");
 need(path.isAbsolute(parent) && fs.statSync(parent).isDirectory(), "runner_temp_invalid");
@@ -52,7 +52,7 @@ const report = { schemaVersion: "inspiration.metadata-checks.v2", sourceCommit, 
     reportBytes: REPORT_LIMIT, playwrightReportBytes: 1048576, playwrightGzipBytes: 131072, termToKillSeconds: 3, drainAfterKillSeconds: 3 },
   scope: { file: "tests/e2e/metadata.spec.ts", cases: 8, desktop: 6, narrowTouch: 2, workers: 1, retries: 0,
     caseTimeoutMs: 45000, globalTimeoutMs: 420000, serverStartupTimeoutMs: 120000, port: 3100 },
-  commands: [], guards: [], generated: [], errors: [],
+  commands: [], guards: [], generated: [], ignoredOutput: [], errors: [],
   proofLimits: ["Full application browser checks use authored PNGs and fresh anonymous browser contexts; no crop cases, accounts, AI or live database.",
     "The unchanged test fixture blocks non-read HTTP methods; it does not establish loopback-only reads or WebSocket isolation.",
     "Playwright owns its web server/browser contexts. Normal runner exit, original process-group absence and port closure are observed; escaped descendant sessions are not independently inventoried.",
@@ -138,7 +138,7 @@ async function guard(label, cleanup = false) {
   const raw = read(SEAL, 262144), pinned = (await run(label + "_seal", "git", ["show", "HEAD:" + SEAL], 10, options))[0];
   need(raw.equals(pinned) && (!report.sealSha256 || hash(raw) === report.sealSha256), "seal_changed"); manifest = JSON.parse(raw); report.sealSha256 = hash(raw);
   need(manifest.schemaVersion === 1 && manifest.kind === "inspiration-metadata-checks-source" && manifest.fileCount === manifest.files.length
-    && JSON.stringify(manifest.historicalExceptions) === '["AGENTS.md","README.md","tests/e2e/metadata.spec.ts"]', "seal_scope_invalid");
+    && JSON.stringify(manifest.historicalExceptions) === '["AGENTS.md","README.md","components/canvas/inspiration-canvas.tsx","tests/e2e/metadata.spec.ts"]', "seal_scope_invalid");
   const index = parseGit((await run(label + "_index", "git", ["ls-files", "--stage", "-z"], 10, options))[0], true);
   const tree = parseGit((await run(label + "_tree", "git", ["ls-tree", "-r", "-z", "HEAD"], 10, options))[0], false);
   need(tree.size === manifest.trackedFileCount && index.size === tree.size, "tracked_count_changed");
@@ -177,10 +177,26 @@ function captureGenerated() {
     else report.generated.push({ path: name, dev: item.dev, ino: item.ino, directory: item.isDirectory(), preAbsent: true });
   }
 }
+function recordIgnored(label, output) {
+  const records = output.toString().split("\0").filter(Boolean);
+  const rows = records.slice(0, 16).map(record => {
+    const name = record.slice(3), pathBytes = Buffer.byteLength(name);
+    let prefix = "", prefixBytes = 0;
+    for (const character of name) {
+      const size = Buffer.byteLength(character); if (prefixBytes + size > 240) break;
+      prefix += character; prefixBytes += size;
+    }
+    return { status: record.slice(0, 2), path: prefix, pathBytes, truncated: pathBytes > 240 };
+  });
+  report.ignoredOutput.push({ label, bytes: output.length, sha256: hash(output), recordCount: records.length,
+    rows, truncated: records.length > 16 });
+  need(records.length <= 16 && rows.every(row => !row.truncated), "ignored_diagnostic_limit");
+  return records;
+}
 async function generatedPaths(label, cleanup = false) {
   captureGenerated();
   const output = (await run(label + "_ignored", "git", ["status", "--porcelain=v1", "-z", "--ignored=matching", "--untracked-files=normal"], 10, { quiet: true, cleanup }))[0];
-  for (const record of output.toString().split("\0").filter(Boolean)) {
+  for (const record of recordIgnored(label, output)) {
     need(record.startsWith("!! "), "unexpected_working_output");
     need(GENERATED.includes(record.slice(3).replace(/\/$/, "")), "unexpected_ignored_output");
   }
@@ -317,7 +333,7 @@ try {
   report.runtime.pnpm = (await run("pnpm_version", process.execPath, [corepack, "pnpm", "--version"], 15))[0].toString().trim(); need(report.runtime.pnpm === "10.24.0", "pnpm_version_changed");
   await run("install", process.execPath, [corepack, "pnpm", "install", "--frozen-lockfile", "--ignore-scripts", "--store-dir", path.join(root, "pnpm", "store")], 180);
   await generatedPaths("after_install"); await guard("after_install");
-  await run("focused_lint", process.execPath, [corepack, "pnpm", "exec", "eslint", "--no-cache", "components/canvas/metadata-combobox.tsx", "tests/e2e/metadata.spec.ts"], 45);
+  await run("focused_lint", process.execPath, [corepack, "pnpm", "exec", "eslint", "--no-cache", "components/canvas/metadata-combobox.tsx", "components/canvas/inspiration-canvas.tsx", "tests/e2e/metadata.spec.ts"], 45);
   await generatedPaths("after_lint"); await guard("after_lint");
   await run("install_chromium", process.execPath, [corepack, "pnpm", "exec", "playwright", "install", "--with-deps", "chromium"], 180);
   await generatedPaths("after_chromium"); await guard("after_chromium");
@@ -342,7 +358,8 @@ finally {
       const file = path.join(repo, entry.path); ancestors(file, repo); await removeOwned(file, entry); entry.removed = true;
     }
     await guard("after_output_cleanup", true);
-    need((await run("final_ignored", "git", ["status", "--porcelain=v1", "-z", "--ignored=matching", "--untracked-files=all"], 10, { cleanup: true, quiet: true }))[0].length === 0, "generated_output_remaining");
+    const finalIgnored = (await run("final_ignored", "git", ["status", "--porcelain=v1", "-z", "--ignored=matching", "--untracked-files=all"], 10, { cleanup: true, quiet: true }))[0];
+    recordIgnored("final", finalIgnored); need(finalIgnored.length === 0, "generated_output_remaining");
     owner(); await removeOwned(root, identity); report.cleanup = "passed";
   } catch (error) { report.cleanup = "unverified"; report.scratchRetained = fs.existsSync(root); report.errors.push(errorCode(error)); }
 }
