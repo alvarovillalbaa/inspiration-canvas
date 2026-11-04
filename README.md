@@ -15,6 +15,11 @@ Unselected search text is not metadata. “Save info” applies the draft; a fai
 save keeps it available for retry. Existing comma-containing tags remain single
 tags. See the [metadata-control receipt](docs/results/2026/10-29/metadata-controls.md)
 for source, build and the separately pending browser-check boundaries.
+The [current verification scope](docs/proposals/metadata-checks-v2.md) is covered
+by the owner's standing continuation approval: the same eight authored cases,
+with bounded diagnostics, complete checkout guards and owned runner storage.
+They remain unrun until an actual result is recorded; the four completed crop
+cases are separate evidence.
 
 ## Stack
 
