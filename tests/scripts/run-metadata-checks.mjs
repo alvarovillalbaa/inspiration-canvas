@@ -5,13 +5,13 @@ import { spawn } from "node:child_process";
 import { createHash, randomUUID } from "node:crypto";
 import { gzipSync } from "node:zlib";
 
-const SEAL = "docs/results/2026/11-05/metadata-checks-source-attempt-3.json";
+const SEAL = "docs/results/2026/11-05/metadata-checks-source-attempt-4.json";
 const OLD = "docs/results/2026/10-29/metadata-controls-inventory.json";
 const OLD_HASH = "115d3b0d38806c0ca05024a6f02d13ed04cd8fc54326e7dcd3ac90eb1662906e";
 const OLD_BLOB = "8bd3d3b5ebfa9dff8a95000c91ef88e26697da31";
 const CONFIG = ".metadata-v2.playwright.config.ts";
 const ACTIVE = ".github/workflows/metadata-checks-v2.yml";
-const GENERATED = ["node_modules", ".next", "next-env.d.ts", "app/.well-known/workflow", ".eve", ".output"];
+const GENERATED = ["node_modules", ".next", "next-env.d.ts", "app/.well-known/workflow", ".eve", ".output", ".swc"];
 const STREAM_LIMIT = 524288, REPORT_LIMIT = 262144;
 const hash = (bytes, algorithm = "sha256") => createHash(algorithm).update(bytes).digest("hex");
 const blob = bytes => hash(Buffer.concat([Buffer.from(`blob ${bytes.length}\0`), bytes]), "sha1");
@@ -21,7 +21,7 @@ const sourceCommit = process.argv[3];
 need(process.argv.length === 4 && process.argv[2] === "--source-commit" && /^[a-f0-9]{40}$/.test(sourceCommit ?? ""), "source_pin_required");
 need(process.version === "v24.21.0" && process.platform === "linux" && process.env.GITHUB_ACTIONS === "true"
   && process.env.GITHUB_REPOSITORY === "alvarovillalbaa/inspiration-canvas" && process.env.GITHUB_EVENT_NAME === "create"
-  && process.env.GITHUB_REF === "refs/heads/qa/metadata-combobox-20261105-3"
+  && process.env.GITHUB_REF === "refs/heads/qa/metadata-combobox-20261105-4"
   && process.env.METADATA_PUBLIC_REPOSITORY === "true" && process.env.METADATA_CREATED_REF_TYPE === "branch", "approved_public_ci_required");
 const repo = fs.realpathSync(process.cwd()), parent = fs.realpathSync(process.env.RUNNER_TEMP ?? "");
 need(path.isAbsolute(parent) && fs.statSync(parent).isDirectory(), "runner_temp_invalid");
@@ -58,7 +58,7 @@ const report = { schemaVersion: "inspiration.metadata-checks.v2", sourceCommit, 
     "Playwright owns its web server/browser contexts. Normal runner exit, original process-group absence and port closure are observed; escaped descendant sessions are not independently inventoried.",
     "Userspace deadlines do not interrupt blocked kernel filesystem calls. Executable hashes do not inventory dynamic libraries."] };
 const workEnd = Date.now() + 780000;
-let cleanupEnd, interrupted = false, manifest, historical, corepack, configIdentity, browserStarted = false, browserRow, parsedReport = false;
+let cleanupEnd, interrupted = false, manifest, historical, corepack, configIdentity, browserStarted = false, browserRow, parsedReport = false, generatedPreAbsent = false;
 const handlers = new Map(["SIGINT", "SIGTERM", "SIGHUP"].map(signal => {
   const handler = () => { interrupted = true; }; process.on(signal, handler); return [signal, handler];
 }));
@@ -138,7 +138,7 @@ async function guard(label, cleanup = false) {
   const raw = read(SEAL, 262144), pinned = (await run(label + "_seal", "git", ["show", "HEAD:" + SEAL], 10, options))[0];
   need(raw.equals(pinned) && (!report.sealSha256 || hash(raw) === report.sealSha256), "seal_changed"); manifest = JSON.parse(raw); report.sealSha256 = hash(raw);
   need(manifest.schemaVersion === 1 && manifest.kind === "inspiration-metadata-checks-source" && manifest.fileCount === manifest.files.length
-    && JSON.stringify(manifest.historicalExceptions) === '["AGENTS.md","README.md","components/canvas/inspiration-canvas.tsx","tests/e2e/metadata.spec.ts"]', "seal_scope_invalid");
+    && JSON.stringify(manifest.historicalExceptions) === '["AGENTS.md","README.md","components/canvas/inspiration-canvas.tsx","components/canvas/metadata-combobox.tsx","tests/e2e/metadata.spec.ts"]', "seal_scope_invalid");
   const index = parseGit((await run(label + "_index", "git", ["ls-files", "--stage", "-z"], 10, options))[0], true);
   const tree = parseGit((await run(label + "_tree", "git", ["ls-tree", "-r", "-z", "HEAD"], 10, options))[0], false);
   need(tree.size === manifest.trackedFileCount && index.size === tree.size, "tracked_count_changed");
@@ -170,9 +170,10 @@ function ancestors(file, boundary) {
   }
 }
 function captureGenerated() {
+  need(generatedPreAbsent, "generated_preabsence_unverified");
   for (const name of GENERATED) if (fs.existsSync(name)) {
     ancestors(path.join(repo, name), repo); const item = fs.lstatSync(name), previous = report.generated.find(entry => entry.path === name);
-    need(!item.isSymbolicLink() && (item.isDirectory() || item.isFile()), "generated_type_changed");
+    need(!item.isSymbolicLink() && (item.isDirectory() || item.isFile()) && (name !== ".swc" || item.isDirectory()), "generated_type_changed");
     if (previous) need(previous.dev === item.dev && previous.ino === item.ino && previous.directory === item.isDirectory(), "generated_identity_changed");
     else report.generated.push({ path: name, dev: item.dev, ino: item.ino, directory: item.isDirectory(), preAbsent: true });
   }
@@ -198,7 +199,8 @@ async function generatedPaths(label, cleanup = false) {
   const output = (await run(label + "_ignored", "git", ["status", "--porcelain=v1", "-z", "--ignored=matching", "--untracked-files=normal"], 10, { quiet: true, cleanup }))[0];
   for (const record of recordIgnored(label, output)) {
     need(record.startsWith("!! "), "unexpected_working_output");
-    need(GENERATED.includes(record.slice(3).replace(/\/$/, "")), "unexpected_ignored_output");
+    const name = record.slice(3).replace(/\/$/, "");
+    need((name !== ".swc" && GENERATED.includes(name)) || name === ".swc/.gitignore" || name === ".swc/plugins", "unexpected_ignored_output");
   }
 }
 function removeConfig() {
@@ -324,7 +326,11 @@ async function removeOwned(file, snapshot) {
   need(!fs.existsSync(file), "cleanup_path_remaining");
 }
 try {
-  for (const name of [...GENERATED, CONFIG]) need(!fs.existsSync(name), "preexisting_generated_output");
+  for (const name of [...GENERATED, CONFIG]) {
+    try { fs.lstatSync(name); throw new Error("preexisting_generated_output"); }
+    catch (error) { if (error.code !== "ENOENT") throw error; }
+  }
+  generatedPreAbsent = true;
   await guard("before"); await generatedPaths("before");
   report.portUnboundBefore = await portUnbound(); need(report.portUnboundBefore, "port_already_bound");
   const digest = createHash("sha256"); for await (const chunk of fs.createReadStream(process.execPath)) digest.update(chunk); report.runtime.executableSha256 = digest.digest("hex");

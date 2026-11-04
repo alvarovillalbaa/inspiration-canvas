@@ -16,7 +16,16 @@ locator after a popup opened; two touch cases did not select media, and the
 remaining desktop case hit overlapping-media pointer interception. Full source
 guards passed, but unexpected ignored output left cleanup unverified and the
 owned scratch retained. Its receipt and retirement are preserved at
-`df87d7cffbd25981ebc2e40c0d662dd6fa72c9ef`. Attempt 3 remains unexecuted.
+`df87d7cffbd25981ebc2e40c0d662dd6fa72c9ef`.
+
+[Attempt 3](../results/2026/11-05/metadata-checks-attempt-3.md), checked source
+`59f29ac3cf51ae4030290e83b121ec2165728cb2`, ran the same eight cases once:
+seven passed and one failed. Both touch cases and the earlier popup/switch
+failures passed. The remaining tag case showed `Research, notes` in the input
+but only selected `Design`/`design` options. Cleanup remained unverified because
+the generated SWC cache was outside the known-output list. Its failure and
+retirement remain at `7922ef79e9ad7bc1191b2e8433c84564d3521b14`.
+Attempt 4 remains unexecuted; no fixture, assertion or timeout changes are made.
 
 The [original proposal](metadata-combobox-checks.md), inactive workflow,
 [inventory](../results/2026/10-29/metadata-controls-inventory.json) and source/
@@ -44,6 +53,17 @@ tag creation precedes the unchanged outside-popup chip assertion. Exact field,
 option, chip and close-action selectors and every case assertion remain intact;
 no primitive modal override or vendor change is proposed.
 
+The [locked primitive's close/reopen logic](https://github.com/mui/base-ui/blob/v1.6.0/packages/react/src/combobox/root/AriaCombobox.tsx#L541)
+can retain a frozen closing query when an outside-input popup is reopened before
+its exit finishes. The tag snapshot is consistent with that stale filter, not
+a general comma-splitting failure; other comma-containing tags passed. Both
+metadata filters now close over the same current controlled query that builds
+their create option. The public filter callback changes with that query, which
+the primitive includes in its filter dependencies. This preserves exact-case
+selection identity and literal commas without a wait, motion override or vendor
+patch. During the brief closing phase, the cleared input may reset the displayed
+options immediately instead of retaining the old filtered list.
+
 Touch selection now runs through the existing Rnd touch-start callback, keeping
 an existing selected group. The locked [react-draggable handler](https://github.com/react-grid-layout/react-draggable/blob/v4.7.0/lib/DraggableCore.tsx#L333)
 prevents the compatibility click on touch start; mouse selection is unchanged.
@@ -53,10 +73,12 @@ desktop scale. The [resizer source](https://github.com/bokuweb/re-resizable/blob
 was inspected from a tree declaring 6.11.2; a matching version tag/npm artifact
 was not verified. Playwright's real hit testing remains enabled.
 
-Attempt 2 retained only hashes of ignored-status output, so its unknown path
-cannot be identified from the receipt. Attempt 3 records bounded escaped path
-diagnostics before rejecting unexpected output. The known generated-path list
-and cleanup authority stay unchanged; no unknown output is deleted.
+Attempt 2 retained only hashes of ignored-status output. Attempt 3's bounded
+diagnostics identify `.swc/.gitignore` and `.swc/plugins/`; its 109-byte
+pre-cleanup and 36-byte final status hashes match attempt 2. Attempt 4 permits
+only these observed ignored rows and cleanup of a pre-absent, identity-captured,
+nonsymlink `.swc` directory. Other unexpected output still fails and remains
+outside cleanup authority. These status hashes are not cache-content hashes.
 
 Each case starts with empty browser state and Playwright owns its context
 teardown. The existing automatic route fixture blocks and asserts every
@@ -72,7 +94,7 @@ setup, seed, migration or hosted upload is part of these anonymous flows.
 Use one standard public Ubuntu 24.04 job, Node 24.21.0/pnpm 10.24.0, capped at
 fifteen minutes. The new inactive example invokes
 `tests/scripts/run-metadata-checks.mjs`. Only `create` of
-`qa/metadata-combobox-20261105-3` in this exact public repository can activate it;
+`qa/metadata-combobox-20261105-4` in this exact public repository can activate it;
 checkout uses an immutable preparation SHA. Publish source commits with
 `[skip ci]`. Do not activate the historical push example or overwrite another
 branch. Remove the active temporary workflow after the terminal result and
@@ -86,13 +108,14 @@ startup and no screenshots, video or traces. No full Next build or broader
 unit/browser suite is included. Use no secrets, new account, model call or paid
 enrollment. Existing deployment and backend directions stay separate.
 
-A new inventory at `docs/results/2026/11-05/metadata-checks-source-attempt-3.json` covers
+A new inventory at `docs/results/2026/11-05/metadata-checks-source-attempt-4.json` covers
 all current application inputs, excluding `.agents/` and dated results just as
 the old inventory did. Full HEAD/index/mode/working-byte guards additionally
 cover every tracked leaf, including those excluded vendor/result files and the
 new ledger. The original 175-input set differs in AGENTS/README status text,
 the named landmark/touch selection in `components/canvas/inspiration-canvas.tsx`,
-and the documented fixture repairs in `tests/e2e/metadata.spec.ts`. Earlier
+the current-query filters in `components/canvas/metadata-combobox.tsx`, and the
+earlier documented fixture repairs in `tests/e2e/metadata.spec.ts`. Earlier
 source ledgers remain immutable. Do not copy dependency folders, repository
 histories or old audit trees into an evidence bundle.
 

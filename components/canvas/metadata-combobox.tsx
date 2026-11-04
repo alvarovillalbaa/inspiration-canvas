@@ -94,7 +94,7 @@ export function MetadataCombobox({
       <label htmlFor={id} className="text-muted-foreground">{label}</label>
       <Combobox<string>
         items={items}
-        filter={matchesMetadataOption}
+        filter={(option) => matchesMetadataOption(option, query)}
         value={value || null}
         onValueChange={(nextValue, details) => {
           // Search clearing and Escape keep metadata; the named Clear button removes it.
@@ -164,7 +164,7 @@ export function MetadataTagsCombobox({
       <Combobox<string, true>
         multiple
         items={items}
-        filter={matchesMetadataOption}
+        filter={(option) => matchesMetadataOption(option, query)}
         value={[...value]}
         onValueChange={(nextValue, details) => {
           if (details.reason === "escape-key") {
