@@ -1,0 +1,86 @@
+{
+  "schemaVersion": 1,
+  "kind": "inspiration-metadata-checks-publication",
+  "observedAtUtc": "2026-11-04T23:30:28Z",
+  "repository": "alvarovillalbaa/inspiration-canvas",
+  "acceptedRun": {
+    "id": 41933509907,
+    "job": 126936070253,
+    "source": "d817a5b99503748b1cbfc0aaaf624962f180a58c",
+    "sourceTree": "2c914cee9eceedf9171514e087e530f705ff55a2",
+    "cases": 8,
+    "retries": 0
+  },
+  "receiptEdition": {
+    "commit": "009fc12316c7a4d6d85fa8f693cb89723a065c79",
+    "tree": "4f9168750b4e25c4b790e9a4ba850d4d3b57184f",
+    "trackedLeaves": 1035,
+    "remoteTreeComplete": true,
+    "nativeHeadIndexTreeAndWorkingLeavesMatch": true,
+    "clean": true,
+    "activeWorkflowAbsent": true
+  },
+  "statusOnlyDifferencesFromCheckedInputs": [
+    "README.md",
+    "docs/proposals/metadata-checks-v2.md"
+  ],
+  "checkedInputs": {
+    "total": 178,
+    "unchanged": 176,
+    "bytes": 1357361
+  },
+  "observedRefs": [
+    {
+      "branch": "main",
+      "sha": "009fc12316c7a4d6d85fa8f693cb89723a065c79"
+    },
+    {
+      "branch": "qa/metadata-combobox-20261104",
+      "sha": "41b01d396de18cf9c8d1f1fc7646d60c8aa0f017"
+    },
+    {
+      "branch": "qa/metadata-combobox-20261104-2",
+      "sha": "df87d7cffbd25981ebc2e40c0d662dd6fa72c9ef"
+    },
+    {
+      "branch": "qa/metadata-combobox-20261105-3",
+      "sha": "7922ef79e9ad7bc1191b2e8433c84564d3521b14"
+    },
+    {
+      "branch": "qa/metadata-combobox-20261105-4",
+      "sha": "009fc12316c7a4d6d85fa8f693cb89723a065c79"
+    }
+  ],
+  "workflowRetirement": {
+    "path": ".github/workflows/metadata-checks-v2.yml",
+    "absentAtReceiptEdition": true,
+    "qaBranches": "Retained bookmarks. The fourth branch advances once more with this publication file; the earlier three stay at their own retired editions.",
+    "oldMetadataQaBranch": "Not changed by this packet."
+  },
+  "hosting": {
+    "observedAtUtc": "2026-11-04T23:29:17Z",
+    "id": "dpl_DAWbBnecWPFkt7jaAMbNHUPF7byc",
+    "url": "inspiration-canvas-qlrqm6vf2-my-team-4f230354.vercel.app",
+    "canonicalAlias": "inspiration-canvas.vercel.app",
+    "state": "READY",
+    "target": "production",
+    "sourceCommit": "d817a5b99503748b1cbfc0aaaf624962f180a58c",
+    "project": {
+      "id": "prj_uND96E27Awaq5OhYjJ3YKDWawZhq",
+      "name": "inspiration-canvas",
+      "framework": "nextjs"
+    },
+    "scope": "READY production metadata at the exact checked application source. This precedes the two receipt-only editions; it is not a hosted browser/HTTP/Auth result. Final exact-head production metadata is verified separately in the portfolio handoff."
+  },
+  "finalPublicationEdition": {
+    "change": "Only this additional publication file follows receiptEdition. Its commit SHA and complete tree are resolved from Git history, avoiding a self-referential file hash.",
+    "expectedLeaves": 1036,
+    "repeatTests": false
+  },
+  "proofLimits": [
+    "All eight Chromium cases exercised the actual loopback application in anonymous storage mode, not production, signed-in persistence, real providers, Safari, physical touch, file-picker or assistive-technology behavior.",
+    "Three earlier failures remain immutable and separate from the final pass; the four crop cases were not rerun.",
+    "The original process groups, framework closure, port and owned paths were verified. Separately detached sessions and dynamic libraries were not independently inventoried.",
+    "No local install/build/browser/server/database bypassed Storage Guard; no model call, new account or paid enrollment occurred."
+  ]
+}
