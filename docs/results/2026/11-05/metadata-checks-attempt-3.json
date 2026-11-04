@@ -1,0 +1,2264 @@
+{
+  "schemaVersion": 1,
+  "kind": "inspiration-metadata-checks-attempt-3",
+  "sourceCommit": "59f29ac3cf51ae4030290e83b121ec2165728cb2",
+  "sourceTree": "5f7387224882e58051a6d72554f38744d845f8f5",
+  "activationCommit": "98d357bde360bc3959562a8f0f8b154672e02d07",
+  "activationTree": "e04f38fbd47b65db000dc2f19aa92bed9719e09a",
+  "run": {
+    "id": 41931883111,
+    "url": "https://github.com/alvarovillalbaa/inspiration-canvas/actions/runs/41931883111",
+    "status": "completed",
+    "conclusion": "failure",
+    "event": "create",
+    "headSha": "98d357bde360bc3959562a8f0f8b154672e02d07"
+  },
+  "job": {
+    "id": 126930549311,
+    "name": "metadata",
+    "status": "completed",
+    "conclusion": "failure",
+    "startedAt": "2026-11-04T23:12:47Z",
+    "completedAt": "2026-11-04T23:15:03Z"
+  },
+  "controller": {
+    "schemaVersion": "inspiration.metadata-checks.v2",
+    "sourceCommit": "59f29ac3cf51ae4030290e83b121ec2165728cb2",
+    "status": "failed",
+    "startedAtUtc": "2026-11-04T23:12:54.913Z",
+    "runtime": {
+      "node": "v24.21.0",
+      "platform": "linux",
+      "architecture": "x64",
+      "executableSha256": "7fde7b8afa198da66257f42ee2001d874c7355631e6d1579a5fb5ef1f246df4c",
+      "corepackCliSha256": "3655bc798f300951f2070fee411b337d626b0c3ae80c2d24c46ccac4595d4bf9",
+      "pnpm": "10.24.0"
+    },
+    "limits": {
+      "workSeconds": 780,
+      "cleanupSeconds": 60,
+      "finalStdoutSeconds": 2,
+      "jobMinutes": 15,
+      "streamBytes": 524288,
+      "reportBytes": 262144,
+      "playwrightReportBytes": 1048576,
+      "playwrightGzipBytes": 131072,
+      "termToKillSeconds": 3,
+      "drainAfterKillSeconds": 3
+    },
+    "scope": {
+      "file": "tests/e2e/metadata.spec.ts",
+      "cases": 8,
+      "desktop": 6,
+      "narrowTouch": 2,
+      "workers": 1,
+      "retries": 0,
+      "caseTimeoutMs": 45000,
+      "globalTimeoutMs": 420000,
+      "serverStartupTimeoutMs": 120000,
+      "port": 3100
+    },
+    "commands": [
+      {
+        "label": "before_head",
+        "args": [
+          "git",
+          "rev-parse",
+          "HEAD"
+        ],
+        "allowedExits": [
+          0
+        ],
+        "exitCode": 0,
+        "signal": null,
+        "stop": null,
+        "spawned": true,
+        "exitObserved": true,
+        "closeObserved": true,
+        "originalProcessGroupAbsent": true,
+        "termSent": false,
+        "killSent": false,
+        "streams": [
+          {
+            "name": "stdout",
+            "observedBytes": 41,
+            "capturedBytes": 41,
+            "observedSha256": "2baf9e00da1165e6106c1295076d248ef5ae02d41655d948610dba47006c91f4",
+            "capturedSha256": "2baf9e00da1165e6106c1295076d248ef5ae02d41655d948610dba47006c91f4",
+            "complete": true
+          },
+          {
+            "name": "stderr",
+            "observedBytes": 0,
+            "capturedBytes": 0,
+            "observedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "capturedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "complete": true
+          }
+        ]
+      },
+      {
+        "label": "before_seal",
+        "args": [
+          "git",
+          "show",
+          "HEAD:docs/results/2026/11-05/metadata-checks-source-attempt-3.json"
+        ],
+        "allowedExits": [
+          0
+        ],
+        "exitCode": 0,
+        "signal": null,
+        "stop": null,
+        "spawned": true,
+        "exitObserved": true,
+        "closeObserved": true,
+        "originalProcessGroupAbsent": true,
+        "termSent": false,
+        "killSent": false,
+        "streams": [
+          {
+            "name": "stdout",
+            "observedBytes": 46145,
+            "capturedBytes": 46145,
+            "observedSha256": "79a5acad6fbce1215dab2bc4d265ec3f6a9a3445f8694143aa100a2d1c8bc3f5",
+            "capturedSha256": "79a5acad6fbce1215dab2bc4d265ec3f6a9a3445f8694143aa100a2d1c8bc3f5",
+            "complete": true
+          },
+          {
+            "name": "stderr",
+            "observedBytes": 0,
+            "capturedBytes": 0,
+            "observedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "capturedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "complete": true
+          }
+        ]
+      },
+      {
+        "label": "before_index",
+        "args": [
+          "git",
+          "ls-files",
+          "--stage",
+          "-z"
+        ],
+        "allowedExits": [
+          0
+        ],
+        "exitCode": 0,
+        "signal": null,
+        "stop": null,
+        "spawned": true,
+        "exitObserved": true,
+        "closeObserved": true,
+        "originalProcessGroupAbsent": true,
+        "termSent": false,
+        "killSent": false,
+        "streams": [
+          {
+            "name": "stdout",
+            "observedBytes": 112596,
+            "capturedBytes": 112596,
+            "observedSha256": "3787779142badd11a68b1259b2a519e9467748dacd02bc206e2a943af83f7980",
+            "capturedSha256": "3787779142badd11a68b1259b2a519e9467748dacd02bc206e2a943af83f7980",
+            "complete": true
+          },
+          {
+            "name": "stderr",
+            "observedBytes": 0,
+            "capturedBytes": 0,
+            "observedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "capturedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "complete": true
+          }
+        ]
+      },
+      {
+        "label": "before_tree",
+        "args": [
+          "git",
+          "ls-tree",
+          "-r",
+          "-z",
+          "HEAD"
+        ],
+        "allowedExits": [
+          0
+        ],
+        "exitCode": 0,
+        "signal": null,
+        "stop": null,
+        "spawned": true,
+        "exitObserved": true,
+        "closeObserved": true,
+        "originalProcessGroupAbsent": true,
+        "termSent": false,
+        "killSent": false,
+        "streams": [
+          {
+            "name": "stdout",
+            "observedBytes": 115686,
+            "capturedBytes": 115686,
+            "observedSha256": "8de0ba004841f7ba57299af4f1134b4c493c69909e769fc5fc889a5335e86a6e",
+            "capturedSha256": "8de0ba004841f7ba57299af4f1134b4c493c69909e769fc5fc889a5335e86a6e",
+            "complete": true
+          },
+          {
+            "name": "stderr",
+            "observedBytes": 0,
+            "capturedBytes": 0,
+            "observedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "capturedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "complete": true
+          }
+        ]
+      },
+      {
+        "label": "before_status",
+        "args": [
+          "git",
+          "status",
+          "--porcelain=v1",
+          "-z",
+          "--untracked-files=all"
+        ],
+        "allowedExits": [
+          0
+        ],
+        "exitCode": 0,
+        "signal": null,
+        "stop": null,
+        "spawned": true,
+        "exitObserved": true,
+        "closeObserved": true,
+        "originalProcessGroupAbsent": true,
+        "termSent": false,
+        "killSent": false,
+        "streams": [
+          {
+            "name": "stdout",
+            "observedBytes": 0,
+            "capturedBytes": 0,
+            "observedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "capturedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "complete": true
+          },
+          {
+            "name": "stderr",
+            "observedBytes": 0,
+            "capturedBytes": 0,
+            "observedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "capturedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "complete": true
+          }
+        ]
+      },
+      {
+        "label": "before_working",
+        "args": [
+          "git",
+          "-c",
+          "core.filemode=true",
+          "diff",
+          "--no-ext-diff",
+          "--no-textconv",
+          "--quiet",
+          "--exit-code",
+          "HEAD",
+          "--"
+        ],
+        "allowedExits": [
+          0
+        ],
+        "exitCode": 0,
+        "signal": null,
+        "stop": null,
+        "spawned": true,
+        "exitObserved": true,
+        "closeObserved": true,
+        "originalProcessGroupAbsent": true,
+        "termSent": false,
+        "killSent": false,
+        "streams": [
+          {
+            "name": "stdout",
+            "observedBytes": 0,
+            "capturedBytes": 0,
+            "observedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "capturedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "complete": true
+          },
+          {
+            "name": "stderr",
+            "observedBytes": 0,
+            "capturedBytes": 0,
+            "observedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "capturedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "complete": true
+          }
+        ]
+      },
+      {
+        "label": "before_ignored",
+        "args": [
+          "git",
+          "status",
+          "--porcelain=v1",
+          "-z",
+          "--ignored=matching",
+          "--untracked-files=normal"
+        ],
+        "allowedExits": [
+          0
+        ],
+        "exitCode": 0,
+        "signal": null,
+        "stop": null,
+        "spawned": true,
+        "exitObserved": true,
+        "closeObserved": true,
+        "originalProcessGroupAbsent": true,
+        "termSent": false,
+        "killSent": false,
+        "streams": [
+          {
+            "name": "stdout",
+            "observedBytes": 0,
+            "capturedBytes": 0,
+            "observedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "capturedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "complete": true
+          },
+          {
+            "name": "stderr",
+            "observedBytes": 0,
+            "capturedBytes": 0,
+            "observedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "capturedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "complete": true
+          }
+        ]
+      },
+      {
+        "label": "prepare_pnpm",
+        "args": [
+          "[node]",
+          "/opt/hostedtoolcache/node/24.21.0/x64/lib/node_modules/corepack/dist/corepack.js",
+          "prepare",
+          "pnpm@10.24.0",
+          "--activate"
+        ],
+        "allowedExits": [
+          0
+        ],
+        "exitCode": 0,
+        "signal": null,
+        "stop": null,
+        "spawned": true,
+        "exitObserved": true,
+        "closeObserved": true,
+        "originalProcessGroupAbsent": true,
+        "termSent": false,
+        "killSent": false,
+        "streams": [
+          {
+            "name": "stdout",
+            "observedBytes": 51,
+            "capturedBytes": 51,
+            "observedSha256": "715c13fae36966c37c2ece18b08dab40260e459a8f5161a6560cfdca93d41f4c",
+            "capturedSha256": "715c13fae36966c37c2ece18b08dab40260e459a8f5161a6560cfdca93d41f4c",
+            "complete": true,
+            "head": "Preparing pnpm@10.24.0 for immediate activation...\n",
+            "tail": "Preparing pnpm@10.24.0 for immediate activation...\n"
+          },
+          {
+            "name": "stderr",
+            "observedBytes": 0,
+            "capturedBytes": 0,
+            "observedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "capturedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "complete": true,
+            "head": "",
+            "tail": ""
+          }
+        ]
+      },
+      {
+        "label": "pnpm_version",
+        "args": [
+          "[node]",
+          "/opt/hostedtoolcache/node/24.21.0/x64/lib/node_modules/corepack/dist/corepack.js",
+          "pnpm",
+          "--version"
+        ],
+        "allowedExits": [
+          0
+        ],
+        "exitCode": 0,
+        "signal": null,
+        "stop": null,
+        "spawned": true,
+        "exitObserved": true,
+        "closeObserved": true,
+        "originalProcessGroupAbsent": true,
+        "termSent": false,
+        "killSent": false,
+        "streams": [
+          {
+            "name": "stdout",
+            "observedBytes": 8,
+            "capturedBytes": 8,
+            "observedSha256": "d57d8c9c1f2bf0cd42f130efec6786ebacc3a3e25d8695ad1ca56216de38faa4",
+            "capturedSha256": "d57d8c9c1f2bf0cd42f130efec6786ebacc3a3e25d8695ad1ca56216de38faa4",
+            "complete": true,
+            "head": "10.24.0\n",
+            "tail": "10.24.0\n"
+          },
+          {
+            "name": "stderr",
+            "observedBytes": 0,
+            "capturedBytes": 0,
+            "observedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "capturedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "complete": true,
+            "head": "",
+            "tail": ""
+          }
+        ]
+      },
+      {
+        "label": "install",
+        "args": [
+          "[node]",
+          "/opt/hostedtoolcache/node/24.21.0/x64/lib/node_modules/corepack/dist/corepack.js",
+          "pnpm",
+          "install",
+          "--frozen-lockfile",
+          "--ignore-scripts",
+          "--store-dir",
+          "[scratch]/pnpm/store"
+        ],
+        "allowedExits": [
+          0
+        ],
+        "exitCode": 0,
+        "signal": null,
+        "stop": null,
+        "spawned": true,
+        "exitObserved": true,
+        "closeObserved": true,
+        "originalProcessGroupAbsent": true,
+        "termSent": false,
+        "killSent": false,
+        "streams": [
+          {
+            "name": "stdout",
+            "observedBytes": 2392,
+            "capturedBytes": 2392,
+            "observedSha256": "38fe09a39abecda8ab90c6224176e95b991b717ba1dfc2fa6056451627838c74",
+            "capturedSha256": "38fe09a39abecda8ab90c6224176e95b991b717ba1dfc2fa6056451627838c74",
+            "complete": true,
+            "head": "Lockfile is up to date, resolution step is skipped\nProgress: resolved 1, reused 0, downloaded 0, added 0\nPackages: +1386\n++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\nProgress: resolved 1386, reused 0, downloaded 95, added 72\nProgress: resolved 1386, reused 0, downloaded 287, added 237\nProgress: resolved 1386, reused 0, downloaded 386, added 301\nProgress: resolved 1386, reused 0, downloaded 436, added 334\nProgress: resolved 1386, reused 0, downloaded 449, added",
+            "tail": ".5.3\n+ react-zoom-pan-pinch 4.0.3\n+ recharts 3.9.0\n+ shadcn 4.11.0\n+ sharp 0.34.5\n+ shiki 4.3.1\n+ sonner 2.0.7\n+ streamdown 2.5.0\n+ tailwind-merge 3.6.0\n+ tw-animate-css 1.4.0\n+ use-stick-to-bottom 1.1.6\n+ vaul 1.1.2\n+ workflow 4.5.0\n+ zod 4.4.3\n\ndevDependencies:\n+ @playwright/test 1.61.1\n+ @tailwindcss/postcss 4.3.1\n+ @testing-library/jest-dom 6.9.1\n+ @testing-library/react 16.3.2\n+ @types/node 20.19.43\n+ @types/react 19.2.17\n+ @types/react-dom 19.2.3\n+ @vitest/browser 4.1.9\n+ dotenv 17.4.2\n+ drizzle-kit 0.31.10\n+ eslint 9.39.4\n+ eslint-config-next 16.2.9\n+ jsdom 28.1.0\n+ playwright 1.61.1\n+ tailwindcss 4.3.1\n+ tsx 4.22.4\n+ typescript 5.9.3\n+ vitest 4.1.9\n\nDone in 12.2s using pnpm v10.24.0\n"
+          },
+          {
+            "name": "stderr",
+            "observedBytes": 0,
+            "capturedBytes": 0,
+            "observedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "capturedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "complete": true,
+            "head": "",
+            "tail": ""
+          }
+        ]
+      },
+      {
+        "label": "after_install_ignored",
+        "args": [
+          "git",
+          "status",
+          "--porcelain=v1",
+          "-z",
+          "--ignored=matching",
+          "--untracked-files=normal"
+        ],
+        "allowedExits": [
+          0
+        ],
+        "exitCode": 0,
+        "signal": null,
+        "stop": null,
+        "spawned": true,
+        "exitObserved": true,
+        "closeObserved": true,
+        "originalProcessGroupAbsent": true,
+        "termSent": false,
+        "killSent": false,
+        "streams": [
+          {
+            "name": "stdout",
+            "observedBytes": 17,
+            "capturedBytes": 17,
+            "observedSha256": "585c81200a41fe87505db2ccf942ebccd9144967bcc79cfc7ebd795a9982a00a",
+            "capturedSha256": "585c81200a41fe87505db2ccf942ebccd9144967bcc79cfc7ebd795a9982a00a",
+            "complete": true
+          },
+          {
+            "name": "stderr",
+            "observedBytes": 0,
+            "capturedBytes": 0,
+            "observedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "capturedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "complete": true
+          }
+        ]
+      },
+      {
+        "label": "after_install_head",
+        "args": [
+          "git",
+          "rev-parse",
+          "HEAD"
+        ],
+        "allowedExits": [
+          0
+        ],
+        "exitCode": 0,
+        "signal": null,
+        "stop": null,
+        "spawned": true,
+        "exitObserved": true,
+        "closeObserved": true,
+        "originalProcessGroupAbsent": true,
+        "termSent": false,
+        "killSent": false,
+        "streams": [
+          {
+            "name": "stdout",
+            "observedBytes": 41,
+            "capturedBytes": 41,
+            "observedSha256": "2baf9e00da1165e6106c1295076d248ef5ae02d41655d948610dba47006c91f4",
+            "capturedSha256": "2baf9e00da1165e6106c1295076d248ef5ae02d41655d948610dba47006c91f4",
+            "complete": true
+          },
+          {
+            "name": "stderr",
+            "observedBytes": 0,
+            "capturedBytes": 0,
+            "observedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "capturedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "complete": true
+          }
+        ]
+      },
+      {
+        "label": "after_install_seal",
+        "args": [
+          "git",
+          "show",
+          "HEAD:docs/results/2026/11-05/metadata-checks-source-attempt-3.json"
+        ],
+        "allowedExits": [
+          0
+        ],
+        "exitCode": 0,
+        "signal": null,
+        "stop": null,
+        "spawned": true,
+        "exitObserved": true,
+        "closeObserved": true,
+        "originalProcessGroupAbsent": true,
+        "termSent": false,
+        "killSent": false,
+        "streams": [
+          {
+            "name": "stdout",
+            "observedBytes": 46145,
+            "capturedBytes": 46145,
+            "observedSha256": "79a5acad6fbce1215dab2bc4d265ec3f6a9a3445f8694143aa100a2d1c8bc3f5",
+            "capturedSha256": "79a5acad6fbce1215dab2bc4d265ec3f6a9a3445f8694143aa100a2d1c8bc3f5",
+            "complete": true
+          },
+          {
+            "name": "stderr",
+            "observedBytes": 0,
+            "capturedBytes": 0,
+            "observedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "capturedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "complete": true
+          }
+        ]
+      },
+      {
+        "label": "after_install_index",
+        "args": [
+          "git",
+          "ls-files",
+          "--stage",
+          "-z"
+        ],
+        "allowedExits": [
+          0
+        ],
+        "exitCode": 0,
+        "signal": null,
+        "stop": null,
+        "spawned": true,
+        "exitObserved": true,
+        "closeObserved": true,
+        "originalProcessGroupAbsent": true,
+        "termSent": false,
+        "killSent": false,
+        "streams": [
+          {
+            "name": "stdout",
+            "observedBytes": 112596,
+            "capturedBytes": 112596,
+            "observedSha256": "3787779142badd11a68b1259b2a519e9467748dacd02bc206e2a943af83f7980",
+            "capturedSha256": "3787779142badd11a68b1259b2a519e9467748dacd02bc206e2a943af83f7980",
+            "complete": true
+          },
+          {
+            "name": "stderr",
+            "observedBytes": 0,
+            "capturedBytes": 0,
+            "observedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "capturedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "complete": true
+          }
+        ]
+      },
+      {
+        "label": "after_install_tree",
+        "args": [
+          "git",
+          "ls-tree",
+          "-r",
+          "-z",
+          "HEAD"
+        ],
+        "allowedExits": [
+          0
+        ],
+        "exitCode": 0,
+        "signal": null,
+        "stop": null,
+        "spawned": true,
+        "exitObserved": true,
+        "closeObserved": true,
+        "originalProcessGroupAbsent": true,
+        "termSent": false,
+        "killSent": false,
+        "streams": [
+          {
+            "name": "stdout",
+            "observedBytes": 115686,
+            "capturedBytes": 115686,
+            "observedSha256": "8de0ba004841f7ba57299af4f1134b4c493c69909e769fc5fc889a5335e86a6e",
+            "capturedSha256": "8de0ba004841f7ba57299af4f1134b4c493c69909e769fc5fc889a5335e86a6e",
+            "complete": true
+          },
+          {
+            "name": "stderr",
+            "observedBytes": 0,
+            "capturedBytes": 0,
+            "observedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "capturedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "complete": true
+          }
+        ]
+      },
+      {
+        "label": "after_install_status",
+        "args": [
+          "git",
+          "status",
+          "--porcelain=v1",
+          "-z",
+          "--untracked-files=all"
+        ],
+        "allowedExits": [
+          0
+        ],
+        "exitCode": 0,
+        "signal": null,
+        "stop": null,
+        "spawned": true,
+        "exitObserved": true,
+        "closeObserved": true,
+        "originalProcessGroupAbsent": true,
+        "termSent": false,
+        "killSent": false,
+        "streams": [
+          {
+            "name": "stdout",
+            "observedBytes": 0,
+            "capturedBytes": 0,
+            "observedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "capturedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "complete": true
+          },
+          {
+            "name": "stderr",
+            "observedBytes": 0,
+            "capturedBytes": 0,
+            "observedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "capturedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "complete": true
+          }
+        ]
+      },
+      {
+        "label": "after_install_working",
+        "args": [
+          "git",
+          "-c",
+          "core.filemode=true",
+          "diff",
+          "--no-ext-diff",
+          "--no-textconv",
+          "--quiet",
+          "--exit-code",
+          "HEAD",
+          "--"
+        ],
+        "allowedExits": [
+          0
+        ],
+        "exitCode": 0,
+        "signal": null,
+        "stop": null,
+        "spawned": true,
+        "exitObserved": true,
+        "closeObserved": true,
+        "originalProcessGroupAbsent": true,
+        "termSent": false,
+        "killSent": false,
+        "streams": [
+          {
+            "name": "stdout",
+            "observedBytes": 0,
+            "capturedBytes": 0,
+            "observedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "capturedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "complete": true
+          },
+          {
+            "name": "stderr",
+            "observedBytes": 0,
+            "capturedBytes": 0,
+            "observedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "capturedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "complete": true
+          }
+        ]
+      },
+      {
+        "label": "focused_lint",
+        "args": [
+          "[node]",
+          "/opt/hostedtoolcache/node/24.21.0/x64/lib/node_modules/corepack/dist/corepack.js",
+          "pnpm",
+          "exec",
+          "eslint",
+          "--no-cache",
+          "components/canvas/metadata-combobox.tsx",
+          "components/canvas/inspiration-canvas.tsx",
+          "tests/e2e/metadata.spec.ts"
+        ],
+        "allowedExits": [
+          0
+        ],
+        "exitCode": 0,
+        "signal": null,
+        "stop": null,
+        "spawned": true,
+        "exitObserved": true,
+        "closeObserved": true,
+        "originalProcessGroupAbsent": true,
+        "termSent": false,
+        "killSent": false,
+        "streams": [
+          {
+            "name": "stdout",
+            "observedBytes": 0,
+            "capturedBytes": 0,
+            "observedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "capturedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "complete": true,
+            "head": "",
+            "tail": ""
+          },
+          {
+            "name": "stderr",
+            "observedBytes": 0,
+            "capturedBytes": 0,
+            "observedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "capturedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "complete": true,
+            "head": "",
+            "tail": ""
+          }
+        ]
+      },
+      {
+        "label": "after_lint_ignored",
+        "args": [
+          "git",
+          "status",
+          "--porcelain=v1",
+          "-z",
+          "--ignored=matching",
+          "--untracked-files=normal"
+        ],
+        "allowedExits": [
+          0
+        ],
+        "exitCode": 0,
+        "signal": null,
+        "stop": null,
+        "spawned": true,
+        "exitObserved": true,
+        "closeObserved": true,
+        "originalProcessGroupAbsent": true,
+        "termSent": false,
+        "killSent": false,
+        "streams": [
+          {
+            "name": "stdout",
+            "observedBytes": 17,
+            "capturedBytes": 17,
+            "observedSha256": "585c81200a41fe87505db2ccf942ebccd9144967bcc79cfc7ebd795a9982a00a",
+            "capturedSha256": "585c81200a41fe87505db2ccf942ebccd9144967bcc79cfc7ebd795a9982a00a",
+            "complete": true
+          },
+          {
+            "name": "stderr",
+            "observedBytes": 0,
+            "capturedBytes": 0,
+            "observedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "capturedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "complete": true
+          }
+        ]
+      },
+      {
+        "label": "after_lint_head",
+        "args": [
+          "git",
+          "rev-parse",
+          "HEAD"
+        ],
+        "allowedExits": [
+          0
+        ],
+        "exitCode": 0,
+        "signal": null,
+        "stop": null,
+        "spawned": true,
+        "exitObserved": true,
+        "closeObserved": true,
+        "originalProcessGroupAbsent": true,
+        "termSent": false,
+        "killSent": false,
+        "streams": [
+          {
+            "name": "stdout",
+            "observedBytes": 41,
+            "capturedBytes": 41,
+            "observedSha256": "2baf9e00da1165e6106c1295076d248ef5ae02d41655d948610dba47006c91f4",
+            "capturedSha256": "2baf9e00da1165e6106c1295076d248ef5ae02d41655d948610dba47006c91f4",
+            "complete": true
+          },
+          {
+            "name": "stderr",
+            "observedBytes": 0,
+            "capturedBytes": 0,
+            "observedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "capturedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "complete": true
+          }
+        ]
+      },
+      {
+        "label": "after_lint_seal",
+        "args": [
+          "git",
+          "show",
+          "HEAD:docs/results/2026/11-05/metadata-checks-source-attempt-3.json"
+        ],
+        "allowedExits": [
+          0
+        ],
+        "exitCode": 0,
+        "signal": null,
+        "stop": null,
+        "spawned": true,
+        "exitObserved": true,
+        "closeObserved": true,
+        "originalProcessGroupAbsent": true,
+        "termSent": false,
+        "killSent": false,
+        "streams": [
+          {
+            "name": "stdout",
+            "observedBytes": 46145,
+            "capturedBytes": 46145,
+            "observedSha256": "79a5acad6fbce1215dab2bc4d265ec3f6a9a3445f8694143aa100a2d1c8bc3f5",
+            "capturedSha256": "79a5acad6fbce1215dab2bc4d265ec3f6a9a3445f8694143aa100a2d1c8bc3f5",
+            "complete": true
+          },
+          {
+            "name": "stderr",
+            "observedBytes": 0,
+            "capturedBytes": 0,
+            "observedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "capturedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "complete": true
+          }
+        ]
+      },
+      {
+        "label": "after_lint_index",
+        "args": [
+          "git",
+          "ls-files",
+          "--stage",
+          "-z"
+        ],
+        "allowedExits": [
+          0
+        ],
+        "exitCode": 0,
+        "signal": null,
+        "stop": null,
+        "spawned": true,
+        "exitObserved": true,
+        "closeObserved": true,
+        "originalProcessGroupAbsent": true,
+        "termSent": false,
+        "killSent": false,
+        "streams": [
+          {
+            "name": "stdout",
+            "observedBytes": 112596,
+            "capturedBytes": 112596,
+            "observedSha256": "3787779142badd11a68b1259b2a519e9467748dacd02bc206e2a943af83f7980",
+            "capturedSha256": "3787779142badd11a68b1259b2a519e9467748dacd02bc206e2a943af83f7980",
+            "complete": true
+          },
+          {
+            "name": "stderr",
+            "observedBytes": 0,
+            "capturedBytes": 0,
+            "observedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "capturedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "complete": true
+          }
+        ]
+      },
+      {
+        "label": "after_lint_tree",
+        "args": [
+          "git",
+          "ls-tree",
+          "-r",
+          "-z",
+          "HEAD"
+        ],
+        "allowedExits": [
+          0
+        ],
+        "exitCode": 0,
+        "signal": null,
+        "stop": null,
+        "spawned": true,
+        "exitObserved": true,
+        "closeObserved": true,
+        "originalProcessGroupAbsent": true,
+        "termSent": false,
+        "killSent": false,
+        "streams": [
+          {
+            "name": "stdout",
+            "observedBytes": 115686,
+            "capturedBytes": 115686,
+            "observedSha256": "8de0ba004841f7ba57299af4f1134b4c493c69909e769fc5fc889a5335e86a6e",
+            "capturedSha256": "8de0ba004841f7ba57299af4f1134b4c493c69909e769fc5fc889a5335e86a6e",
+            "complete": true
+          },
+          {
+            "name": "stderr",
+            "observedBytes": 0,
+            "capturedBytes": 0,
+            "observedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "capturedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "complete": true
+          }
+        ]
+      },
+      {
+        "label": "after_lint_status",
+        "args": [
+          "git",
+          "status",
+          "--porcelain=v1",
+          "-z",
+          "--untracked-files=all"
+        ],
+        "allowedExits": [
+          0
+        ],
+        "exitCode": 0,
+        "signal": null,
+        "stop": null,
+        "spawned": true,
+        "exitObserved": true,
+        "closeObserved": true,
+        "originalProcessGroupAbsent": true,
+        "termSent": false,
+        "killSent": false,
+        "streams": [
+          {
+            "name": "stdout",
+            "observedBytes": 0,
+            "capturedBytes": 0,
+            "observedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "capturedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "complete": true
+          },
+          {
+            "name": "stderr",
+            "observedBytes": 0,
+            "capturedBytes": 0,
+            "observedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "capturedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "complete": true
+          }
+        ]
+      },
+      {
+        "label": "after_lint_working",
+        "args": [
+          "git",
+          "-c",
+          "core.filemode=true",
+          "diff",
+          "--no-ext-diff",
+          "--no-textconv",
+          "--quiet",
+          "--exit-code",
+          "HEAD",
+          "--"
+        ],
+        "allowedExits": [
+          0
+        ],
+        "exitCode": 0,
+        "signal": null,
+        "stop": null,
+        "spawned": true,
+        "exitObserved": true,
+        "closeObserved": true,
+        "originalProcessGroupAbsent": true,
+        "termSent": false,
+        "killSent": false,
+        "streams": [
+          {
+            "name": "stdout",
+            "observedBytes": 0,
+            "capturedBytes": 0,
+            "observedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "capturedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "complete": true
+          },
+          {
+            "name": "stderr",
+            "observedBytes": 0,
+            "capturedBytes": 0,
+            "observedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "capturedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "complete": true
+          }
+        ]
+      },
+      {
+        "label": "install_chromium",
+        "args": [
+          "[node]",
+          "/opt/hostedtoolcache/node/24.21.0/x64/lib/node_modules/corepack/dist/corepack.js",
+          "pnpm",
+          "exec",
+          "playwright",
+          "install",
+          "--with-deps",
+          "chromium"
+        ],
+        "allowedExits": [
+          0
+        ],
+        "exitCode": 0,
+        "signal": null,
+        "stop": null,
+        "spawned": true,
+        "exitObserved": true,
+        "closeObserved": true,
+        "originalProcessGroupAbsent": true,
+        "termSent": false,
+        "killSent": false,
+        "streams": [
+          {
+            "name": "stdout",
+            "observedBytes": 15828,
+            "capturedBytes": 15828,
+            "observedSha256": "0fc55577c142a75cb438d767369f969ea218e4c28b9209f6eea96d01d8671d46",
+            "capturedSha256": "0fc55577c142a75cb438d767369f969ea218e4c28b9209f6eea96d01d8671d46",
+            "complete": true,
+            "head": "Installing dependencies...\nSwitching to root user to install dependencies...\nGet:1 file:/etc/apt/apt-mirrors.txt Mirrorlist [144 B]\nGet:6 https://packages.microsoft.com/ubuntu/24.04/prod noble InRelease [3600 B]\nHit:2 http://azure.archive.ubuntu.com/ubuntu noble InRelease\nGet:7 https://packages.microsoft.com/ubuntu/24.04/prod noble/main amd64 Packages [731 kB]\nGet:3 http://azure.archive.ubuntu.com/ubuntu noble-updates InRelease [126 kB]\nGet:4 http://azure.archive.ubuntu.com/ubuntu noble-backport",
+            "tail": "0% of 114.2 MiB\n|■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■        |  90% of 114.2 MiB\n|■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■| 100% of 114.2 MiB\nChrome Headless Shell 149.0.7827.55 (playwright chromium-headless-shell v1228) downloaded to [scratch]/browsers/chromium_headless_shell-1228\n"
+          },
+          {
+            "name": "stderr",
+            "observedBytes": 237,
+            "capturedBytes": 237,
+            "observedSha256": "3b419c69ff321ee6851fa5489a2bb0c9a2ef093815a709dbd05391f89767267f",
+            "capturedSha256": "3b419c69ff321ee6851fa5489a2bb0c9a2ef093815a709dbd05391f89767267f",
+            "complete": true,
+            "head": "\nRunning kernel seems to be up-to-date.\n\nNo services need to be restarted.\n\nNo containers need to be restarted.\n\nNo user sessions are running outdated binaries.\n\nNo VM guests are running outdated hypervisor (qemu) binaries on this host.\n",
+            "tail": "\nRunning kernel seems to be up-to-date.\n\nNo services need to be restarted.\n\nNo containers need to be restarted.\n\nNo user sessions are running outdated binaries.\n\nNo VM guests are running outdated hypervisor (qemu) binaries on this host.\n"
+          }
+        ]
+      },
+      {
+        "label": "after_chromium_ignored",
+        "args": [
+          "git",
+          "status",
+          "--porcelain=v1",
+          "-z",
+          "--ignored=matching",
+          "--untracked-files=normal"
+        ],
+        "allowedExits": [
+          0
+        ],
+        "exitCode": 0,
+        "signal": null,
+        "stop": null,
+        "spawned": true,
+        "exitObserved": true,
+        "closeObserved": true,
+        "originalProcessGroupAbsent": true,
+        "termSent": false,
+        "killSent": false,
+        "streams": [
+          {
+            "name": "stdout",
+            "observedBytes": 17,
+            "capturedBytes": 17,
+            "observedSha256": "585c81200a41fe87505db2ccf942ebccd9144967bcc79cfc7ebd795a9982a00a",
+            "capturedSha256": "585c81200a41fe87505db2ccf942ebccd9144967bcc79cfc7ebd795a9982a00a",
+            "complete": true
+          },
+          {
+            "name": "stderr",
+            "observedBytes": 0,
+            "capturedBytes": 0,
+            "observedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "capturedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "complete": true
+          }
+        ]
+      },
+      {
+        "label": "after_chromium_head",
+        "args": [
+          "git",
+          "rev-parse",
+          "HEAD"
+        ],
+        "allowedExits": [
+          0
+        ],
+        "exitCode": 0,
+        "signal": null,
+        "stop": null,
+        "spawned": true,
+        "exitObserved": true,
+        "closeObserved": true,
+        "originalProcessGroupAbsent": true,
+        "termSent": false,
+        "killSent": false,
+        "streams": [
+          {
+            "name": "stdout",
+            "observedBytes": 41,
+            "capturedBytes": 41,
+            "observedSha256": "2baf9e00da1165e6106c1295076d248ef5ae02d41655d948610dba47006c91f4",
+            "capturedSha256": "2baf9e00da1165e6106c1295076d248ef5ae02d41655d948610dba47006c91f4",
+            "complete": true
+          },
+          {
+            "name": "stderr",
+            "observedBytes": 0,
+            "capturedBytes": 0,
+            "observedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "capturedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "complete": true
+          }
+        ]
+      },
+      {
+        "label": "after_chromium_seal",
+        "args": [
+          "git",
+          "show",
+          "HEAD:docs/results/2026/11-05/metadata-checks-source-attempt-3.json"
+        ],
+        "allowedExits": [
+          0
+        ],
+        "exitCode": 0,
+        "signal": null,
+        "stop": null,
+        "spawned": true,
+        "exitObserved": true,
+        "closeObserved": true,
+        "originalProcessGroupAbsent": true,
+        "termSent": false,
+        "killSent": false,
+        "streams": [
+          {
+            "name": "stdout",
+            "observedBytes": 46145,
+            "capturedBytes": 46145,
+            "observedSha256": "79a5acad6fbce1215dab2bc4d265ec3f6a9a3445f8694143aa100a2d1c8bc3f5",
+            "capturedSha256": "79a5acad6fbce1215dab2bc4d265ec3f6a9a3445f8694143aa100a2d1c8bc3f5",
+            "complete": true
+          },
+          {
+            "name": "stderr",
+            "observedBytes": 0,
+            "capturedBytes": 0,
+            "observedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "capturedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "complete": true
+          }
+        ]
+      },
+      {
+        "label": "after_chromium_index",
+        "args": [
+          "git",
+          "ls-files",
+          "--stage",
+          "-z"
+        ],
+        "allowedExits": [
+          0
+        ],
+        "exitCode": 0,
+        "signal": null,
+        "stop": null,
+        "spawned": true,
+        "exitObserved": true,
+        "closeObserved": true,
+        "originalProcessGroupAbsent": true,
+        "termSent": false,
+        "killSent": false,
+        "streams": [
+          {
+            "name": "stdout",
+            "observedBytes": 112596,
+            "capturedBytes": 112596,
+            "observedSha256": "3787779142badd11a68b1259b2a519e9467748dacd02bc206e2a943af83f7980",
+            "capturedSha256": "3787779142badd11a68b1259b2a519e9467748dacd02bc206e2a943af83f7980",
+            "complete": true
+          },
+          {
+            "name": "stderr",
+            "observedBytes": 0,
+            "capturedBytes": 0,
+            "observedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "capturedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "complete": true
+          }
+        ]
+      },
+      {
+        "label": "after_chromium_tree",
+        "args": [
+          "git",
+          "ls-tree",
+          "-r",
+          "-z",
+          "HEAD"
+        ],
+        "allowedExits": [
+          0
+        ],
+        "exitCode": 0,
+        "signal": null,
+        "stop": null,
+        "spawned": true,
+        "exitObserved": true,
+        "closeObserved": true,
+        "originalProcessGroupAbsent": true,
+        "termSent": false,
+        "killSent": false,
+        "streams": [
+          {
+            "name": "stdout",
+            "observedBytes": 115686,
+            "capturedBytes": 115686,
+            "observedSha256": "8de0ba004841f7ba57299af4f1134b4c493c69909e769fc5fc889a5335e86a6e",
+            "capturedSha256": "8de0ba004841f7ba57299af4f1134b4c493c69909e769fc5fc889a5335e86a6e",
+            "complete": true
+          },
+          {
+            "name": "stderr",
+            "observedBytes": 0,
+            "capturedBytes": 0,
+            "observedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "capturedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "complete": true
+          }
+        ]
+      },
+      {
+        "label": "after_chromium_status",
+        "args": [
+          "git",
+          "status",
+          "--porcelain=v1",
+          "-z",
+          "--untracked-files=all"
+        ],
+        "allowedExits": [
+          0
+        ],
+        "exitCode": 0,
+        "signal": null,
+        "stop": null,
+        "spawned": true,
+        "exitObserved": true,
+        "closeObserved": true,
+        "originalProcessGroupAbsent": true,
+        "termSent": false,
+        "killSent": false,
+        "streams": [
+          {
+            "name": "stdout",
+            "observedBytes": 0,
+            "capturedBytes": 0,
+            "observedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "capturedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "complete": true
+          },
+          {
+            "name": "stderr",
+            "observedBytes": 0,
+            "capturedBytes": 0,
+            "observedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "capturedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "complete": true
+          }
+        ]
+      },
+      {
+        "label": "after_chromium_working",
+        "args": [
+          "git",
+          "-c",
+          "core.filemode=true",
+          "diff",
+          "--no-ext-diff",
+          "--no-textconv",
+          "--quiet",
+          "--exit-code",
+          "HEAD",
+          "--"
+        ],
+        "allowedExits": [
+          0
+        ],
+        "exitCode": 0,
+        "signal": null,
+        "stop": null,
+        "spawned": true,
+        "exitObserved": true,
+        "closeObserved": true,
+        "originalProcessGroupAbsent": true,
+        "termSent": false,
+        "killSent": false,
+        "streams": [
+          {
+            "name": "stdout",
+            "observedBytes": 0,
+            "capturedBytes": 0,
+            "observedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "capturedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "complete": true
+          },
+          {
+            "name": "stderr",
+            "observedBytes": 0,
+            "capturedBytes": 0,
+            "observedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "capturedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "complete": true
+          }
+        ]
+      },
+      {
+        "label": "metadata_browser",
+        "args": [
+          "[node]",
+          "/opt/hostedtoolcache/node/24.21.0/x64/lib/node_modules/corepack/dist/corepack.js",
+          "pnpm",
+          "exec",
+          "playwright",
+          "test",
+          "--config",
+          ".metadata-v2.playwright.config.ts",
+          "--project",
+          "chromium"
+        ],
+        "allowedExits": [
+          0,
+          1
+        ],
+        "exitCode": 1,
+        "signal": null,
+        "stop": null,
+        "spawned": true,
+        "exitObserved": true,
+        "closeObserved": true,
+        "originalProcessGroupAbsent": true,
+        "termSent": false,
+        "killSent": false,
+        "streams": [
+          {
+            "name": "stdout",
+            "observedBytes": 3011,
+            "capturedBytes": 3011,
+            "observedSha256": "f5c7df9febaa0e3425ee55c6de67d64f6ae863f7b6b20cba3ad469d15d178309",
+            "capturedSha256": "f5c7df9febaa0e3425ee55c6de67d64f6ae863f7b6b20cba3ad469d15d178309",
+            "complete": true,
+            "head": "\nRunning 8 tests using 1 worker\n\n  ✓  1 [chromium] › tests/e2e/metadata.spec.ts:231:3 › anonymous metadata desktop › creates and reuses all three metadata fields only after explicit Save info and reload (8.9s)\n  ✓  2 [chromium] › tests/e2e/metadata.spec.ts:259:3 › anonymous metadata desktop › filters existing category and subcategory with keyboard selection without autosaving (6.6s)\n  ✘  3 [chromium] › tests/e2e/metadata.spec.ts:281:3 › anonymous metadata desktop › keeps ",
+            "tail": " await expectUsableNarrowPopup(page);\n      178 |   await activate(option, touch);\n      179 |   if (field === \"Tags\") {\n        at createValue ([repository]/tests/e2e/metadata.spec.ts:176:24)\n        at [repository]/tests/e2e/metadata.spec.ts:285:64\n\n    Error Context: ../../_temp/metadata-checks-8ri4xH/output/results/metadata-anonymous-metadat-0cfc6-nd-deduplicating-selections-chromium/error-context.md\n\n  1 failed\n    [chromium] › tests/e2e/metadata.spec.ts:281:3 › anonymous metadata desktop › keeps tags case-sensitive and comma-literal while removing and deduplicating selections \n  7 passed (1.4m)\n"
+          },
+          {
+            "name": "stderr",
+            "observedBytes": 1448,
+            "capturedBytes": 1448,
+            "observedSha256": "589bd06bc237fe6077de77b9d85b265f65bd89ddebab11614bd37699364aaa60",
+            "capturedSha256": "589bd06bc237fe6077de77b9d85b265f65bd89ddebab11614bd37699364aaa60",
+            "complete": true,
+            "head": "[WebServer] (node:3933) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.\n[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)\n[WebServer] (node:3946) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.\n[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)\n[WebServer] (node:3963) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.\n[WebServer] (Use `node ",
+            "tail": "[WebServer] (node:4020) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.\n[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)\n[WebServer] (node:4032) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.\n[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)\n(node:4055) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.\n(Use `node --trace-warnings ...` to show where the warning was created)\n(node:4167) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.\n(Use `node --trace-warnings ...` to show where the warning was created)\n"
+          }
+        ]
+      },
+      {
+        "label": "after_ignored",
+        "args": [
+          "git",
+          "status",
+          "--porcelain=v1",
+          "-z",
+          "--ignored=matching",
+          "--untracked-files=normal"
+        ],
+        "allowedExits": [
+          0
+        ],
+        "exitCode": 0,
+        "signal": null,
+        "stop": null,
+        "spawned": true,
+        "exitObserved": true,
+        "closeObserved": true,
+        "originalProcessGroupAbsent": true,
+        "termSent": false,
+        "killSent": false,
+        "streams": [
+          {
+            "name": "stdout",
+            "observedBytes": 109,
+            "capturedBytes": 109,
+            "observedSha256": "bc0331a39e2de7f5553d81fb8b85b85a063d84b8086fb2fef01b1584fa19ac76",
+            "capturedSha256": "bc0331a39e2de7f5553d81fb8b85b85a063d84b8086fb2fef01b1584fa19ac76",
+            "complete": true
+          },
+          {
+            "name": "stderr",
+            "observedBytes": 0,
+            "capturedBytes": 0,
+            "observedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "capturedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "complete": true
+          }
+        ]
+      },
+      {
+        "label": "after_output_cleanup_head",
+        "args": [
+          "git",
+          "rev-parse",
+          "HEAD"
+        ],
+        "allowedExits": [
+          0
+        ],
+        "exitCode": 0,
+        "signal": null,
+        "stop": null,
+        "spawned": true,
+        "exitObserved": true,
+        "closeObserved": true,
+        "originalProcessGroupAbsent": true,
+        "termSent": false,
+        "killSent": false,
+        "streams": [
+          {
+            "name": "stdout",
+            "observedBytes": 41,
+            "capturedBytes": 41,
+            "observedSha256": "2baf9e00da1165e6106c1295076d248ef5ae02d41655d948610dba47006c91f4",
+            "capturedSha256": "2baf9e00da1165e6106c1295076d248ef5ae02d41655d948610dba47006c91f4",
+            "complete": true
+          },
+          {
+            "name": "stderr",
+            "observedBytes": 0,
+            "capturedBytes": 0,
+            "observedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "capturedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "complete": true
+          }
+        ]
+      },
+      {
+        "label": "after_output_cleanup_seal",
+        "args": [
+          "git",
+          "show",
+          "HEAD:docs/results/2026/11-05/metadata-checks-source-attempt-3.json"
+        ],
+        "allowedExits": [
+          0
+        ],
+        "exitCode": 0,
+        "signal": null,
+        "stop": null,
+        "spawned": true,
+        "exitObserved": true,
+        "closeObserved": true,
+        "originalProcessGroupAbsent": true,
+        "termSent": false,
+        "killSent": false,
+        "streams": [
+          {
+            "name": "stdout",
+            "observedBytes": 46145,
+            "capturedBytes": 46145,
+            "observedSha256": "79a5acad6fbce1215dab2bc4d265ec3f6a9a3445f8694143aa100a2d1c8bc3f5",
+            "capturedSha256": "79a5acad6fbce1215dab2bc4d265ec3f6a9a3445f8694143aa100a2d1c8bc3f5",
+            "complete": true
+          },
+          {
+            "name": "stderr",
+            "observedBytes": 0,
+            "capturedBytes": 0,
+            "observedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "capturedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "complete": true
+          }
+        ]
+      },
+      {
+        "label": "after_output_cleanup_index",
+        "args": [
+          "git",
+          "ls-files",
+          "--stage",
+          "-z"
+        ],
+        "allowedExits": [
+          0
+        ],
+        "exitCode": 0,
+        "signal": null,
+        "stop": null,
+        "spawned": true,
+        "exitObserved": true,
+        "closeObserved": true,
+        "originalProcessGroupAbsent": true,
+        "termSent": false,
+        "killSent": false,
+        "streams": [
+          {
+            "name": "stdout",
+            "observedBytes": 112596,
+            "capturedBytes": 112596,
+            "observedSha256": "3787779142badd11a68b1259b2a519e9467748dacd02bc206e2a943af83f7980",
+            "capturedSha256": "3787779142badd11a68b1259b2a519e9467748dacd02bc206e2a943af83f7980",
+            "complete": true
+          },
+          {
+            "name": "stderr",
+            "observedBytes": 0,
+            "capturedBytes": 0,
+            "observedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "capturedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "complete": true
+          }
+        ]
+      },
+      {
+        "label": "after_output_cleanup_tree",
+        "args": [
+          "git",
+          "ls-tree",
+          "-r",
+          "-z",
+          "HEAD"
+        ],
+        "allowedExits": [
+          0
+        ],
+        "exitCode": 0,
+        "signal": null,
+        "stop": null,
+        "spawned": true,
+        "exitObserved": true,
+        "closeObserved": true,
+        "originalProcessGroupAbsent": true,
+        "termSent": false,
+        "killSent": false,
+        "streams": [
+          {
+            "name": "stdout",
+            "observedBytes": 115686,
+            "capturedBytes": 115686,
+            "observedSha256": "8de0ba004841f7ba57299af4f1134b4c493c69909e769fc5fc889a5335e86a6e",
+            "capturedSha256": "8de0ba004841f7ba57299af4f1134b4c493c69909e769fc5fc889a5335e86a6e",
+            "complete": true
+          },
+          {
+            "name": "stderr",
+            "observedBytes": 0,
+            "capturedBytes": 0,
+            "observedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "capturedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "complete": true
+          }
+        ]
+      },
+      {
+        "label": "after_output_cleanup_status",
+        "args": [
+          "git",
+          "status",
+          "--porcelain=v1",
+          "-z",
+          "--untracked-files=all"
+        ],
+        "allowedExits": [
+          0
+        ],
+        "exitCode": 0,
+        "signal": null,
+        "stop": null,
+        "spawned": true,
+        "exitObserved": true,
+        "closeObserved": true,
+        "originalProcessGroupAbsent": true,
+        "termSent": false,
+        "killSent": false,
+        "streams": [
+          {
+            "name": "stdout",
+            "observedBytes": 0,
+            "capturedBytes": 0,
+            "observedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "capturedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "complete": true
+          },
+          {
+            "name": "stderr",
+            "observedBytes": 0,
+            "capturedBytes": 0,
+            "observedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "capturedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "complete": true
+          }
+        ]
+      },
+      {
+        "label": "after_output_cleanup_working",
+        "args": [
+          "git",
+          "-c",
+          "core.filemode=true",
+          "diff",
+          "--no-ext-diff",
+          "--no-textconv",
+          "--quiet",
+          "--exit-code",
+          "HEAD",
+          "--"
+        ],
+        "allowedExits": [
+          0
+        ],
+        "exitCode": 0,
+        "signal": null,
+        "stop": null,
+        "spawned": true,
+        "exitObserved": true,
+        "closeObserved": true,
+        "originalProcessGroupAbsent": true,
+        "termSent": false,
+        "killSent": false,
+        "streams": [
+          {
+            "name": "stdout",
+            "observedBytes": 0,
+            "capturedBytes": 0,
+            "observedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "capturedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "complete": true
+          },
+          {
+            "name": "stderr",
+            "observedBytes": 0,
+            "capturedBytes": 0,
+            "observedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "capturedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "complete": true
+          }
+        ]
+      },
+      {
+        "label": "final_ignored",
+        "args": [
+          "git",
+          "status",
+          "--porcelain=v1",
+          "-z",
+          "--ignored=matching",
+          "--untracked-files=all"
+        ],
+        "allowedExits": [
+          0
+        ],
+        "exitCode": 0,
+        "signal": null,
+        "stop": null,
+        "spawned": true,
+        "exitObserved": true,
+        "closeObserved": true,
+        "originalProcessGroupAbsent": true,
+        "termSent": false,
+        "killSent": false,
+        "streams": [
+          {
+            "name": "stdout",
+            "observedBytes": 36,
+            "capturedBytes": 36,
+            "observedSha256": "73126d384c005cd351094892e8c954e4fd95e29833906a376b420638ba4d8652",
+            "capturedSha256": "73126d384c005cd351094892e8c954e4fd95e29833906a376b420638ba4d8652",
+            "complete": true
+          },
+          {
+            "name": "stderr",
+            "observedBytes": 0,
+            "capturedBytes": 0,
+            "observedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "capturedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "complete": true
+          }
+        ]
+      }
+    ],
+    "guards": [
+      {
+        "label": "before",
+        "passed": true,
+        "inputFiles": 178,
+        "inputBytes": 1355242,
+        "trackedFiles": 1030,
+        "fullIndexMatchesHead": true,
+        "fullWorkingBytesMatchHead": true,
+        "historicalFiles": 175,
+        "historicalChanged": [
+          "AGENTS.md",
+          "README.md",
+          "components/canvas/inspiration-canvas.tsx",
+          "tests/e2e/metadata.spec.ts"
+        ],
+        "historicalInventorySha256": "115d3b0d38806c0ca05024a6f02d13ed04cd8fc54326e7dcd3ac90eb1662906e"
+      },
+      {
+        "label": "after_install",
+        "passed": true,
+        "inputFiles": 178,
+        "inputBytes": 1355242,
+        "trackedFiles": 1030,
+        "fullIndexMatchesHead": true,
+        "fullWorkingBytesMatchHead": true,
+        "historicalFiles": 175,
+        "historicalChanged": [
+          "AGENTS.md",
+          "README.md",
+          "components/canvas/inspiration-canvas.tsx",
+          "tests/e2e/metadata.spec.ts"
+        ],
+        "historicalInventorySha256": "115d3b0d38806c0ca05024a6f02d13ed04cd8fc54326e7dcd3ac90eb1662906e"
+      },
+      {
+        "label": "after_lint",
+        "passed": true,
+        "inputFiles": 178,
+        "inputBytes": 1355242,
+        "trackedFiles": 1030,
+        "fullIndexMatchesHead": true,
+        "fullWorkingBytesMatchHead": true,
+        "historicalFiles": 175,
+        "historicalChanged": [
+          "AGENTS.md",
+          "README.md",
+          "components/canvas/inspiration-canvas.tsx",
+          "tests/e2e/metadata.spec.ts"
+        ],
+        "historicalInventorySha256": "115d3b0d38806c0ca05024a6f02d13ed04cd8fc54326e7dcd3ac90eb1662906e"
+      },
+      {
+        "label": "after_chromium",
+        "passed": true,
+        "inputFiles": 178,
+        "inputBytes": 1355242,
+        "trackedFiles": 1030,
+        "fullIndexMatchesHead": true,
+        "fullWorkingBytesMatchHead": true,
+        "historicalFiles": 175,
+        "historicalChanged": [
+          "AGENTS.md",
+          "README.md",
+          "components/canvas/inspiration-canvas.tsx",
+          "tests/e2e/metadata.spec.ts"
+        ],
+        "historicalInventorySha256": "115d3b0d38806c0ca05024a6f02d13ed04cd8fc54326e7dcd3ac90eb1662906e"
+      },
+      {
+        "label": "after_output_cleanup",
+        "passed": true,
+        "inputFiles": 178,
+        "inputBytes": 1355242,
+        "trackedFiles": 1030,
+        "fullIndexMatchesHead": true,
+        "fullWorkingBytesMatchHead": true,
+        "historicalFiles": 175,
+        "historicalChanged": [
+          "AGENTS.md",
+          "README.md",
+          "components/canvas/inspiration-canvas.tsx",
+          "tests/e2e/metadata.spec.ts"
+        ],
+        "historicalInventorySha256": "115d3b0d38806c0ca05024a6f02d13ed04cd8fc54326e7dcd3ac90eb1662906e"
+      }
+    ],
+    "generated": [
+      {
+        "path": "node_modules",
+        "dev": 2049,
+        "ino": 9190982,
+        "directory": true,
+        "preAbsent": true,
+        "removed": true
+      },
+      {
+        "path": ".next",
+        "dev": 2049,
+        "ino": 9442101,
+        "directory": true,
+        "preAbsent": true,
+        "removed": true
+      },
+      {
+        "path": "next-env.d.ts",
+        "dev": 2049,
+        "ino": 9273889,
+        "directory": false,
+        "preAbsent": true,
+        "removed": true
+      },
+      {
+        "path": "app/.well-known/workflow",
+        "dev": 2049,
+        "ino": 9442083,
+        "directory": true,
+        "preAbsent": true,
+        "removed": true
+      }
+    ],
+    "ignoredOutput": [
+      {
+        "label": "before",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "recordCount": 0,
+        "rows": [],
+        "truncated": false
+      },
+      {
+        "label": "after_install",
+        "bytes": 17,
+        "sha256": "585c81200a41fe87505db2ccf942ebccd9144967bcc79cfc7ebd795a9982a00a",
+        "recordCount": 1,
+        "rows": [
+          {
+            "status": "!!",
+            "path": "node_modules/",
+            "pathBytes": 13,
+            "truncated": false
+          }
+        ],
+        "truncated": false
+      },
+      {
+        "label": "after_lint",
+        "bytes": 17,
+        "sha256": "585c81200a41fe87505db2ccf942ebccd9144967bcc79cfc7ebd795a9982a00a",
+        "recordCount": 1,
+        "rows": [
+          {
+            "status": "!!",
+            "path": "node_modules/",
+            "pathBytes": 13,
+            "truncated": false
+          }
+        ],
+        "truncated": false
+      },
+      {
+        "label": "after_chromium",
+        "bytes": 17,
+        "sha256": "585c81200a41fe87505db2ccf942ebccd9144967bcc79cfc7ebd795a9982a00a",
+        "recordCount": 1,
+        "rows": [
+          {
+            "status": "!!",
+            "path": "node_modules/",
+            "pathBytes": 13,
+            "truncated": false
+          }
+        ],
+        "truncated": false
+      },
+      {
+        "label": "after",
+        "bytes": 109,
+        "sha256": "bc0331a39e2de7f5553d81fb8b85b85a063d84b8086fb2fef01b1584fa19ac76",
+        "recordCount": 6,
+        "rows": [
+          {
+            "status": "!!",
+            "path": ".next/",
+            "pathBytes": 6,
+            "truncated": false
+          },
+          {
+            "status": "!!",
+            "path": ".swc/.gitignore",
+            "pathBytes": 15,
+            "truncated": false
+          },
+          {
+            "status": "!!",
+            "path": ".swc/plugins/",
+            "pathBytes": 13,
+            "truncated": false
+          },
+          {
+            "status": "!!",
+            "path": "app/.well-known/workflow/",
+            "pathBytes": 25,
+            "truncated": false
+          },
+          {
+            "status": "!!",
+            "path": "next-env.d.ts",
+            "pathBytes": 13,
+            "truncated": false
+          },
+          {
+            "status": "!!",
+            "path": "node_modules/",
+            "pathBytes": 13,
+            "truncated": false
+          }
+        ],
+        "truncated": false
+      },
+      {
+        "label": "final",
+        "bytes": 36,
+        "sha256": "73126d384c005cd351094892e8c954e4fd95e29833906a376b420638ba4d8652",
+        "recordCount": 2,
+        "rows": [
+          {
+            "status": "!!",
+            "path": ".swc/.gitignore",
+            "pathBytes": 15,
+            "truncated": false
+          },
+          {
+            "status": "!!",
+            "path": ".swc/plugins/",
+            "pathBytes": 13,
+            "truncated": false
+          }
+        ],
+        "truncated": false
+      }
+    ],
+    "errors": [
+      "playwright_totals_failed",
+      "unexpected_ignored_output",
+      "generated_output_remaining"
+    ],
+    "proofLimits": [
+      "Full application browser checks use authored PNGs and fresh anonymous browser contexts; no crop cases, accounts, AI or live database.",
+      "The unchanged test fixture blocks non-read HTTP methods; it does not establish loopback-only reads or WebSocket isolation.",
+      "Playwright owns its web server/browser contexts. Normal runner exit, original process-group absence and port closure are observed; escaped descendant sessions are not independently inventoried.",
+      "Userspace deadlines do not interrupt blocked kernel filesystem calls. Executable hashes do not inventory dynamic libraries."
+    ],
+    "sealSha256": "79a5acad6fbce1215dab2bc4d265ec3f6a9a3445f8694143aa100a2d1c8bc3f5",
+    "portUnboundBefore": true,
+    "generatedConfigSha256": "70b86fd95c25746b2ff8470f855a763d626e09fbb4c7fd1e5f66d953776d0b1f",
+    "generatedConfigRemoved": true,
+    "browser": {
+      "raw": {
+        "encoding": "gzip-base64",
+        "bytes": 19129,
+        "sha256": "306e488676531be273f3bfb12e7f9bf2243792bfacdbc27e3089ed3978f9c682",
+        "compressedBytes": 2829,
+        "data": "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"
+      },
+      "cases": [
+        {
+          "name": "creates and reuses all three metadata fields only after explicit Save info and reload",
+          "project": "chromium",
+          "expected": "passed",
+          "attempts": [
+            {
+              "status": "passed",
+              "retry": 0,
+              "durationMs": 8897,
+              "errors": []
+            }
+          ],
+          "blockedWrites": {
+            "bytes": 2,
+            "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+            "empty": true
+          }
+        },
+        {
+          "name": "filters existing category and subcategory with keyboard selection without autosaving",
+          "project": "chromium",
+          "expected": "passed",
+          "attempts": [
+            {
+              "status": "passed",
+              "retry": 0,
+              "durationMs": 6579,
+              "errors": []
+            }
+          ],
+          "blockedWrites": {
+            "bytes": 2,
+            "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+            "empty": true
+          }
+        },
+        {
+          "name": "keeps tags case-sensitive and comma-literal while removing and deduplicating selections",
+          "project": "chromium",
+          "expected": "passed",
+          "attempts": [
+            {
+              "status": "failed",
+              "retry": 0,
+              "durationMs": 13399,
+              "errors": [
+                "Error: expect(locator).toBeVisible() failed\n\nLocator: getByRole('option', { name: 'Create “Research, notes”', exact: true })\nExpected: visible\nTimeout: 10000ms\nError: element(s) not found\n\nCall log:\n  - Expect \"toBeVisible\" with timeout 10000ms\n  - waiting for getByRole('option', { name: 'Create “Research, notes”', exact: true })\n\n\n  174 |   await input.fill(value);\n  175 |   const option = page.getByRole(\"option\", { name: `Create “${value.trim()}”`, exact: true });\n> 176 |   await expect(option).toBeVisible();\n      |                        ^\n  177 |   if (touch) await expectUsableNarrowPopup(page);\n  178 |   await activate(option, touch);\n  179 |   if (field === \"Tags\") {\n    at createValue ([repository]/tests/e2e/metadata.spec.ts:176:24)\n    at [repository]/tests/e2e/metadata.spec.ts:285:64"
+              ]
+            }
+          ],
+          "blockedWrites": {
+            "bytes": 2,
+            "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+            "empty": true
+          }
+        },
+        {
+          "name": "persists cleared category, subcategory, and tags as null and an empty array",
+          "project": "chromium",
+          "expected": "passed",
+          "attempts": [
+            {
+              "status": "passed",
+              "retry": 0,
+              "durationMs": 5968,
+              "errors": []
+            }
+          ],
+          "blockedWrites": {
+            "bytes": 2,
+            "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+            "empty": true
+          }
+        },
+        {
+          "name": "discards canceled searches and unsaved choices when opening another media item",
+          "project": "chromium",
+          "expected": "passed",
+          "attempts": [
+            {
+              "status": "passed",
+              "retry": 0,
+              "durationMs": 6661,
+              "errors": []
+            }
+          ],
+          "blockedWrites": {
+            "bytes": 2,
+            "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+            "empty": true
+          }
+        },
+        {
+          "name": "retains metadata drafts after local storage failure and saves the same draft on retry",
+          "project": "chromium",
+          "expected": "passed",
+          "attempts": [
+            {
+              "status": "passed",
+              "retry": 0,
+              "durationMs": 5409,
+              "errors": []
+            }
+          ],
+          "blockedWrites": {
+            "bytes": 2,
+            "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+            "empty": true
+          }
+        },
+        {
+          "name": "creates and reuses metadata with narrow touch controls and persists after reload",
+          "project": "chromium",
+          "expected": "passed",
+          "attempts": [
+            {
+              "status": "passed",
+              "retry": 0,
+              "durationMs": 8409,
+              "errors": []
+            }
+          ],
+          "blockedWrites": {
+            "bytes": 2,
+            "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+            "empty": true
+          }
+        },
+        {
+          "name": "removes chips and clears fields with usable narrow touch popups and no overflow",
+          "project": "chromium",
+          "expected": "passed",
+          "attempts": [
+            {
+              "status": "passed",
+              "retry": 0,
+              "durationMs": 6082,
+              "errors": []
+            }
+          ],
+          "blockedWrites": {
+            "bytes": 2,
+            "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+            "empty": true
+          }
+        }
+      ],
+      "accepted": false,
+      "stats": {
+        "expected": 7,
+        "unexpected": 1,
+        "flaky": 0,
+        "skipped": 0,
+        "durationMs": 81718.42199999999
+      },
+      "globalErrorCount": 0,
+      "globalErrors": [],
+      "normalFrameworkResult": true
+    },
+    "playwrightOutput": {
+      "frameworkCreatedLeaf": true,
+      "directory": true,
+      "symlink": false,
+      "dev": 2049,
+      "ino": 9442385
+    },
+    "failureContexts": [
+      {
+        "path": "metadata-anonymous-metadat-0cfc6-nd-deduplicating-selections-chromium/error-context.md",
+        "bytes": 12784,
+        "retainedPrefixBytes": 8192,
+        "prefixSha256": "70233f92f96a790386a84a7a71da6e94a64ae49d092964b08d3476ee6cfa5a8b",
+        "truncated": true,
+        "text": "# Instructions\n\n- Following Playwright test failed.\n- Explain why, be concise, respect Playwright best practices.\n- Provide a snippet of code with the fix, if possible.\n\n# Test info\n\n- Name: metadata.spec.ts >> anonymous metadata desktop >> keeps tags case-sensitive and comma-literal while removing and deduplicating selections\n- Location: tests/e2e/metadata.spec.ts:281:3\n\n# Error details\n\n```\nError: expect(locator).toBeVisible() failed\n\nLocator: getByRole('option', { name: 'Create “Research, notes”', exact: true })\nExpected: visible\nTimeout: 10000ms\nError: element(s) not found\n\nCall log:\n  - Expect \"toBeVisible\" with timeout 10000ms\n  - waiting for getByRole('option', { name: 'Create “Research, notes”', exact: true })\n\n```\n\n```yaml\n- complementary \"Media info\":\n  - status: Analysis skipped\n  - toolbar:\n    - button \"Dismiss\"\n    - combobox \"Tags\" [expanded]: Research, notes\n- listbox:\n  - option \"Design\" [selected]\n  - option \"design\" [selected]\n- button \"Dismiss\"\n```\n\n# Test source\n\n```ts\n  76  |   if (touch) await target.tap();\n  77  |   else await target.click();\n  78  | }\n  79  | \n  80  | async function startCanvas(page: Page, touch = false) {\n  81  |   await page.goto(\"/\");\n  82  |   await expect(page.getByText(\"Untitled inspiration canvas\", { exact: true })).toBeVisible();\n  83  |   await activate(page.getByRole(\"button\", { name: \"Keep temporary\", exact: true }), touch);\n  84  |   await expect(page.getByRole(\"button\", { name: \"Upload\", exact: true })).toBeVisible();\n  85  | }\n  86  | \n  87  | async function uploadImages(page: Page, names: string[], touch = false): Promise<UploadedImage[]> {\n  88  |   const before = await page.getByTestId(\"media-item\").count();\n  89  |   await page.getByTestId(\"media-upload-input\").setInputFiles(names.map(name => ({\n  90  |     name: `${name}.png`, mimeType: \"image/png\", buffer: authoredPng(),\n  91  |   })));\n  92  |   await expect(page.getByTestId(\"media-item\")).toHaveCount(before + names.length);\n  93  |   const uploaded: UploadedImage[] = [];\n  94  |   for (let index = 0; index < names.length; index++) {\n  95  |     const id = await page.getByTestId(\"media-item\").nth(before + index).getAttribute(\"data-media-id\");\n  96  |     expect(id).toMatch(/^temp-/);\n  97  |     uploaded.push({ id: id!, item: page.getByTestId(\"media-item\").and(page.locator(`[data-media-id=\"${id}\"]`)) });\n  98  |   }\n  99  |   await activate(page.getByRole(\"button\", { name: \"Fit view\", exact: true }), touch);\n  100 |   for (const { item } of uploaded) await expect(item).toBeVisible();\n  101 |   return uploaded;\n  102 | }\n  103 | \n  104 | function infoPanel(page: Page) {\n  105 |   return page.getByRole(\"complementary\", { name: \"Media info\", exact: true });\n  106 | }\n  107 | \n  108 | async function openInfo(page: Page, image: UploadedImage, touch = false, contextMenu = false) {\n  109 |   if (contextMenu) {\n  110 |     // At the fitted 2x desktop scale, this exposed point clears the corner resize handle.\n  111 |     await image.item.click({ button: \"right\", position: { x: 24, y: 24 } });\n  112 |   } else {\n  113 |     await activate(image.item, touch);\n  114 |     await activate(image.item.getByRole(\"button\", { name: \"Media actions\", exact: true }), touch);\n  115 |   }\n  116 |   await activate(page.getByRole(\"menuitem\", { name: \"Info\", exact: true }), touch);\n  117 |   const panel = infoPanel(page);\n  118 |   await expect(panel).toBeVisible();\n  119 |   for (const name of [\"Category\", \"Subcategory\", \"Tags\"] as const) {\n  120 |     await expect(panel.getByRole(\"combobox\", { name, exact: true })).toBeVisible();\n  121 |   }\n  122 |   return panel;\n  123 | }\n  124 | \n  125 | async function closeInfo(page: Page, touch = false) {\n  126 |   await activate(infoPanel(page).getByRole(\"button\", { name: \"Close info\", exact: true }), touch);\n  127 |   await expect(infoPanel(page)).toHaveCount(0);\n  128 | }\n  129 | \n  130 | async function persistedMetadata(page: Page, id: string): Promise<Metadata> {\n  131 |   return page.evaluate(({ key, id }) => {\n  132 |     const state = JSON.parse(localStorage.getItem(key)!);\n  133 |     const item = state.mediaItems.find((entry: { id: string }) => entry.id === id);\n  134 |     if (!item) throw new Error(\"The authored temporary image was not persisted.\");\n  135 |     return { category: item.category, subcategory: item.subcategory, tagsJson: item.tagsJson };\n  136 |   }, { key: STATE_KEY, id });\n  137 | }\n  138 | \n  139 | async function expectMetadataDraft(panel: Locator, expected: Metadata) {\n  140 |   await expect(panel.getByRole(\"combobox\", { name: \"Category\", exact: true })).toHaveValue(expected.category ?? \"\");\n  141 |   await expect(panel.getByRole(\"combobox\", { name: \"Subcategory\", exact: true })).toHaveValue(expected.subcategory ?? \"\");\n  142 |   await expect(panel.getByRole(\"button\", { name: /^Remove .+ from tags$/ })).toHaveCount(expected.tagsJson.length);\n  143 |   for (const tag of expected.tagsJson) {\n  144 |     await expect(panel.getByRole(\"button\", { name: `Remove ${tag} from tags`, exact: true })).toHaveCount(1);\n  145 |   }\n  146 | }\n  147 | \n  148 | async function expectNarrowPage(page: Page) {\n  149 |   expect(await page.evaluate(() => ({\n  150 |     viewport: innerWidth,\n  151 |     documentOverflow: document.documentElement.scrollWidth > innerWidth,\n  152 |     bodyOverflow: document.body.scrollWidth > innerWidth,\n  153 |   }))).toEqual({ viewport: 390, documentOverflow: false, bodyOverflow: false });\n  154 | }\n  155 | \n  156 | async function expectUsableNarrowPopup(page: Page) {\n  157 |   const listbox = page.getByRole(\"listbox\");\n  158 |   await expect(listbox).toBeVisible();\n  159 |   const box = await listbox.boundingBox();\n  160 |   const viewport = page.viewportSize()!;\n  161 |   expect(box).not.toBeNull();\n  162 |   expect(box!.width).toBeGreaterThan(40);\n  163 |   expect(box!.height).toBeGreaterThan(0);\n  164 |   expect(box!.x).toBeGreaterThanOrEqual(-1);\n  165 |   expect(box!.x + box!.width).toBeLessThanOrEqual(viewport.width + 1);\n  166 |   expect(box!.y).toBeGreaterThanOrEqual(-1);\n  167 |   expect(box!.y + box!.height).toBeLessThanOrEqual(viewport.height + 1);\n  168 |   await expectNarrowPage(page);\n  169 | }\n  170 | \n  171 | async function createValue(page: Page, panel: Locator, field: Field, value: string, touch = false) {\n  172 |   const input = panel.getByRole(\"combobox\", { name: field, exact: true });\n  173 |   await activate(input, touch);\n  174 |   await input.fill(value);\n  175 |   const option = page.getByRole(\"option\", { name: `Create “${value.trim()}”`, exact: true });\n> 176 |   await expect(option).toBeVisible();\n      |                        ^ Error: expect(locator).toBeVisible() failed\n  177 |   if (touch) await expectUsableNarrowPopup(page);\n  178 |   await activate(option, touch);\n  179 |   if (field === \"Tags\") {\n  180 |     await input.press(\"Escape\");\n  181 |     await expect(panel.getByRole(\"button\", { name: `Remove ${value.trim()} from tags`, exact: true })).toHaveCount(1);\n  182 |   } else await expect(input).toHaveValue(value.trim());\n  183 | }\n  184 | \n  185 | async function chooseExisting(page: Page, panel: Locator, field: Field, value: string, touch = false) {\n  186 |   const input = panel.getByRole(\"combobox\", { name: field, exact: true });\n  187 |   await activate(input, touch);\n  188 |   await input.fill(value);\n  189 |   const option = page.getByRole(\"option\", { name: value, exact: true });\n  190 |   await expect(option).toBeVisible();\n  191 |   await expect(page.getByRole(\"option\", { name: `Create “${value}”`, exact: true })).toHaveCount(0);\n  192 |   if (touch) await expectUsableNarrowPopup(page);\n  193 |   await activate(option, touch);\n  194 |   if (field === \"Tags\") await input.press(\"Escape\");\n  195 |   else await expect(input).toHaveValue(value);\n  196 | }\n  197 | \n  198 | async function keyboardChooseExisting(page: Page, panel: Locator, field: \"Category\" | \"Subcategory\", query: string, value: string) {\n  199 |   const input = panel.getByRole(\"combobox\", { name: field, exact: true });\n  200 |   await input.fill(query);\n  201 |   const option = page.getByRole(\"option\", { name: value, exact: true });\n  202 |   await expe"
+      }
+    ],
+    "portUnboundAfter": true,
+    "unexpectedDatabaseAbsent": true,
+    "serverUploadsEmpty": true,
+    "playwrightShutdown": "normal_runner_close_and_port_unbound",
+    "cleanup": "unverified",
+    "scratchRetained": true,
+    "interrupted": false,
+    "completedAtUtc": "2026-11-04T23:14:59.494Z"
+  },
+  "classification": {
+    "browserCasesExecuted": 8,
+    "passed": 7,
+    "failed": 1,
+    "timedOut": 0,
+    "retries": 0,
+    "metadataAcceptance": false,
+    "cleanup": "unverified",
+    "scratchRetained": true,
+    "failedCase": "keeps tags case-sensitive and comma-literal while removing and deduplicating selections",
+    "observedFailure": "The Create “Research, notes” option was absent after entering the literal tag; current options were selected Design and design.",
+    "unexpectedIgnoredPaths": [
+      ".swc/.gitignore",
+      ".swc/plugins/"
+    ],
+    "priorOutputHashesMatched": true,
+    "proposedRepair": "Diagnose the actual tag input/filtered options flow, retain all eight names/assertions; permit cleanup only of a pre-absent identity-owned .swc generated cache."
+  },
+  "previousAttempt": "docs/results/2026/11-04/metadata-checks-attempt-2.json",
+  "proofLimits": [
+    "Full application browser checks use authored PNGs and fresh anonymous browser contexts; no crop cases, accounts, AI or live database.",
+    "The unchanged test fixture blocks non-read HTTP methods; it does not establish loopback-only reads or WebSocket isolation.",
+    "Playwright owns its web server/browser contexts. Normal runner exit, original process-group absence and port closure are observed; escaped descendant sessions are not independently inventoried.",
+    "Userspace deadlines do not interrupt blocked kernel filesystem calls. Executable hashes do not inventory dynamic libraries."
+  ]
+}
