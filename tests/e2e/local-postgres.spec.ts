@@ -102,6 +102,7 @@ test("local PostgreSQL preserves uploaded metadata and crop across reload and de
   let ownId: string | null = null, writes = 0, reads = 0, developmentWebSockets = 0;
   let persisted = false, commentPersisted = false, removed = false, cleanupError: string | null = null;
   let stage = "prepare-authored-png", primaryError: string | null = null;
+  let uploadControl: { visible: boolean; enabled: boolean; box: { x: number; y: number; width: number; height: number } | null; viewport: { width: number; height: number } | null } | null = null;
   let uploadObservation: { status: number; contentType: string; bodyShape: ReturnType<typeof responseBodyShape> | null } | null = null;
   const requestDiagnostics: Array<{ method: string; path: string; queryKeys: string[]; queryKeyCount: number; originClass: string }> = [];
   const record = (list: string[], value: string) => { if (list.length < 16) list.push(diagnosticText(value, 160)); };
@@ -128,7 +129,10 @@ test("local PostgreSQL preserves uploaded metadata and crop across reload and de
   await context.route("**/*", async (route) => {
     const request = route.request(), url = new URL(request.url()), method = request.method();
     const staticRead = url.pathname.startsWith("/_next/static/") || url.pathname === "/favicon.ico";
-    if (url.origin !== ORIGIN || url.username || url.password || url.hash || (url.search && (!staticRead || url.search.length > 256))) {
+    // Next 16.2.9's observed App Router refresh reads only this root resource.
+    const rootFlightRead = method === "GET" && url.pathname === "/" && [...url.searchParams].length === 1
+      && url.searchParams.has("_rsc") && /^[A-Za-z0-9_-]{0,64}$/.test(url.searchParams.get("_rsc") || "");
+    if (url.origin !== ORIGIN || url.username || url.password || url.hash || (url.search && ((!staticRead && !rootFlightRead) || url.search.length > 256))) {
       record(unexpected, "Unexpected request origin or query"); recordRequest(method, url); await route.abort("blockedbyclient"); return;
     }
     const read = ["GET", "HEAD"].includes(method);
@@ -151,7 +155,16 @@ test("local PostgreSQL preserves uploaded metadata and crop across reload and de
     stage = "navigate-local-canvas";
     await page.goto("/", { waitUntil: "load" }); await expectLocalMode(page);
     stage = "open-file-chooser";
-    const chooser = await Promise.all([page.waitForEvent("filechooser"), page.getByRole("button", { name: "Upload", exact: true }).click()]);
+    const uploadButton = page.getByRole("button", { name: "Upload", exact: true });
+    uploadControl = { visible: await uploadButton.isVisible(), enabled: await uploadButton.isEnabled(),
+      box: await uploadButton.boundingBox(), viewport: page.viewportSize() };
+    if (narrow) {
+      expect(uploadControl.box).not.toBeNull();
+      expect(uploadControl.box!.x).toBeGreaterThanOrEqual(0);
+      expect(uploadControl.box!.x + uploadControl.box!.width).toBeLessThanOrEqual(390);
+      expect(uploadControl.box!.y + uploadControl.box!.height).toBeLessThanOrEqual(844);
+    }
+    const chooser = await Promise.all([page.waitForEvent("filechooser"), uploadButton.click()]);
     stage = "upload-authored-file";
     const [uploadResponse] = await Promise.all([
       page.waitForResponse(matchesResponse("/api/upload", "POST")),
@@ -293,7 +306,7 @@ test("local PostgreSQL preserves uploaded metadata and crop across reload and de
     await new Promise<void>((resolve) => setImmediate(resolve));
     const boundary = { kind: "local-postgres-boundary", schemaVersion: 1, project: testInfo.project.name,
       mediaId: ownId, persisted, commentPersisted, removed, reads, writes, developmentWebSockets,
-      unexpected, pageErrors, httpErrors, cleanupError, stage, primaryError, uploadObservation, requestDiagnostics };
+      unexpected, pageErrors, httpErrors, cleanupError, stage, primaryError, uploadObservation, requestDiagnostics, uploadControl };
     const body = Buffer.from(JSON.stringify(boundary));
     expect.soft(body.length).toBeLessThanOrEqual(16 * 1024);
     if (body.length <= 16 * 1024) {

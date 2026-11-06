@@ -1714,7 +1714,7 @@ export function InspirationCanvas() {
         />
 
         <div className="absolute inset-x-0 bottom-[calc(env(safe-area-inset-bottom)+18px)] z-30 flex justify-center px-4">
-          <div className="flex items-center gap-1 rounded-md border border-border bg-background/90 p-1 shadow-lg backdrop-blur-sm">
+          <div className="flex max-w-full flex-wrap items-center justify-center gap-1 rounded-md border border-border bg-background/90 p-1 shadow-lg backdrop-blur-sm">
             <ToolButton label="Upload" onClick={() => fileInputRef.current?.click()}>
               {uploading ? <Activity className="size-4" /> : <Upload className="size-4" />}
             </ToolButton>
