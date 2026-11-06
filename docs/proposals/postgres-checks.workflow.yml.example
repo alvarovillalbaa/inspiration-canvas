@@ -6,7 +6,7 @@ permissions:
   contents: read
 jobs:
   postgres:
-    if: github.repository == 'alvarovillalbaa/inspiration-canvas' && github.event.repository.private == false && github.event.ref_type == 'branch' && github.event.ref == 'qa/local-postgres-20261106-2' && github.ref == 'refs/heads/qa/local-postgres-20261106-2'
+    if: github.repository == 'alvarovillalbaa/inspiration-canvas' && github.event.repository.private == false && github.event.ref_type == 'branch' && github.event.ref == 'qa/local-postgres-20261106-3' && github.ref == 'refs/heads/qa/local-postgres-20261106-3'
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     services:
@@ -35,5 +35,5 @@ jobs:
         with:
           node-version: 24.21.0
           package-manager-cache: false
-      - name: Prepare lock and verify PostgreSQL and local app
+      - name: Verify preserved core evidence and complete local app checks
         run: python3 tests/scripts/run-postgres-checks.py

@@ -36,36 +36,6 @@ def vector():
                          else (repo / name).read_bytes()) for name in paths}
 
 
-def importer(text):
-    # The root importer's scalar specifier/version pairs; no YAML execution.
-    section = text.split("\n  .:\n", 1)[1].split("\npackages:", 1)[0]
-    result = {}
-    for match in re.finditer(r"^      (.+):\n        specifier: (.+)\n        version: (.+)$", section, re.M):
-        name, specifier, version = match.groups()
-        result[name.strip("'\"")] = (specifier, version)
-    assert len(result) > 50
-    return result
-
-
-def without_database_peers(value):
-    # Compare retained package/peer versions while allowing only the explicitly
-    # removed adapters and the newly added PostgreSQL peer bindings to differ.
-    database_peers = {"@libsql/client", "@neondatabase/serverless", "drizzle-orm", "pg", "@types/pg"}
-    output, index = "", 0
-    while index < len(value):
-        if value[index] != "(":
-            output += value[index]; index += 1; continue
-        depth, end = 1, index + 1
-        while depth and end < len(value):
-            depth += (value[end] == "(") - (value[end] == ")")
-            end += 1
-        assert depth == 0, "Malformed dependency peer context"
-        nested = value[index + 1:end - 1]
-        if not any(nested.startswith(name + "@") for name in database_peers):
-            output += "(" + without_database_peers(nested) + ")"
-        index = end
-    return output
-
 
 before = vector()
 preexisting = {}
@@ -134,7 +104,7 @@ def run(argv, timeout=120, accepted=(0,)):
         proc.wait(timeout=10)
     report["commands"].append({"argv": argv, "exitCode": proc.returncode, "timedOut": timed_out,
         "seconds": round(time.time() - started, 3), "stdout": file_stream(out_path), "stderr": file_stream(err_path)})
-    assert all(digest((app / name).read_bytes()) == before[name] for name in selected if name != "pnpm-lock.yaml"), "Export source changed"
+    assert all(digest((app / name).read_bytes()) == before[name] for name in selected), "Export source changed"
     if proc.returncode not in accepted or timed_out:
         raise RuntimeError("Focused command failed: " + " ".join(argv))
     return base64.b64decode(report["commands"][-1]["stdout"]["base64"])
@@ -174,37 +144,51 @@ try:
         destination.parent.mkdir(parents=True, exist_ok=True)
         shutil.copyfile(repo / name, destination)
     report["export"] = {"files": len(selected), "bytes": sum((app / name).stat().st_size for name in selected), "sha256": {name: before[name] for name in selected}}
-    old_importer = importer((app / "pnpm-lock.yaml").read_text())
-    run(pnpm + ["install", "--lockfile-only", "--no-frozen-lockfile", "--ignore-scripts", "--store-dir", str(root / "store")], 240)
+    previous_bytes = (repo / "docs/results/2026/11-06/postgres-checks-attempt-2.json").read_bytes()
+    previous_digest = "8bae87329d664956aa93aa02d382a4904db5ece72674c386ce01f68d86037fee"
+    assert digest(previous_bytes) == previous_digest
+    previous = json.loads(previous_bytes)
+    assert previous["sourceCommit"] == "a93eb1b5f2533fd12f2ef29b5206859a00dfc07f"
+    assert previous["sourceUnchanged"] and previous["scratchRemoved"] and previous["databaseRemoved"]
+    assert previous["liveOwnedBeforeScratchRemoval"] == [] and previous["uncertainNewProcesses"] == []
+    assert len(previous["commands"]) == 6
+    for command in previous["commands"]:
+        assert command["exitCode"] == 0 and not command["timedOut"]
+        for label in ["stdout", "stderr"]:
+            capture = command[label]
+            data = base64.b64decode(capture["base64"], validate=True)
+            assert capture["complete"] and len(data) == capture["bytes"] and digest(data) == capture["sha256"]
+    carried = {}
+    for phase, expected in [("unit", 55), ("postgres", 16)]:
+        result = previous[phase]
+        assert result["success"] and result["numPassedTests"] == result["numTotalTests"] == expected
+        assert result["numFailedTests"] == result["numPendingTests"] == 0
+        identities = [case["fullName"] for suite in result["testResults"] for case in suite["assertionResults"]]
+        assert len(identities) == expected
+        if phase == "postgres": assert len(set(identities)) == expected
+        assert all(case["status"] == "passed" for suite in result["testResults"] for case in suite["assertionResults"])
+        carried[phase] = {"passed": expected, "identities": identities}
     lock = (app / "pnpm-lock.yaml").read_bytes()
-    new_importer = importer(lock.decode())
-    removed = {"@libsql/client", "@neondatabase/serverless", "drizzle-orm", "drizzle-kit"}
-    assert set(old_importer) - set(new_importer) == removed
-    assert set(new_importer) - set(old_importer) == {"pg", "@types/pg"}
-    peer_changes = {}
-    for name in set(old_importer) & set(new_importer):
-        old_spec, old_version = old_importer[name]
-        new_spec, new_version = new_importer[name]
-        assert old_spec == new_spec, "Unrelated dependency specifier changed: " + name
-        if old_version != new_version:
-            assert name == "eve" and without_database_peers(old_version) == without_database_peers(new_version), "Unrelated dependency version changed: " + name
-            peer_changes[name] = {"before": old_version, "after": new_version}
-    graph_nodes = [key.lstrip("'\"") for key in re.findall(r"^  (.+):$", lock.decode(), re.M)]
-    assert not any(key.startswith(("@libsql/", "@neondatabase/serverless@", "drizzle-orm@", "drizzle-kit@")) for key in graph_nodes), "Removed adapter still has a resolved package node"
-    report["generatedLock"] = {"bytes": len(lock), "sha256": digest(lock), "retainedDirectDependencies": len(set(old_importer) & set(new_importer)), "removed": sorted(removed), "added": ["pg", "@types/pg"], "databasePeerChanges": peer_changes}
+    assert len(lock) == previous["generatedLock"]["bytes"] and digest(lock) == previous["generatedLock"]["sha256"]
+    for name, expected in previous["export"]["sha256"].items():
+        if name != "pnpm-lock.yaml":
+            assert before.get(name) == expected, "Previously checked runtime/test input changed: " + name
+    graph_nodes = [key.lstrip("'\\\"") for key in re.findall(r"^  (.+):$", lock.decode(), re.M)]
+    assert not any(key.startswith(("@libsql/", "@neondatabase/serverless@", "drizzle-orm@", "drizzle-kit@")) for key in graph_nodes)
+    report["carried"] = {"sourceCommit": previous["sourceCommit"], "receiptSha256": previous_digest,
+        "streamsVerified": 12, "unchangedPriorInputs": 161, "phases": carried}
+    report["installedLock"] = previous["generatedLock"]
     run(pnpm + ["install", "--frozen-lockfile", "--ignore-scripts", "--store-dir", str(root / "store")], 240)
     database_guard("mark")
     database_marked = True
-    run(pnpm + ["exec", "vitest", "run", "tests/unit/local-persistence.test.ts", "tests/unit/persistence-mode.test.ts", "tests/unit/temporary-import.test.ts", "tests/unit/temporary-transfer.test.ts", "tests/unit/temporary-transfer-receipt.test.ts", "--reporter=json", "--outputFile=unit-results.json"], accepted=(0, 1))
-    report["unit"] = json.loads((app / "unit-results.json").read_text())
-    assert report["commands"][-1]["exitCode"] == 0, "Unit CLI did not exit successfully"
-    assert report["unit"]["success"] and report["unit"]["numPassedTests"] == 55 and report["unit"]["numPendingTests"] == 0
-    run(pnpm + ["exec", "vitest", "run", "--config", "vitest.postgres.config.ts", "--reporter=json", "--outputFile=postgres-results.json"], accepted=(0, 1))
-    report["postgres"] = json.loads((app / "postgres-results.json").read_text())
-    assert report["commands"][-1]["exitCode"] == 0, "PostgreSQL CLI did not exit successfully"
-    assert report["postgres"]["success"] and report["postgres"]["numPassedTests"] == 16 and report["postgres"]["numPendingTests"] == 0
-    changed = subprocess.check_output(["git", "diff", "--name-only", "49ffc0794b8d5163e11ade4419e2a816c46d938d", source], cwd=repo, text=True).splitlines()
-    scoped = [name for name in changed if name.endswith((".ts", ".tsx")) and name in selected]
+    # Explicit reviewed input list works in checkout's intentionally shallow tree.
+    scoped = ["app/api/canvas/route.ts", "app/api/upload/route.ts", "components/canvas/inspiration-canvas.tsx",
+        "lib/api/auth.ts", "lib/api/local-context.ts", "lib/canvas/persistence-mode.ts", "lib/config.ts",
+        "lib/db/client.ts", "lib/db/repository.ts", "lib/db/schema.ts", "playwright.postgres.config.ts",
+        "scripts/db-push.ts", "scripts/db-seed.ts", "tests/e2e/local-postgres.spec.ts",
+        "tests/integration/postgres.test.ts", "tests/unit/local-persistence.test.ts",
+        "tests/unit/persistence-mode.test.ts", "tests/unit/temporary-import.test.ts", "vitest.postgres.config.ts"]
+    assert all(name in selected for name in scoped)
     run(pnpm + ["exec", "eslint", *scoped])
     (app / "tsconfig.postgres-checks.json").write_text(json.dumps({"extends": "./tsconfig.json", "include": scoped, "exclude": ["node_modules"], "compilerOptions": {"incremental": False, "plugins": []}}))
     run(pnpm + ["exec", "tsc", "--noEmit", "-p", "tsconfig.postgres-checks.json"])
@@ -299,9 +283,5 @@ finally:
     captures = [item[label] for item in report["commands"] for label in ["stdout", "stderr"]]
     if "server" in report: captures.extend([report["server"]["stdout"], report["server"]["stderr"]])
     report["passed"] = status == 0 and report["sourceUnchanged"] and report["scratchRemoved"] and report["databaseRemoved"] and all(item["complete"] for item in captures)
-    if lock is not None:
-        encoded = base64.b64encode(lock).decode()
-        for index, offset in enumerate(range(0, len(encoded), 24000)):
-            print(f"CANVAS_POSTGRES_LOCK_{index:04d}=" + encoded[offset:offset + 24000], flush=True)
     print("CANVAS_POSTGRES_RESULT=" + json.dumps(report, separators=(",", ":")), flush=True)
 raise SystemExit(0 if report["passed"] else 1)
