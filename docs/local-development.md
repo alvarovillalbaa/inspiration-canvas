@@ -86,3 +86,7 @@ code. The guard rejects resolved copies of those adapters and allows only the
 reviewed database peer-context change; retained direct versions stay pinned.
 Framework metadata may still advertise optional adapters. This does not claim
 the full Eve runtime or all of its deployment requirements are completed.
+
+[Accepted results and preserved failures](results/2026/11-06/postgres-checks.md)
+separate the original core execution, current actual browser journeys and
+remaining hosted/provider proof.
