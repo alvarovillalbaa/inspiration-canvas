@@ -193,6 +193,25 @@ function isNoRowsError(error: { code?: string } | null): boolean {
   return error?.code === "PGRST116";
 }
 
+export class SupabaseUniqueConstraintError extends Error {
+  readonly code = "23505";
+  constructor() {
+    super("Record already exists.");
+    this.name = "SupabaseUniqueConstraintError";
+  }
+}
+
+export async function getCanvasForUser(
+  supabase: SupabaseClient,
+  userId: string,
+  canvasId: string,
+): Promise<CanvasRecord | null> {
+  const canvas = await supabase.from("canvases").select("*").eq("id", canvasId).eq("user_id", userId).maybeSingle<CanvasRow>();
+  if (isNoRowsError(canvas.error)) return null;
+  throwIfError(canvas.error);
+  return canvas.data ? canvasFromRow(canvas.data) : null;
+}
+
 export async function getOrCreateDefaultCanvasForUser(
   supabase: SupabaseClient,
   userId: string,
@@ -389,6 +408,7 @@ export async function createMediaItemForUser(
     })
     .select("*")
     .single<MediaRow>();
+  if (inserted.error?.code === "23505") throw new SupabaseUniqueConstraintError();
   throwIfError(inserted.error);
   return mediaFromRow(inserted.data);
 }
@@ -498,12 +518,13 @@ export async function createCommentForUser(
   userId: string,
   mediaId: string,
   body: string,
+  commentId?: string,
 ): Promise<CommentRecord> {
   const createdAt = now();
   const inserted = await supabase
     .from("comments")
     .insert({
-      id: id(),
+      id: commentId || id(),
       media_item_id: mediaId,
       user_id: userId,
       body: body.trim(),
@@ -512,8 +533,20 @@ export async function createCommentForUser(
     })
     .select("*")
     .single<CommentRow>();
+  if (inserted.error?.code === "23505") throw new SupabaseUniqueConstraintError();
   throwIfError(inserted.error);
   return commentFromRow(inserted.data);
+}
+
+export async function getCommentForUser(
+  supabase: SupabaseClient,
+  userId: string,
+  commentId: string,
+): Promise<CommentRecord | null> {
+  const comment = await supabase.from("comments").select("*").eq("id", commentId).eq("user_id", userId).maybeSingle<CommentRow>();
+  if (isNoRowsError(comment.error)) return null;
+  throwIfError(comment.error);
+  return comment.data ? commentFromRow(comment.data) : null;
 }
 
 export async function createTasteBriefForUser(

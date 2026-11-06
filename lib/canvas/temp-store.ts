@@ -7,6 +7,7 @@ const DB_VERSION = 1;
 const BLOB_STORE = "media-blobs";
 const STATE_KEY = "inspiration-canvas:temporary-state";
 const ACK_KEY = "inspiration-canvas:temporary-storage-acknowledged-at";
+const TRANSFER_KEY = "inspiration-canvas:temporary-transfer-receipt";
 const MAX_TEMP_UPLOAD_BYTES = 50 * 1024 * 1024;
 
 export type TempCanvasState = {
@@ -178,9 +179,27 @@ export function saveTempCanvasState(state: TempCanvasState): void {
   window.localStorage.setItem(STATE_KEY, serializeState(state));
 }
 
+export function markTempCanvasTransferred(state: TempCanvasState, canvasId: string): void {
+  window.localStorage.setItem(TRANSFER_KEY, JSON.stringify({
+    canvasId,
+    snapshot: serializeState(state),
+  }));
+}
+
+export function wasTempCanvasTransferred(state: TempCanvasState, canvasId: string): boolean {
+  if (typeof window === "undefined") return false;
+  try {
+    const receipt = JSON.parse(window.localStorage.getItem(TRANSFER_KEY) || "null");
+    return receipt?.canvasId === canvasId && receipt.snapshot === serializeState(state);
+  } catch {
+    return false;
+  }
+}
+
 export async function clearTempCanvasState(): Promise<void> {
   if (typeof window !== "undefined") {
     window.localStorage.removeItem(STATE_KEY);
+    window.localStorage.removeItem(TRANSFER_KEY);
   }
   await clearTempBlobs();
 }

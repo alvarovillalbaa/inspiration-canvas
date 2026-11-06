@@ -50,6 +50,12 @@ Open `http://localhost:3000`.
 
 Without Supabase credentials, the app runs as an anonymous browser canvas and stores uploads temporarily for four hours in `localStorage` plus IndexedDB. Without AI credentials, uploads, comments, preview, drag, resize, visual image cropping, delete, and zoom still work. AI actions ask anonymous users to sign in or show a clear credentials message.
 
+Saving a temporary canvas to an account copies its layout, crop, metadata and
+comments as well as its files. Interrupted saves can be retried without creating
+another copy of the same item or comment. The browser recovery copy remains until
+its original four-hour expiry; a failed or incomplete save keeps it pending.
+See the [transfer contract and verification limits](docs/temporary-canvas-transfer.md).
+
 The crop editor previews the original image with a movable selection and eight resize handles. Drag with a mouse or touch, or focus a handle and use arrow keys (Shift for larger steps). Reset restores the full image; Cancel discards the current selection. Save keeps the existing normalized crop metadata and original file. Failed saves keep the dialog and selection available for retry. See [the crop release evidence](docs/results/2026/10-27/visual-crop.md) for checks and outstanding browser acceptance.
 
 ## Vercel Setup

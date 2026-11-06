@@ -129,15 +129,16 @@ import {
 import {
   addTempComment,
   addTempFilesToCanvas,
-  clearTempCanvasState,
   deleteTempMedia,
   getTempBlob,
   getTemporaryStorageAcknowledgedAt,
   loadTempCanvasState,
   markTemporaryStorageAcknowledged,
   updateTempMediaItems,
+  wasTempCanvasTransferred,
   type TempCanvasState,
 } from "@/lib/canvas/temp-store";
+import { transferTemporaryCanvas } from "@/lib/canvas/transfer";
 import { createBrowserSupabaseClient } from "@/lib/supabase/browser";
 import type { CanvasRecord, CommentRecord, MediaItem } from "@/lib/types";
 import { cn } from "@/lib/utils";
@@ -335,6 +336,9 @@ export function InspirationCanvas() {
   const [infoSaving, setInfoSaving] = useState(false);
   const [infoError, setInfoError] = useState<{ id: string; message: string } | null>(null);
   const infoSaveController = useRef<AbortController | null>(null);
+  const temporarySaveInFlight = useRef(false);
+  const canvasLoadEpoch = useRef(0);
+  const authEpoch = useRef(0);
   const [curatorInput, setCuratorInput] = useState("");
   const [groupBy, setGroupBy] = useState<GroupByMode>("none");
   const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(new Set());
@@ -434,8 +438,10 @@ export function InspirationCanvas() {
   }, []);
 
   const loadTemporaryCanvas = useCallback(async (showDialog = true) => {
+    const epoch = ++canvasLoadEpoch.current;
     setError(null);
     const state = await loadTempCanvasState();
+    if (epoch !== canvasLoadEpoch.current) return;
     applyTemporaryState(state);
     setAuthState("anonymous");
     setLoading(false);
@@ -445,23 +451,31 @@ export function InspirationCanvas() {
   }, [applyTemporaryState]);
 
   const loadCanvas = useCallback(async () => {
+    const epoch = ++canvasLoadEpoch.current;
     setLoading(true);
     setError(null);
     try {
       const response = await fetch("/api/canvas", { cache: "no-store" });
+      if (epoch !== canvasLoadEpoch.current) return;
       if (response.status === 401 || response.status === 503) {
         await loadTemporaryCanvas();
         return;
       }
       if (!response.ok) throw new Error("Could not load canvas.");
       const data = (await response.json()) as CanvasResponse;
+      const temporary = await loadTempCanvasState();
+      if (epoch !== canvasLoadEpoch.current) return;
+      const pending = temporary.mediaItems.length > 0 &&
+        !wasTempCanvasTransferred(temporary, data.canvas.id);
       setCanvas(data.canvas);
       setItems(data.mediaItems);
       setAuthState("authenticated");
+      setTempState(pending ? temporary : null);
+      if (pending) setAuthDialogOpen(true);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not load canvas.");
+      if (epoch === canvasLoadEpoch.current) setError(err instanceof Error ? err.message : "Could not load canvas.");
     } finally {
-      setLoading(false);
+      if (epoch === canvasLoadEpoch.current) setLoading(false);
     }
   }, [loadTemporaryCanvas]);
 
@@ -490,16 +504,12 @@ export function InspirationCanvas() {
     }
 
     let active = true;
+    const initialAuthEpoch = authEpoch.current;
     void supabase.auth.getUser().then(async ({ data }) => {
-      if (!active) return;
-      const pendingTemporaryState = await loadTempCanvasState();
-      setTempState(pendingTemporaryState);
+      if (!active || initialAuthEpoch !== authEpoch.current) return;
       if (data.user) {
         setAuthState("authenticated");
         await loadCanvas();
-        if (pendingTemporaryState.mediaItems.length > 0) {
-          setAuthDialogOpen(true);
-        }
       } else {
         await loadTemporaryCanvas();
       }
@@ -508,16 +518,19 @@ export function InspirationCanvas() {
     const { data: subscription } = supabase.auth.onAuthStateChange((event) => {
       if (!active) return;
       if (event === "SIGNED_IN") {
+        ++authEpoch.current;
         setAuthState("authenticated");
         void loadCanvas();
       }
       if (event === "SIGNED_OUT") {
+        ++authEpoch.current;
         void loadTemporaryCanvas();
       }
     });
 
     return () => {
       active = false;
+      ++canvasLoadEpoch.current;
       subscription.subscription.unsubscribe();
     };
   }, [loadCanvas, loadTemporaryCanvas]);
@@ -917,59 +930,29 @@ export function InspirationCanvas() {
   }
 
   async function signOut() {
+    ++authEpoch.current;
+    ++canvasLoadEpoch.current;
     const supabase = createBrowserSupabaseClient();
     await supabase?.auth.signOut();
     await loadTemporaryCanvas();
   }
 
   async function saveTemporaryCanvasToAccount() {
-    if (!tempState || !canvas || !isAuthenticated || tempState.mediaItems.length === 0) return;
+    if (!tempState || !canvas || !isAuthenticated || tempState.mediaItems.length === 0 || temporarySaveInFlight.current) return;
+    temporarySaveInFlight.current = true;
+    const epoch = authEpoch.current;
     setSavingTemporaryCanvas(true);
     setError(null);
     try {
-      for (const tempItem of tempState.mediaItems) {
-        const blob = await getTempBlob(tempItem.storageKey);
-        if (!blob) continue;
-        const file = new File([blob], tempItem.fileName, { type: tempItem.mimeType });
-        const form = new FormData();
-        form.append("file", file);
-        form.append("canvasId", canvas.id);
-        form.append("x", String(tempItem.x));
-        form.append("y", String(tempItem.y));
-        const response = await fetch("/api/upload", { method: "POST", body: form });
-        const data = (await response.json()) as { media?: MediaItem; error?: string };
-        if (!response.ok || !data.media) throw new Error(data.error || "Upload failed.");
-        await fetch(`/api/media/${data.media.id}`, {
-          method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            title: tempItem.title,
-            width: tempItem.width,
-            height: tempItem.height,
-            zIndex: tempItem.zIndex,
-            rotation: tempItem.rotation,
-            cropJson: tempItem.cropJson,
-            tagsJson: tempItem.tagsJson,
-            category: tempItem.category,
-            subcategory: tempItem.subcategory,
-            description: tempItem.description,
-          }),
-        });
-        for (const comment of tempState.commentsByMediaId[tempItem.id] || []) {
-          await fetch(`/api/media/${data.media.id}/comments`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ body: comment.body }),
-          });
-        }
-      }
-      await clearTempCanvasState();
+      await transferTemporaryCanvas(tempState, canvas.id);
+      if (epoch !== authEpoch.current) return;
       setTempState(null);
       setAuthDialogOpen(false);
       await loadCanvas();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not save temporary canvas.");
+      if (epoch === authEpoch.current) setError(err instanceof Error ? err.message : "Could not save temporary canvas.");
     } finally {
+      temporarySaveInFlight.current = false;
       setSavingTemporaryCanvas(false);
     }
   }
@@ -1804,7 +1787,7 @@ export function InspirationCanvas() {
               </DialogTitle>
               <DialogDescription>
                 {authState === "authenticated" && tempState?.mediaItems.length
-                  ? "Move your temporary uploads into your signed-in account so they persist in the database."
+                  ? "Save your uploads, layout, metadata and comments to your account. If saving is interrupted, retry safely. The browser recovery copy remains until its original expiry."
                   : `Uploads are stored in this browser until ${
                       tempState
                         ? new Date(tempState.expiresAt).toLocaleString()
@@ -1814,6 +1797,7 @@ export function InspirationCanvas() {
             </DialogHeader>
             {authState === "authenticated" ? (
               <div className="space-y-3">
+                {error ? <p role="alert" className="text-sm text-destructive">{error} Your temporary copy has been kept.</p> : null}
                 {tempState?.mediaItems.length ? (
                   <Button
                     className="w-full"
