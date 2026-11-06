@@ -46,5 +46,9 @@ crop and metadata receipts remain separate. The temporary CI template is
 Ubuntu runner for at most 15 minutes, a frozen dependency lock and disposable
 files, with providers disabled and no database/server/browser started.
 
+All 29 focused checks, scoped types and lint exited successfully on the first
+run. The [result and raw receipt](results/2026/11-06/temporary-transfer-checks.md)
+record the retained lint warning, exact source, mocked boundaries and cleanup.
+
 The broader local PostgreSQL convergence remains unfinished: the current local
 SQLite/libSQL and Neon transport paths have not been replaced by this repair.
