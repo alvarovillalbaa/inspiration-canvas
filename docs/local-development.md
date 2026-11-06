@@ -68,3 +68,11 @@ This change covers Canvas's local database path, not every app or the remaining
 AI/Eve requirements. The implementation follows the primary
 [node-postgres pooling](https://node-postgres.com/features/pooling) and
 [transaction](https://node-postgres.com/features/transactions) contracts.
+
+The first lock preparation exposed old optional `db0` bindings under Eve/Nitro.
+The two version-scoped pnpm [dependency-removal overrides](https://pnpm.io/10.x/settings#overrides)
+remove unused libSQL/Drizzle bindings without replacing Eve or editing vendor
+code. The guard rejects resolved copies of those adapters and allows only the
+reviewed database peer-context change; retained direct versions stay pinned.
+Framework metadata may still advertise optional adapters. This does not claim
+the full Eve runtime or all of its deployment requirements are completed.

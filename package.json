@@ -12,7 +12,9 @@
       "unrs-resolver"
     ],
     "overrides": {
-      "@vercel/queue>@vercel/oidc": "3.7.0"
+      "@vercel/queue>@vercel/oidc": "3.7.0",
+      "db0@0.3.4>@libsql/client": "-",
+      "db0@0.3.4>drizzle-orm": "-"
     }
   },
   "scripts": {

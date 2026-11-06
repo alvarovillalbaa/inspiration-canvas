@@ -47,6 +47,26 @@ def importer(text):
     return result
 
 
+def without_database_peers(value):
+    # Compare retained package/peer versions while allowing only the explicitly
+    # removed adapters and the newly added PostgreSQL peer bindings to differ.
+    database_peers = {"@libsql/client", "@neondatabase/serverless", "drizzle-orm", "pg", "@types/pg"}
+    output, index = "", 0
+    while index < len(value):
+        if value[index] != "(":
+            output += value[index]; index += 1; continue
+        depth, end = 1, index + 1
+        while depth and end < len(value):
+            depth += (value[end] == "(") - (value[end] == ")")
+            end += 1
+        assert depth == 0, "Malformed dependency peer context"
+        nested = value[index + 1:end - 1]
+        if not any(nested.startswith(name + "@") for name in database_peers):
+            output += "(" + without_database_peers(nested) + ")"
+        index = end
+    return output
+
+
 before = vector()
 preexisting = {}
 for entry in Path("/proc").iterdir():
@@ -155,16 +175,23 @@ try:
         shutil.copyfile(repo / name, destination)
     report["export"] = {"files": len(selected), "bytes": sum((app / name).stat().st_size for name in selected), "sha256": {name: before[name] for name in selected}}
     old_importer = importer((app / "pnpm-lock.yaml").read_text())
-    run(pnpm + ["install", "--lockfile-only", "--ignore-scripts", "--store-dir", str(root / "store")], 240)
+    run(pnpm + ["install", "--lockfile-only", "--no-frozen-lockfile", "--ignore-scripts", "--store-dir", str(root / "store")], 240)
     lock = (app / "pnpm-lock.yaml").read_bytes()
     new_importer = importer(lock.decode())
     removed = {"@libsql/client", "@neondatabase/serverless", "drizzle-orm", "drizzle-kit"}
     assert set(old_importer) - set(new_importer) == removed
     assert set(new_importer) - set(old_importer) == {"pg", "@types/pg"}
+    peer_changes = {}
     for name in set(old_importer) & set(new_importer):
-        assert old_importer[name] == new_importer[name], "Unrelated direct dependency changed: " + name
-    assert all(forbidden not in lock.decode() for forbidden in ["@libsql/", "@neondatabase/", "drizzle-orm", "drizzle-kit"])
-    report["generatedLock"] = {"bytes": len(lock), "sha256": digest(lock), "retainedDirectDependencies": len(set(old_importer) & set(new_importer)), "removed": sorted(removed), "added": ["pg", "@types/pg"]}
+        old_spec, old_version = old_importer[name]
+        new_spec, new_version = new_importer[name]
+        assert old_spec == new_spec, "Unrelated dependency specifier changed: " + name
+        if old_version != new_version:
+            assert name == "eve" and without_database_peers(old_version) == without_database_peers(new_version), "Unrelated dependency version changed: " + name
+            peer_changes[name] = {"before": old_version, "after": new_version}
+    graph_nodes = [key.lstrip("'\"") for key in re.findall(r"^  (.+):$", lock.decode(), re.M)]
+    assert not any(key.startswith(("@libsql/", "@neondatabase/serverless@", "drizzle-orm@", "drizzle-kit@")) for key in graph_nodes), "Removed adapter still has a resolved package node"
+    report["generatedLock"] = {"bytes": len(lock), "sha256": digest(lock), "retainedDirectDependencies": len(set(old_importer) & set(new_importer)), "removed": sorted(removed), "added": ["pg", "@types/pg"], "databasePeerChanges": peer_changes}
     run(pnpm + ["install", "--frozen-lockfile", "--ignore-scripts", "--store-dir", str(root / "store")], 240)
     database_guard("mark")
     database_marked = True
