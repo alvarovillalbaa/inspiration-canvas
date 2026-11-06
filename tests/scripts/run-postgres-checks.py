@@ -250,7 +250,7 @@ try:
     # Compile routes before the actual UI scenarios. No fixture write, higher
     # browser timeout or API interception is involved in these method reads.
     report["readinessReads"] = []
-    for pathname, expected_status in [("/", 200), ("/api/upload", 405),
+    for pathname, expected_status in [("/", 200), ("/api/upload", 405), ("/api/media/batch", 405),
         ("/api/media/00000000-0000-4000-8000-000000000000", 404),
         ("/api/media/00000000-0000-4000-8000-000000000000/comments", 200),
         ("/api/uploads/readiness/absent.png", 404)]:

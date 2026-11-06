@@ -90,6 +90,18 @@ function responseBodyShape(value: unknown) {
       ? Object.keys(media).sort().slice(0, 8).map((key) => diagnosticText(key, 32)) : [],
   };
 }
+function ownedPositionBatch(request: import("@playwright/test").Request, ownId: string | null): boolean {
+  if (!ownId || !request.postData() || request.postData()!.length > 1024) return false;
+  try {
+    const input = request.postDataJSON() as Record<string, unknown>;
+    if (!input || Object.keys(input).sort().join(",") !== "updates" || !Array.isArray(input.updates) || input.updates.length !== 1) return false;
+    const update = input.updates[0] as Record<string, unknown>;
+    if (!update || update.id !== ownId || Object.keys(update).sort().join(",") !== "id,patch") return false;
+    const patch = update.patch as Record<string, unknown>;
+    return !!patch && Object.keys(patch).sort().join(",") === "x,y" &&
+      typeof patch.x === "number" && Number.isFinite(patch.x) && typeof patch.y === "number" && Number.isFinite(patch.y);
+  } catch { return false; }
+}
 
 test("local PostgreSQL preserves uploaded metadata and crop across reload and deletes only the authored item", async ({ context, page }, testInfo) => {
   const narrow = testInfo.project.name === "narrow-chromium";
@@ -103,6 +115,8 @@ test("local PostgreSQL preserves uploaded metadata and crop across reload and de
   let persisted = false, commentPersisted = false, removed = false, cleanupError: string | null = null;
   let stage = "prepare-authored-png", primaryError: string | null = null;
   let uploadControl: { visible: boolean; enabled: boolean; box: { x: number; y: number; width: number; height: number } | null; viewport: { width: number; height: number } | null } | null = null;
+  let positionBatches = 0;
+  let restoredComments: { rows: number; authoredRowMatches: boolean; selected: string | null; closeButtons: number; noteInputs: number; textMatches: number } | null = null;
   let uploadObservation: { status: number; contentType: string; bodyShape: ReturnType<typeof responseBodyShape> | null } | null = null;
   const requestDiagnostics: Array<{ method: string; path: string; queryKeys: string[]; queryKeyCount: number; originClass: string }> = [];
   const record = (list: string[], value: string) => { if (list.length < 16) list.push(diagnosticText(value, 160)); };
@@ -140,9 +154,11 @@ test("local PostgreSQL preserves uploaded metadata and crop across reload and de
       || /^\/__nextjs_font\/[a-z0-9-]+\.woff2$/.test(url.pathname) || url.pathname.startsWith("/api/uploads/");
     const ownMedia = ownId !== null && url.pathname === `/api/media/${ownId}`;
     const ownComments = ownId !== null && url.pathname === `/api/media/${ownId}/comments`;
+    const positionBatch = method === "PATCH" && url.pathname === "/api/media/batch" && ownedPositionBatch(request, ownId);
     if ((read && (asset || url.pathname === "/api/canvas" || ownMedia || ownComments))
       || (method === "POST" && url.pathname === "/api/upload") || (ownMedia && ["PATCH", "DELETE"].includes(method))
-      || (ownComments && method === "POST")) {
+      || (ownComments && method === "POST") || positionBatch) {
+      if (positionBatch) positionBatches++;
       if (read) reads++; else writes++;
       await route.continue(); return;
     }
@@ -257,7 +273,16 @@ test("local PostgreSQL preserves uploaded metadata and crop across reload and de
       const [comments] = await Promise.all([
         page.waitForResponse(matchesResponse(`/api/media/${ownId}/comments`, "GET")), openAction(page, item, "Comments"),
       ]);
-      expect(comments.ok()).toBe(true); await expect(item.getByText(comment, { exact: true })).toBeVisible();
+      expect(comments.ok()).toBe(true);
+      const loadedComments = await comments.json() as { comments: Array<{ mediaItemId: string; body: string }> };
+      restoredComments = { rows: loadedComments.comments.length,
+        authoredRowMatches: loadedComments.comments.some((entry) => entry.mediaItemId === ownId && entry.body === comment),
+        selected: await item.getAttribute("aria-pressed"),
+        closeButtons: await item.getByRole("button", { name: "Close comments", exact: true }).count(),
+        noteInputs: await item.getByPlaceholder("Add a note...", { exact: true }).count(),
+        textMatches: await item.getByText(comment, { exact: true }).count() };
+      expect(restoredComments.authoredRowMatches).toBe(true);
+      await expect(item.getByText(comment, { exact: true })).toBeVisible();
       commentPersisted = true;
     }
     stage = "verify-layout";
@@ -306,7 +331,7 @@ test("local PostgreSQL preserves uploaded metadata and crop across reload and de
     await new Promise<void>((resolve) => setImmediate(resolve));
     const boundary = { kind: "local-postgres-boundary", schemaVersion: 1, project: testInfo.project.name,
       mediaId: ownId, persisted, commentPersisted, removed, reads, writes, developmentWebSockets,
-      unexpected, pageErrors, httpErrors, cleanupError, stage, primaryError, uploadObservation, requestDiagnostics, uploadControl };
+      unexpected, pageErrors, httpErrors, cleanupError, stage, primaryError, uploadObservation, requestDiagnostics, uploadControl, positionBatches, restoredComments };
     const body = Buffer.from(JSON.stringify(boundary));
     expect.soft(body.length).toBeLessThanOrEqual(16 * 1024);
     if (body.length <= 16 * 1024) {
