@@ -68,6 +68,28 @@ async function assertImage(item: Locator) {
     return [image.complete, image.naturalWidth, image.naturalHeight];
   })).toEqual([true, 32, 24]);
 }
+function diagnosticText(value: string, maximum: number): string {
+  const clean = value.replace(/(?:https?|wss?|file|blob|data):[^\s<>"']+/gi, "[redacted-url]")
+    .replace(/[\u0000-\u001f\u007f]/g, " ");
+  let text = "", bytes = 0;
+  for (const character of clean) {
+    const size = Buffer.byteLength(character);
+    if (bytes + size > maximum) break;
+    text += character; bytes += size;
+  }
+  return text;
+}
+function responseBodyShape(value: unknown) {
+  const type = (entry: unknown) => entry === null ? "null" : Array.isArray(entry) ? "array" : typeof entry;
+  const object = value !== null && typeof value === "object" && !Array.isArray(value)
+    ? value as Record<string, unknown> : null;
+  const media = object?.media;
+  return {
+    type: type(value), keys: object ? Object.keys(object).sort().slice(0, 8).map((key) => diagnosticText(key, 32)) : [],
+    mediaType: type(media), mediaKeys: media !== null && typeof media === "object" && !Array.isArray(media)
+      ? Object.keys(media).sort().slice(0, 8).map((key) => diagnosticText(key, 32)) : [],
+  };
+}
 
 test("local PostgreSQL preserves uploaded metadata and crop across reload and deletes only the authored item", async ({ context, page }, testInfo) => {
   const narrow = testInfo.project.name === "narrow-chromium";
@@ -79,7 +101,17 @@ test("local PostgreSQL preserves uploaded metadata and crop across reload and de
   let pngIdentity: Stats | null = null;
   let ownId: string | null = null, writes = 0, reads = 0, developmentWebSockets = 0;
   let persisted = false, commentPersisted = false, removed = false, cleanupError: string | null = null;
-  const record = (list: string[], value: string) => { if (list.length < 16) list.push(value.slice(0, 240)); };
+  let stage = "prepare-authored-png", primaryError: string | null = null;
+  let uploadObservation: { status: number; contentType: string; bodyShape: ReturnType<typeof responseBodyShape> | null } | null = null;
+  const requestDiagnostics: Array<{ method: string; path: string; queryKeys: string[]; queryKeyCount: number; originClass: string }> = [];
+  const record = (list: string[], value: string) => { if (list.length < 16) list.push(diagnosticText(value, 160)); };
+  function recordRequest(method: string, url: URL) {
+    if (requestDiagnostics.length >= 3) return;
+    const keys = [...new Set(url.searchParams.keys())];
+    requestDiagnostics.push({ method: diagnosticText(method, 12), path: diagnosticText(url.pathname, 128),
+      queryKeys: keys.slice(0, 4).map((key) => diagnosticText(key, 24)), queryKeyCount: keys.length,
+      originClass: url.origin === ORIGIN ? "same-origin" : ["http:", "https:"].includes(url.protocol) ? "cross-origin" : "other-scheme" });
+  }
   context.on("weberror", (event) => record(pageErrors, `${event.error().name}: ${event.error().message}`));
   context.on("response", (response) => {
     const url = new URL(response.url());
@@ -91,13 +123,13 @@ test("local PostgreSQL preserves uploaded metadata and crop across reload and de
       && !url.username && !url.password && !url.hash && url.search.length <= 256) {
       developmentWebSockets++; route.connectToServer(); return;
     }
-    record(unexpected, "Unexpected WebSocket"); route.close();
+    record(unexpected, "Unexpected WebSocket"); recordRequest("WEBSOCKET", url); route.close();
   });
   await context.route("**/*", async (route) => {
     const request = route.request(), url = new URL(request.url()), method = request.method();
     const staticRead = url.pathname.startsWith("/_next/static/") || url.pathname === "/favicon.ico";
     if (url.origin !== ORIGIN || url.username || url.password || url.hash || (url.search && (!staticRead || url.search.length > 256))) {
-      record(unexpected, "Unexpected request origin or query"); await route.abort("blockedbyclient"); return;
+      record(unexpected, "Unexpected request origin or query"); recordRequest(method, url); await route.abort("blockedbyclient"); return;
     }
     const read = ["GET", "HEAD"].includes(method);
     const asset = url.pathname === "/" || url.pathname === "/favicon.ico" || url.pathname.startsWith("/_next/static/")
@@ -110,31 +142,47 @@ test("local PostgreSQL preserves uploaded metadata and crop across reload and de
       if (read) reads++; else writes++;
       await route.continue(); return;
     }
-    record(unexpected, `Unexpected local request ${method} ${url.pathname}`); await route.abort("blockedbyclient");
+    record(unexpected, `Unexpected local request ${method} ${url.pathname}`); recordRequest(method, url); await route.abort("blockedbyclient");
   });
 
   try {
     mkdirSync(path.dirname(pngPath), { recursive: true });
     writeFileSync(pngPath, authoredPng(), { flag: "wx" }); pngIdentity = lstatSync(pngPath);
+    stage = "navigate-local-canvas";
     await page.goto("/", { waitUntil: "load" }); await expectLocalMode(page);
+    stage = "open-file-chooser";
     const chooser = await Promise.all([page.waitForEvent("filechooser"), page.getByRole("button", { name: "Upload", exact: true }).click()]);
+    stage = "upload-authored-file";
     const [uploadResponse] = await Promise.all([
       page.waitForResponse(matchesResponse("/api/upload", "POST")),
       chooser[0].setFiles(pngPath),
     ]);
+    stage = "read-upload-response";
+    uploadObservation = { status: uploadResponse.status(), contentType: diagnosticText(uploadResponse.headers()["content-type"] || "", 128), bodyShape: null };
+    let uploaded: { media: { id: string; fileName: string } } | undefined, uploadParseError: unknown;
+    try {
+      uploaded = await uploadResponse.json() as { media: { id: string; fileName: string } };
+      uploadObservation.bodyShape = responseBodyShape(uploaded);
+    } catch (error) { uploadParseError = error; }
+    if (uploaded?.media?.fileName === fileName && typeof uploaded.media.id === "string"
+      && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(uploaded.media.id)) ownId = uploaded.media.id;
+    stage = "assert-upload-contract";
     expect(uploadResponse.status()).toBe(201);
-    const uploaded = await uploadResponse.json() as { media: { id: string; fileName: string } };
-    expect(uploaded.media.id).toMatch(/^[0-9a-f-]{36}$/i); ownId = uploaded.media.id;
-    expect(uploaded.media.fileName).toBe(fileName);
-    let item = mediaItem(page, ownId);
+    if (uploadParseError) throw uploadParseError;
+    expect(uploaded!.media.id).toMatch(/^[0-9a-f-]{36}$/i);
+    expect(uploaded!.media.fileName).toBe(fileName);
+    let item = mediaItem(page, ownId!);
+    stage = "fit-uploaded-image";
     await expect(item).toHaveCount(1); await page.getByRole("button", { name: "Fit view", exact: true }).click();
     await expect(item).toBeVisible(); await assertImage(item);
 
+    stage = "edit-info";
     await openAction(page, item, "Info");
     const panel = page.getByRole("complementary", { name: "Media info", exact: true });
     await panel.getByRole("textbox", { name: "Title", exact: true }).fill(title);
     await createMetadataValue(page, panel, "Category", category);
     await createMetadataValue(page, panel, "Tags", tag);
+    stage = "save-info";
     const [savedInfo] = await Promise.all([
       page.waitForResponse(matchesResponse(`/api/media/${ownId}`, "PATCH")),
       panel.getByRole("button", { name: "Save info", exact: true }).click(),
@@ -146,6 +194,7 @@ test("local PostgreSQL preserves uploaded metadata and crop across reload and de
     await page.getByRole("button", { name: "Fit view", exact: true }).click();
 
     if (!narrow) {
+      stage = "add-comment";
       await openAction(page, item, "Comments");
       await item.getByPlaceholder("Add a note...", { exact: true }).fill(comment);
       const [added] = await Promise.all([
@@ -155,6 +204,7 @@ test("local PostgreSQL preserves uploaded metadata and crop across reload and de
       expect(added.status()).toBe(201); await expect(item.getByText(comment, { exact: true })).toBeVisible();
       await item.getByRole("button", { name: "Close comments", exact: true }).click();
     }
+    stage = "crop-image";
     await openAction(page, item, "Crop");
     const crop = page.getByRole("dialog", { name: "Crop image", exact: true });
     await expect.poll(() => crop.getByTestId("crop-preview-image").evaluate((element) => (element as HTMLImageElement).naturalWidth)).toBe(32);
@@ -163,6 +213,7 @@ test("local PostgreSQL preserves uploaded metadata and crop across reload and de
     await crop.getByRole("button", { name: "Move crop", exact: true }).press("ArrowRight");
     await crop.getByRole("button", { name: "Move crop", exact: true }).press("ArrowDown");
     await expect(crop.getByRole("status")).toContainText("Left 1%, top 1% · width 95%, height 95%");
+    stage = "save-crop";
     const [savedCrop] = await Promise.all([
       page.waitForResponse(matchesResponse(`/api/media/${ownId}`, "PATCH")),
       crop.getByRole("button", { name: "Save crop", exact: true }).click(),
@@ -170,6 +221,7 @@ test("local PostgreSQL preserves uploaded metadata and crop across reload and de
     expect(savedCrop.ok()).toBe(true); await expect(crop).toBeHidden();
     await expect(item.getByTestId("media-crop-viewport")).toHaveAttribute("data-cropped", "true");
 
+    stage = "reload-persistence";
     const [reloaded] = await Promise.all([page.waitForResponse(matchesResponse("/api/canvas", "GET")), page.reload({ waitUntil: "load" })]);
     expect(reloaded.ok()).toBe(true);
     const snapshot = await reloaded.json() as { persistence: string; mediaItems: Array<Record<string, unknown>> };
@@ -178,8 +230,9 @@ test("local PostgreSQL preserves uploaded metadata and crop across reload and de
     expect(row).toMatchObject({ fileName, title, category, tagsJson: [tag], storageDriver: "local" });
     expect(row?.cropJson).toEqual(EXPECTED_CROP);
     await expectLocalMode(page); await page.getByRole("button", { name: "Fit view", exact: true }).click();
-    item = mediaItem(page, ownId); await expect(item).toHaveAccessibleName(title); await assertImage(item);
+    item = mediaItem(page, ownId!); await expect(item).toHaveAccessibleName(title); await assertImage(item);
     await expect(item.getByTestId("media-crop-viewport")).toHaveAttribute("data-cropped", "true");
+    stage = "verify-restored-info";
     await openAction(page, item, "Info");
     const restoredPanel = page.getByRole("complementary", { name: "Media info", exact: true });
     await expect(restoredPanel.getByRole("textbox", { name: "Title", exact: true })).toHaveValue(title);
@@ -187,15 +240,21 @@ test("local PostgreSQL preserves uploaded metadata and crop across reload and de
     await expect(restoredPanel.getByRole("button", { name: `Remove ${tag} from tags`, exact: true })).toBeVisible();
     await restoredPanel.getByRole("button", { name: "Close info", exact: true }).click();
     if (!narrow) {
+      stage = "verify-restored-comment";
       const [comments] = await Promise.all([
         page.waitForResponse(matchesResponse(`/api/media/${ownId}/comments`, "GET")), openAction(page, item, "Comments"),
       ]);
       expect(comments.ok()).toBe(true); await expect(item.getByText(comment, { exact: true })).toBeVisible();
       commentPersisted = true;
     }
+    stage = "verify-layout";
     if (narrow) expect(await page.evaluate(() => ({ width: innerWidth, overflow: document.documentElement.scrollWidth > innerWidth })))
       .toEqual({ width: 390, overflow: false });
     persisted = true;
+    stage = "completed";
+  } catch (error) {
+    primaryError = diagnosticText(error instanceof Error ? `${error.name}: ${error.message}` : String(error), 4096);
+    throw error;
   } finally {
     // Only the identity returned by this test's actual upload may be deleted.
     if (ownId) {
@@ -234,11 +293,14 @@ test("local PostgreSQL preserves uploaded metadata and crop across reload and de
     await new Promise<void>((resolve) => setImmediate(resolve));
     const boundary = { kind: "local-postgres-boundary", schemaVersion: 1, project: testInfo.project.name,
       mediaId: ownId, persisted, commentPersisted, removed, reads, writes, developmentWebSockets,
-      unexpected, pageErrors, httpErrors, cleanupError };
+      unexpected, pageErrors, httpErrors, cleanupError, stage, primaryError, uploadObservation, requestDiagnostics };
     const body = Buffer.from(JSON.stringify(boundary));
-    expect(body.length).toBeLessThanOrEqual(16 * 1024);
-    await testInfo.attach("local-postgres-boundary", { body, contentType: "application/json" });
-    expect(unexpected).toEqual([]); expect(pageErrors).toEqual([]); expect(httpErrors).toEqual([]);
-    expect(cleanupError).toBeNull(); expect(removed).toBe(true);
+    expect.soft(body.length).toBeLessThanOrEqual(16 * 1024);
+    if (body.length <= 16 * 1024) {
+      try { await testInfo.attach("local-postgres-boundary", { body, contentType: "application/json" }); }
+      catch (error) { expect.soft(false, diagnosticText(`Boundary attachment failed: ${String(error)}`, 500)).toBe(true); }
+    }
+    expect.soft(unexpected).toEqual([]); expect.soft(pageErrors).toEqual([]); expect.soft(httpErrors).toEqual([]);
+    expect.soft(cleanupError).toBeNull(); expect.soft(removed).toBe(true);
   }
 });

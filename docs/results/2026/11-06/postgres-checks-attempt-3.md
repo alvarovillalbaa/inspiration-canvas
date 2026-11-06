@@ -36,3 +36,10 @@ job is terminal; GitHub's service-container stop completed. Do not claim explici
 scratch removal, primary browser errors, UI acceptance or production rollout.
 The next runner must observe and stop only fully attributed residual processes.
 The temporary workflow is disabled and its QA branch retired before replacement.
+
+Later closure clarification: the sixteen captures and their recorded hashes are
+preserved, but their `complete` flags checked capture size, not every descendant's
+file-handle closure. Because PID 4317's role is unknown, final stream closure is
+also unverified. The next controller rereads stream files after attributed
+descendants stop; this correction does not rewrite the original JSON or claim
+the earlier scratch was removed.

@@ -82,6 +82,33 @@ def file_stream(path):
         return stream(handle.read(4_000_001))
 
 
+def owned_processes():
+    owned, uncertain = [], []
+    for entry in Path("/proc").iterdir():
+        if not entry.name.isdigit(): continue
+        try:
+            uid = entry.stat().st_uid
+            if uid != os.getuid(): continue
+            fields = (entry / "stat").read_text().rsplit(") ", 1)[1].split()
+            if preexisting.get(entry.name) == fields[19] or fields[0] == "Z": continue
+            cwd = os.readlink(entry / "cwd")
+            pgid = int(fields[2])
+            if pgid in groups or cwd == str(root) or cwd.startswith(str(root) + "/"):
+                command = (entry / "cmdline").read_bytes()[:4096].replace(b"\0", b" ").decode("utf-8", "replace")
+                owned.append({"pid": int(entry.name), "startTime": fields[19], "uid": uid,
+                    "pgid": pgid, "cwd": cwd, "command": command})
+        except (FileNotFoundError, ProcessLookupError): pass
+        except PermissionError: uncertain.append(int(entry.name))
+    return owned, uncertain
+
+
+def signal_owned(identity, selected_signal):
+    current, _ = owned_processes()
+    if any(row == identity for row in current):
+        try: os.kill(identity["pid"], selected_signal)
+        except ProcessLookupError: pass
+
+
 def run(argv, timeout=120, accepted=(0,)):
     timeout = min(timeout, max(1, work_deadline - time.monotonic()))
     started = time.time()
@@ -172,11 +199,13 @@ try:
     assert len(lock) == previous["generatedLock"]["bytes"] and digest(lock) == previous["generatedLock"]["sha256"]
     for name, expected in previous["export"]["sha256"].items():
         if name != "pnpm-lock.yaml":
-            assert before.get(name) == expected, "Previously checked runtime/test input changed: " + name
+            if name != "tests/e2e/local-postgres.spec.ts":
+                assert before.get(name) == expected, "Previously checked runtime/test input changed: " + name
     graph_nodes = [key.lstrip("'\\\"") for key in re.findall(r"^  (.+):$", lock.decode(), re.M)]
     assert not any(key.startswith(("@libsql/", "@neondatabase/serverless@", "drizzle-orm@", "drizzle-kit@")) for key in graph_nodes)
     report["carried"] = {"sourceCommit": previous["sourceCommit"], "receiptSha256": previous_digest,
-        "streamsVerified": 12, "unchangedPriorInputs": 161, "phases": carried}
+        "streamsVerified": 12, "unchangedPriorInputs": 160, "phases": carried,
+        "previouslyUnexecutedBrowserFixture": {"before": previous["export"]["sha256"]["tests/e2e/local-postgres.spec.ts"], "after": before["tests/e2e/local-postgres.spec.ts"]}}
     report["installedLock"] = previous["generatedLock"]
     run(pnpm + ["install", "--frozen-lockfile", "--ignore-scripts", "--store-dir", str(root / "store")], 240)
     database_guard("mark")
@@ -248,6 +277,23 @@ finally:
         if server_out is not None: server_out.close()
         if server_err is not None: server_err.close()
     report["sourceUnchanged"] = before == vector()
+    residual, uncertain = owned_processes()
+    report["residualBeforeTermination"] = residual
+    report["residualSignals"] = []
+    for identity in residual:
+        signal_owned(identity, signal.SIGTERM)
+        report["residualSignals"].append({"pid": identity["pid"], "signal": "TERM", "startTime": identity["startTime"]})
+    deadline = time.monotonic() + 5
+    while residual and time.monotonic() < deadline:
+        time.sleep(0.1); residual, uncertain = owned_processes()
+    if residual:
+        status = 1
+        for identity in residual:
+            signal_owned(identity, signal.SIGKILL)
+            report["residualSignals"].append({"pid": identity["pid"], "signal": "KILL", "startTime": identity["startTime"]})
+        deadline = time.monotonic() + 3
+        while residual and time.monotonic() < deadline:
+            time.sleep(0.1); residual, uncertain = owned_processes()
     report["databaseRemoved"] = False
     if database_marked:
         try:
@@ -255,33 +301,27 @@ finally:
             report["databaseRemoved"] = True
         except Exception as error:
             report["databaseCleanupError"] = str(error)
-    live, uncertain = [], []
-    for entry in Path("/proc").iterdir():
-        if not entry.name.isdigit():
-            continue
-        try:
-            if entry.stat().st_uid != os.getuid():
-                continue
-            fields = (entry / "stat").read_text().rsplit(") ", 1)[1].split()
-            if preexisting.get(entry.name) == fields[19]:
-                continue
-            cwd = os.readlink(entry / "cwd")
-            if entry.stat().st_uid == os.getuid() and fields[0] != "Z" and (int(fields[2]) in groups or cwd.startswith(str(root) + "/")):
-                live.append(int(entry.name))
-        except (FileNotFoundError, ProcessLookupError):
-            pass
-        except PermissionError:
-            uncertain.append(int(entry.name))
+    residual, uncertain = owned_processes()
+    live = [row["pid"] for row in residual]
     report["liveOwnedBeforeScratchRemoval"] = live
     report["uncertainNewProcesses"] = uncertain
     current = root.lstat()
     report["scratchIdentityMatches"] = not root.is_symlink() and (current.st_dev, current.st_ino, current.st_uid) == root_identity
+    # Descendants may retain a command's file handles after its parent exits.
+    # Read final stream bytes only after all attributed processes have stopped.
+    for index, command in enumerate(report["commands"]):
+        command["stdout"] = file_stream(root / f"command-{index}.stdout")
+        command["stderr"] = file_stream(root / f"command-{index}.stderr")
+    if "server" in report:
+        report["server"]["stdout"] = file_stream(root / "server.stdout")
+        report["server"]["stderr"] = file_stream(root / "server.stderr")
+    report["streamClosureVerified"] = not live and not uncertain
     if not live and not uncertain and report["scratchIdentityMatches"]:
         shutil.rmtree(root)
     report["scratchRemoved"] = not root.exists()
     report["finishedAt"] = time.time()
     captures = [item[label] for item in report["commands"] for label in ["stdout", "stderr"]]
     if "server" in report: captures.extend([report["server"]["stdout"], report["server"]["stderr"]])
-    report["passed"] = status == 0 and report["sourceUnchanged"] and report["scratchRemoved"] and report["databaseRemoved"] and all(item["complete"] for item in captures)
+    report["passed"] = status == 0 and report["sourceUnchanged"] and report["scratchRemoved"] and report["databaseRemoved"] and report["streamClosureVerified"] and all(item["complete"] for item in captures)
     print("CANVAS_POSTGRES_RESULT=" + json.dumps(report, separators=(",", ":")), flush=True)
 raise SystemExit(0 if report["passed"] else 1)
