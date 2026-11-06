@@ -28,7 +28,7 @@ and four completed crop cases remain separate evidence.
 
 - Next.js App Router, TypeScript, Tailwind CSS, shadcn/ui, Geist
 - Anonymous browser storage for four-hour temporary canvases
-- Local SQLite/libSQL query layer for development
+- Standard PostgreSQL for optional single-user local persistence
 - Supabase Auth/Postgres/Storage for hosted persistence
 - Optional Vercel Blob media storage for signed-in hosted uploads
 - Vercel AI SDK through AI Gateway
@@ -40,15 +40,23 @@ and four completed crop cases remain separate evidence.
 
 ```bash
 corepack pnpm install
-cp .env.example .env.local
+cp .env.example .env
+createdb inspiration_canvas
+# Set LOCAL_PERSISTENCE_ENABLED=true in .env, then:
 corepack pnpm db:push
 corepack pnpm db:seed
 corepack pnpm dev
 ```
 
-Open `http://localhost:3000`.
+Open `http://127.0.0.1:3000`. Local commands bind to loopback by default.
 
-Without Supabase credentials, the app runs as an anonymous browser canvas and stores uploads temporarily for four hours in `localStorage` plus IndexedDB. Without AI credentials, uploads, comments, preview, drag, resize, visual image cropping, delete, and zoom still work. AI actions ask anonymous users to sign in or show a clear credentials message.
+With local persistence enabled, the canvas, files, layout, metadata and comments
+use the local PostgreSQL API and configured storage. The UI identifies this as
+“Local PostgreSQL”; it does not represent a Supabase account. Without local
+opt-in or Supabase credentials, the app uses a four-hour temporary browser canvas
+in `localStorage` and IndexedDB. Without AI credentials, upload, comments, preview,
+drag, resize, crop, delete and zoom remain available. See
+[local setup and data boundaries](docs/local-development.md).
 
 Saving a temporary canvas to an account copies its layout, crop, metadata and
 comments as well as its files. Interrupted saves can be retried without creating
@@ -72,7 +80,8 @@ The crop editor previews the original image with a movable selection and eight r
 
 See `.env.example` for all variables:
 
-- `DATABASE_URL`: local `file:.data/inspiration-canvas.db` for development fallback.
+- `DATABASE_URL`: PostgreSQL connection string for the explicitly enabled local mode.
+- `LOCAL_PERSISTENCE_ENABLED`: exact `true` enables the single-user loopback API outside Vercel. Default is off.
 - `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`: Supabase Auth/Postgres credentials for hosted persistence.
 - `SUPABASE_MEDIA_BUCKET`: Supabase Storage bucket, default `inspiration-media`.
 - `STORAGE_DRIVER`: `local`, `supabase`, or `blob`.

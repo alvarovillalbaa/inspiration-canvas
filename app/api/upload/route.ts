@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-import { DEFAULT_CANVAS_ID, getConfig } from "@/lib/config";
+import { DEFAULT_CANVAS_ID, getConfig, hasAiCredentials } from "@/lib/config";
 import { getRequestPersistenceContext } from "@/lib/api/auth";
 import {
   createMediaItem,
@@ -112,6 +112,7 @@ export async function POST(request: Request) {
     }
 
     await getOrCreateDefaultCanvas();
+    const analyzeUpload = getConfig().enableAi && hasAiCredentials();
     const storage = getStorageAdapter();
     const storageKey = buildStorageKey(validated.safeName);
     const url = await storage.putFile(validated.buffer, storageKey, {
@@ -167,11 +168,13 @@ export async function POST(request: Request) {
       subcategory: null,
       description: null,
       designAnalysisJson: null,
-      analysisStatus: "pending",
+      analysisStatus: analyzeUpload ? "pending" : "skipped",
       analysisError: null,
       parentIdsJson: [],
     });
-    const workflow = await startMediaIngestionRun(media.id);
+    const workflow = analyzeUpload
+      ? await startMediaIngestionRun(media.id)
+      : { runId: null, mode: "local" as const };
     return NextResponse.json({ media, workflow }, { status: 201 });
   } catch (error) {
     return NextResponse.json(

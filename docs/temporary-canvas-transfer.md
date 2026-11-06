@@ -50,5 +50,6 @@ All 29 focused checks, scoped types and lint exited successfully on the first
 run. The [result and raw receipt](results/2026/11-06/temporary-transfer-checks.md)
 record the retained lint warning, exact source, mocked boundaries and cleanup.
 
-The broader local PostgreSQL convergence remains unfinished: the current local
-SQLite/libSQL and Neon transport paths have not been replaced by this repair.
+The later [local PostgreSQL implementation](local-development.md) is a separate
+change. This account-transfer receipt remains bound to its original source;
+it does not establish that later implementation's acceptance or live Supabase proof.

@@ -19,12 +19,12 @@ export async function GET() {
     const { supabase, user } = persistence.context;
     const canvas = await getOrCreateDefaultCanvasForUser(supabase, user.id);
     const data = await getCanvasDataForUser(supabase, user.id, canvas.id);
-    return NextResponse.json(data);
+    return NextResponse.json({ ...data, persistence: "supabase" });
   }
 
   const canvas = await getOrCreateDefaultCanvas();
   const data = await getCanvasData(canvas.id);
-  return NextResponse.json(data);
+  return NextResponse.json({ ...data, persistence: "local" });
 }
 
 export async function POST(request: Request) {

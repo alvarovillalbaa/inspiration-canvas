@@ -139,6 +139,11 @@ import {
   type TempCanvasState,
 } from "@/lib/canvas/temp-store";
 import { transferTemporaryCanvas } from "@/lib/canvas/transfer";
+import {
+  canvasAuthStateForPersistence,
+  usesCanvasServerPersistence,
+  type CanvasAuthState,
+} from "@/lib/canvas/persistence-mode";
 import { createBrowserSupabaseClient } from "@/lib/supabase/browser";
 import type { CanvasRecord, CommentRecord, MediaItem } from "@/lib/types";
 import { cn } from "@/lib/utils";
@@ -146,9 +151,9 @@ import { cn } from "@/lib/utils";
 type CanvasResponse = {
   canvas: CanvasRecord;
   mediaItems: MediaItem[];
+  persistence: "local" | "supabase";
 };
 
-type AuthState = "checking" | "anonymous" | "authenticated";
 type SidePanel = "info" | "curator" | null;
 type GroupByMode = "none" | "category";
 
@@ -321,7 +326,7 @@ export function InspirationCanvas() {
   const [preview, setPreview] = useState<MediaItem | null>(null);
   const [commentsByMediaId, setCommentsByMediaId] = useState<Record<string, CommentRecord[]>>({});
   const [commentDrafts, setCommentDrafts] = useState<Record<string, string>>({});
-  const [authState, setAuthState] = useState<AuthState>("checking");
+  const [authState, setAuthState] = useState<CanvasAuthState>("checking");
   const [authDialogOpen, setAuthDialogOpen] = useState(false);
   const [authEmail, setAuthEmail] = useState("");
   const [authMessage, setAuthMessage] = useState<string | null>(null);
@@ -360,6 +365,7 @@ export function InspirationCanvas() {
     [items, selectedIds],
   );
   const isAuthenticated = authState === "authenticated";
+  const usesServerPersistence = usesCanvasServerPersistence(authState);
   const canAuthenticate = useMemo(() => Boolean(createBrowserSupabaseClient()), []);
   const infoItem = useMemo(
     () => (infoItemId ? items.find((item) => item.id === infoItemId) : null) || null,
@@ -463,15 +469,19 @@ export function InspirationCanvas() {
       }
       if (!response.ok) throw new Error("Could not load canvas.");
       const data = (await response.json()) as CanvasResponse;
-      const temporary = await loadTempCanvasState();
+      const nextAuthState = canvasAuthStateForPersistence(data.persistence);
+      // Local PostgreSQL is independent of the anonymous browser workspace.
+      // Do not load, import or clear that workspace when selecting local mode.
+      const temporary = nextAuthState === "authenticated" ? await loadTempCanvasState() : null;
       if (epoch !== canvasLoadEpoch.current) return;
-      const pending = temporary.mediaItems.length > 0 &&
+      const pending = temporary !== null && temporary.mediaItems.length > 0 &&
         !wasTempCanvasTransferred(temporary, data.canvas.id);
       setCanvas(data.canvas);
       setItems(data.mediaItems);
-      setAuthState("authenticated");
+      setAuthState(nextAuthState);
       setTempState(pending ? temporary : null);
-      if (pending) setAuthDialogOpen(true);
+      if (nextAuthState === "local") setAuthDialogOpen(false);
+      else if (pending) setAuthDialogOpen(true);
     } catch (err) {
       if (epoch === canvasLoadEpoch.current) setError(err instanceof Error ? err.message : "Could not load canvas.");
     } finally {
@@ -497,10 +507,14 @@ export function InspirationCanvas() {
     const supabase = createBrowserSupabaseClient();
 
     if (!supabase) {
+      let active = true;
       queueMicrotask(() => {
-        void loadTemporaryCanvas();
+        if (active) void loadCanvas();
       });
-      return;
+      return () => {
+        active = false;
+        ++canvasLoadEpoch.current;
+      };
     }
 
     let active = true;
@@ -573,7 +587,7 @@ export function InspirationCanvas() {
   });
 
   async function patchMedia(id: string, patch: Partial<MediaItem>, signal?: AbortSignal) {
-    if (!isAuthenticated) {
+    if (!usesServerPersistence) {
       if (!tempState) return;
       applyTemporaryState(
         updateTempMediaItems(tempState, (current) =>
@@ -606,7 +620,7 @@ export function InspirationCanvas() {
   }
 
   async function patchMediaBatch(updates: Array<{ id: string; patch: Partial<MediaItem> }>) {
-    if (!isAuthenticated) {
+    if (!usesServerPersistence) {
       if (!tempState) return;
       const byId = new Map(updates.map((update) => [update.id, update.patch]));
       applyTemporaryState(
@@ -648,7 +662,7 @@ export function InspirationCanvas() {
     setUploading(true);
     setError(null);
     try {
-      if (!isAuthenticated) {
+      if (!usesServerPersistence) {
         const current = tempState || (await loadTempCanvasState());
         const next = await addTempFilesToCanvas(current, Array.from(files), point);
         applyTemporaryState(next);
@@ -690,7 +704,7 @@ export function InspirationCanvas() {
 
   async function deleteSelected() {
     const ids = [...selectedIds];
-    if (!isAuthenticated) {
+    if (!usesServerPersistence) {
       if (tempState) {
         const next = await deleteTempMedia(tempState, ids);
         applyTemporaryState(next);
@@ -707,7 +721,7 @@ export function InspirationCanvas() {
   }
 
   async function loadComments(mediaId: string) {
-    if (!isAuthenticated) {
+    if (!usesServerPersistence) {
       setCommentsByMediaId((current) => ({
         ...current,
         [mediaId]: tempState?.commentsByMediaId[mediaId] || [],
@@ -723,7 +737,7 @@ export function InspirationCanvas() {
   async function addComment(mediaId: string) {
     const body = commentDrafts[mediaId]?.trim();
     if (!body) return;
-    if (!isAuthenticated) {
+    if (!usesServerPersistence) {
       if (!tempState) return;
       const result = addTempComment(tempState, mediaId, body);
       setTempState(result.state);
@@ -790,7 +804,7 @@ export function InspirationCanvas() {
 
   async function createAiMediaContext(item: MediaItem): Promise<ClientMediaContext> {
     const context = createClientMediaContext(item);
-    if (!isAuthenticated && item.mimeType.startsWith("image/")) {
+    if (!usesServerPersistence && item.mimeType.startsWith("image/")) {
       const blob = await getTempBlob(item.storageKey);
       if (blob && blob.size <= MAX_AI_INLINE_FILE_BYTES) {
         context.file = {
@@ -808,7 +822,7 @@ export function InspirationCanvas() {
     setTasteOpen(true);
     setTasteText("");
     setError(null);
-    const mediaContext = !isAuthenticated
+    const mediaContext = !usesServerPersistence
       ? await Promise.all(selectedItems.map((item) => createAiMediaContext(item)))
       : undefined;
     const response = await fetch("/api/taste-brief", {
@@ -830,7 +844,7 @@ export function InspirationCanvas() {
 
   async function generateChildMedia() {
     if (!canvas || selectedItems.length < 2) return;
-    if (!isAuthenticated) {
+    if (!usesServerPersistence) {
       setError("Sign in to save this temporary canvas before generating child media.");
       setAuthDialogOpen(true);
       return;
@@ -857,7 +871,7 @@ export function InspirationCanvas() {
     setClassifying(true);
     setError(null);
     try {
-      const mediaContext = !isAuthenticated
+      const mediaContext = !usesServerPersistence
         ? await Promise.all(selectedItems.map((item) => createAiMediaContext(item)))
         : undefined;
       const response = await fetch("/api/media/auto-classify", {
@@ -885,7 +899,7 @@ export function InspirationCanvas() {
           return update ? { ...item, ...update } : item;
         }),
       );
-      if (!isAuthenticated && tempState) {
+      if (!usesServerPersistence && tempState) {
         applyTemporaryState(
           updateTempMediaItems(tempState, (current) =>
             current.map((item) => {
@@ -1334,10 +1348,10 @@ export function InspirationCanvas() {
     const controller = new AbortController();
     const deadline = setTimeout(() => controller.abort(), 20_000);
     try {
-      if (!isAuthenticated && !tempState) {
+      if (!usesServerPersistence && !tempState) {
         throw new Error("The temporary canvas is unavailable. Keep this dialog open and try again.");
       }
-      const currentItems = isAuthenticated ? items : tempState!.mediaItems;
+      const currentItems = usesServerPersistence ? items : tempState!.mediaItems;
       if (!currentItems.some((item) => item.id === cropItem.id)) {
         throw new Error("This image is no longer in the current canvas. Your crop selection is still here.");
       }
@@ -1634,7 +1648,9 @@ export function InspirationCanvas() {
                 {items.length} media / {selectedIds.size} selected
               </div>
             </div>
-            {authState === "authenticated" ? (
+            {authState === "local" ? (
+              <Badge variant="secondary">Local PostgreSQL</Badge>
+            ) : isAuthenticated ? (
               <Button size="sm" variant="ghost" className="h-8 rounded-md" onClick={() => void signOut()}>
                 <LogOut className="size-4" />
                 Sign out
@@ -1781,12 +1797,16 @@ export function InspirationCanvas() {
           <DialogContent>
             <DialogHeader>
               <DialogTitle>
-                {authState === "authenticated" && tempState?.mediaItems.length
+                {authState === "local"
+                  ? "Local PostgreSQL canvas"
+                  : isAuthenticated && tempState?.mediaItems.length
                   ? "Save temporary canvas"
                   : "Temporary canvas expires in 4 hours"}
               </DialogTitle>
               <DialogDescription>
-                {authState === "authenticated" && tempState?.mediaItems.length
+                {authState === "local"
+                  ? "This loopback installation saves to its local PostgreSQL database. It is not a signed-in Supabase account."
+                  : isAuthenticated && tempState?.mediaItems.length
                   ? "Save your uploads, layout, metadata and comments to your account. If saving is interrupted, retry safely. The browser recovery copy remains until its original expiry."
                   : `Uploads are stored in this browser until ${
                       tempState
@@ -1795,7 +1815,9 @@ export function InspirationCanvas() {
                     }. Sign in or register to keep them permanently.`}
               </DialogDescription>
             </DialogHeader>
-            {authState === "authenticated" ? (
+            {authState === "local" ? (
+              <p className="text-sm text-muted-foreground">Browser-only uploads are not imported automatically. Their original temporary recovery copy is unchanged.</p>
+            ) : isAuthenticated ? (
               <div className="space-y-3">
                 {error ? <p role="alert" className="text-sm text-destructive">{error} Your temporary copy has been kept.</p> : null}
                 {tempState?.mediaItems.length ? (

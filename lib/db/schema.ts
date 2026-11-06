@@ -1,13 +1,18 @@
-export const SQLITE_SCHEMA = [
-  `CREATE TABLE IF NOT EXISTS canvases (
+export const LOCAL_SCHEMA = "inspiration_canvas_local";
+export const SCHEMA_VERSION = 1;
+export const LOCAL_TABLES = ["canvases", "media_items", "comments", "taste_briefs", "generation_runs", "agent_tool_approvals"];
+
+// Trusted single-user local tables are separate from Supabase's auth/RLS schema.
+export const POSTGRES_SCHEMA = [
+  `CREATE TABLE inspiration_canvas_local.canvases (
     id TEXT PRIMARY KEY,
     name TEXT NOT NULL,
-    created_at TEXT NOT NULL,
-    updated_at TEXT NOT NULL
+    created_at TIMESTAMPTZ NOT NULL,
+    updated_at TIMESTAMPTZ NOT NULL
   )`,
-  `CREATE TABLE IF NOT EXISTS media_items (
+  `CREATE TABLE inspiration_canvas_local.media_items (
     id TEXT PRIMARY KEY,
-    canvas_id TEXT NOT NULL REFERENCES canvases(id) ON DELETE CASCADE,
+    canvas_id TEXT NOT NULL REFERENCES inspiration_canvas_local.canvases(id) ON DELETE CASCADE,
     type TEXT NOT NULL,
     url TEXT NOT NULL,
     storage_driver TEXT NOT NULL DEFAULT 'local',
@@ -17,81 +22,64 @@ export const SQLITE_SCHEMA = [
     mime_type TEXT NOT NULL,
     file_name TEXT NOT NULL,
     title TEXT,
-    size_bytes INTEGER NOT NULL,
+    size_bytes BIGINT NOT NULL,
     intrinsic_width INTEGER,
     intrinsic_height INTEGER,
-    duration_seconds REAL,
-    x REAL NOT NULL,
-    y REAL NOT NULL,
-    width REAL NOT NULL,
-    height REAL NOT NULL,
-    z_index INTEGER NOT NULL,
-    rotation REAL NOT NULL DEFAULT 0,
-    crop_json TEXT,
-    tags_json TEXT NOT NULL DEFAULT '[]',
+    duration_seconds DOUBLE PRECISION,
+    x DOUBLE PRECISION NOT NULL,
+    y DOUBLE PRECISION NOT NULL,
+    width DOUBLE PRECISION NOT NULL,
+    height DOUBLE PRECISION NOT NULL,
+    z_index BIGINT NOT NULL,
+    rotation DOUBLE PRECISION NOT NULL DEFAULT 0,
+    crop_json JSONB,
+    tags_json JSONB NOT NULL DEFAULT '[]'::jsonb,
     category TEXT,
     subcategory TEXT,
     description TEXT,
-    design_analysis_json TEXT,
+    design_analysis_json JSONB,
     analysis_status TEXT NOT NULL DEFAULT 'pending',
     analysis_error TEXT,
-    parent_ids_json TEXT NOT NULL DEFAULT '[]',
-    created_at TEXT NOT NULL,
-    updated_at TEXT NOT NULL
+    parent_ids_json JSONB NOT NULL DEFAULT '[]'::jsonb,
+    created_at TIMESTAMPTZ NOT NULL,
+    updated_at TIMESTAMPTZ NOT NULL
   )`,
-  `CREATE TABLE IF NOT EXISTS comments (
+  `CREATE TABLE inspiration_canvas_local.comments (
     id TEXT PRIMARY KEY,
-    media_item_id TEXT NOT NULL REFERENCES media_items(id) ON DELETE CASCADE,
+    media_item_id TEXT NOT NULL REFERENCES inspiration_canvas_local.media_items(id) ON DELETE CASCADE,
     body TEXT NOT NULL,
-    created_at TEXT NOT NULL,
-    updated_at TEXT NOT NULL
+    created_at TIMESTAMPTZ NOT NULL,
+    updated_at TIMESTAMPTZ NOT NULL
   )`,
-  `CREATE TABLE IF NOT EXISTS taste_briefs (
+  `CREATE TABLE inspiration_canvas_local.taste_briefs (
     id TEXT PRIMARY KEY,
-    canvas_id TEXT NOT NULL REFERENCES canvases(id) ON DELETE CASCADE,
-    media_item_ids_json TEXT NOT NULL,
+    canvas_id TEXT NOT NULL REFERENCES inspiration_canvas_local.canvases(id) ON DELETE CASCADE,
+    media_item_ids_json JSONB NOT NULL,
     text TEXT NOT NULL,
-    created_at TEXT NOT NULL
+    created_at TIMESTAMPTZ NOT NULL
   )`,
-  `CREATE TABLE IF NOT EXISTS generation_runs (
+  `CREATE TABLE inspiration_canvas_local.generation_runs (
     id TEXT PRIMARY KEY,
-    canvas_id TEXT NOT NULL REFERENCES canvases(id) ON DELETE CASCADE,
-    media_item_ids_json TEXT NOT NULL,
+    canvas_id TEXT NOT NULL REFERENCES inspiration_canvas_local.canvases(id) ON DELETE CASCADE,
+    media_item_ids_json JSONB NOT NULL,
     status TEXT NOT NULL,
     prompt TEXT NOT NULL,
-    result_media_item_id TEXT,
+    result_media_item_id TEXT REFERENCES inspiration_canvas_local.media_items(id) ON DELETE SET NULL,
     error TEXT,
-    created_at TEXT NOT NULL,
-    updated_at TEXT NOT NULL
+    created_at TIMESTAMPTZ NOT NULL,
+    updated_at TIMESTAMPTZ NOT NULL
   )`,
-  `CREATE TABLE IF NOT EXISTS agent_tool_approvals (
+  `CREATE TABLE inspiration_canvas_local.agent_tool_approvals (
     id TEXT PRIMARY KEY,
     tool_name TEXT NOT NULL,
-    canvas_id TEXT,
-    media_item_ids_json TEXT NOT NULL,
-    payload_json TEXT NOT NULL,
+    canvas_id TEXT REFERENCES inspiration_canvas_local.canvases(id) ON DELETE CASCADE,
+    media_item_ids_json JSONB NOT NULL,
+    payload_json JSONB NOT NULL,
     status TEXT NOT NULL,
-    created_at TEXT NOT NULL,
-    updated_at TEXT NOT NULL
+    created_at TIMESTAMPTZ NOT NULL,
+    updated_at TIMESTAMPTZ NOT NULL
   )`,
-  `CREATE INDEX IF NOT EXISTS media_items_canvas_idx ON media_items(canvas_id)`,
-  `CREATE INDEX IF NOT EXISTS comments_media_item_idx ON comments(media_item_id)`,
-  `CREATE INDEX IF NOT EXISTS generation_runs_canvas_idx ON generation_runs(canvas_id)`,
+  `CREATE INDEX media_items_canvas_idx ON inspiration_canvas_local.media_items(canvas_id)`,
+  `CREATE INDEX comments_media_item_idx ON inspiration_canvas_local.comments(media_item_id)`,
+  `CREATE INDEX generation_runs_canvas_idx ON inspiration_canvas_local.generation_runs(canvas_id)`,
 ];
-
-export const SQLITE_MIGRATIONS = [
-  `ALTER TABLE media_items ADD COLUMN storage_driver TEXT NOT NULL DEFAULT 'local'`,
-  `ALTER TABLE media_items ADD COLUMN title TEXT`,
-];
-
-export const POSTGRES_MIGRATIONS = [
-  `ALTER TABLE media_items ADD COLUMN IF NOT EXISTS storage_driver TEXT NOT NULL DEFAULT 'local'`,
-  `ALTER TABLE media_items ADD COLUMN IF NOT EXISTS title TEXT`,
-];
-
-export const POSTGRES_SCHEMA = SQLITE_SCHEMA.map((statement) =>
-  statement
-    .replaceAll("INTEGER", "BIGINT")
-    .replaceAll("REAL", "DOUBLE PRECISION")
-    .replaceAll("TEXT PRIMARY KEY", "TEXT PRIMARY KEY"),
-);

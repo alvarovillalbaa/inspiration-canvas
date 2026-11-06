@@ -24,6 +24,7 @@ const boundary = vi.hoisted(() => ({
 vi.mock("@/lib/config", () => ({
   hasSupabaseConfig: boundary.configured,
   isHostedRuntime: boundary.hosted,
+  hasLocalPersistenceConfig: () => false,
   getConfig: () => ({ maxUploadMb: 50, enableVideoUploads: true, storageDriver: "supabase" }),
 }));
 vi.mock("@/lib/supabase/server", () => ({ createServerSupabaseClient: boundary.serverClient }));
@@ -260,11 +261,11 @@ function request(form?: FormData): Request {
 const params = () => ({ params: Promise.resolve({ id: CANVAS }) });
 
 describe("temporary canvas import request boundaries", () => {
-  it("rejects local persistence with 401 before reading a file or constructing storage", async () => {
+  it("rejects unconfigured local persistence with 503 before reading a file or constructing storage", async () => {
     boundary.configured.mockReturnValue(false); boundary.hosted.mockReturnValue(false);
     const input = request(), readForm = vi.spyOn(input, "formData");
     const response = await POST(input, params());
-    expect(response.status).toBe(401); expect(readForm).not.toHaveBeenCalled();
+    expect(response.status).toBe(503); expect(readForm).not.toHaveBeenCalled();
     expect(boundary.serverClient).not.toHaveBeenCalled(); expect(boundary.storage).not.toHaveBeenCalled();
   });
 

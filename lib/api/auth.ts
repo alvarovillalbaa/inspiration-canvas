@@ -1,7 +1,9 @@
 import { NextResponse } from "next/server";
 import type { User } from "@supabase/supabase-js";
+import { headers } from "next/headers";
 
-import { hasSupabaseConfig, isHostedRuntime } from "@/lib/config";
+import { hasLocalPersistenceConfig, hasSupabaseConfig, isHostedRuntime } from "@/lib/config";
+import { localPersistenceRequestAllowed } from "@/lib/api/local-context";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 
 export type AuthenticatedRequestContext = {
@@ -26,6 +28,18 @@ export async function getRequestPersistenceContext(): Promise<RequestContextResu
           },
           { status: 503 },
         ),
+      };
+    }
+    if (!hasLocalPersistenceConfig()) {
+      return {
+        mode: "error",
+        response: NextResponse.json({ error: "Permanent storage is not configured. Use the temporary browser canvas, configure local PostgreSQL, or sign in through Supabase." }, { status: 503 }),
+      };
+    }
+    if (!localPersistenceRequestAllowed(await headers())) {
+      return {
+        mode: "error",
+        response: NextResponse.json({ error: "Local persistence is available only from this app's loopback origin." }, { status: 403 }),
       };
     }
     return { mode: "local" };

@@ -35,7 +35,7 @@ export function getConfig(): AppConfig {
         : "local";
 
   return {
-    databaseUrl: process.env.DATABASE_URL || "file:.data/inspiration-canvas.db",
+    databaseUrl: process.env.DATABASE_URL || "",
     storageDriver,
     uploadDir: process.env.UPLOAD_DIR || ".data/uploads",
     maxUploadMb: readNumber("MAX_UPLOAD_MB", 50),
@@ -70,5 +70,16 @@ export function getMissingAiMessage(): string {
 }
 
 export function isPostgresUrl(url: string): boolean {
-  return /^postgres(ql)?:\/\//i.test(url);
+  try {
+    const parsed = new URL(url);
+    return ["postgres:", "postgresql:"].includes(parsed.protocol) &&
+      Boolean(parsed.hostname) && parsed.pathname.length > 1 && !parsed.hash;
+  } catch {
+    return false;
+  }
+}
+
+export function hasLocalPersistenceConfig(): boolean {
+  return process.env.LOCAL_PERSISTENCE_ENABLED === "true" && !isHostedRuntime() &&
+    isPostgresUrl(getConfig().databaseUrl);
 }
