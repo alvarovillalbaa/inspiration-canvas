@@ -651,6 +651,9 @@ export function InspirationCanvas() {
 
   function selectItem(item: MediaItem, event: MouseEvent) {
     event.stopPropagation();
+    // Portalled menu actions have their own handlers; their React events still
+    // bubble here even though their targets are outside this card's DOM.
+    if (!event.currentTarget.contains(event.target as Node)) return;
     setSelectedIds((current) => {
       const next = new Set(event.shiftKey ? current : []);
       if (event.shiftKey && next.has(item.id)) next.delete(item.id);
