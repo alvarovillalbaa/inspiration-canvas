@@ -58,6 +58,11 @@ in `localStorage` and IndexedDB. Without AI credentials, upload, comments, previ
 drag, resize, crop, delete and zoom remain available. See
 [local setup and data boundaries](docs/local-development.md).
 
+The [local persistence receipt](docs/results/2026/11-06/postgres-checks.md)
+records 55 focused unit cases, 16 real PostgreSQL cases and two actual
+desktop/narrow browser journeys. These are separate checked sources and do not
+establish hosted Supabase or complete AI/Eve acceptance.
+
 Saving a temporary canvas to an account copies its layout, crop, metadata and
 comments as well as its files. Interrupted saves can be retried without creating
 another copy of the same item or comment. The browser recovery copy remains until
