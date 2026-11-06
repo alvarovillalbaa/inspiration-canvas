@@ -1,0 +1,39 @@
+# Inactive. Activate only on the owned QA branch, binding the prepared source.
+name: Temporary local PostgreSQL acceptance
+on:
+  create:
+permissions:
+  contents: read
+jobs:
+  postgres:
+    if: github.repository == 'alvarovillalbaa/inspiration-canvas' && github.event.repository.private == false && github.event.ref_type == 'branch' && github.event.ref == 'qa/local-postgres-20261106-8' && github.ref == 'refs/heads/qa/local-postgres-20261106-8'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:17.6
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: authored-ci-only
+          POSTGRES_DB: inspiration_canvas_checks
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d inspiration_canvas_checks"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      SOURCE_COMMIT: 91bcb251fbbda09520dd259be21cd5672c8cb7b9
+      POSTGRES_PUBLIC_REPOSITORY: ${{ github.event.repository.private == false }}
+      DATABASE_URL: postgresql://postgres:authored-ci-only@127.0.0.1:5432/inspiration_canvas_checks
+      INSPIRATION_CANVAS_DISPOSABLE_DATABASE: 'true'
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ env.SOURCE_COMMIT }}
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
+        with:
+          node-version: 24.21.0
+          package-manager-cache: false
+      - name: Verify preserved core evidence and complete local app checks
+        run: python3 tests/scripts/run-postgres-checks.py
