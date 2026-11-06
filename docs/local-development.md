@@ -61,6 +61,16 @@ template is `docs/proposals/postgres-checks.workflow.yml.example`; it is inactiv
 in normal source. Local install/build/database work remains stopped after the
 Storage Guard preflight (19.3 GiB free; 34.0 GiB required).
 
+The desktop comment journey types spaces, punctuation and a newline through
+browser keyboard events, checks selection stays inside the note, and verifies
+the exact acknowledged text before and after reload. It also holds one actual
+empty comments GET across a successful POST, then delivers its unchanged server
+response to check that an old read cannot erase the new row. This uses
+[Playwright route.fetch/fulfill](https://playwright.dev/docs/api/class-route#route-fetch)
+for timing control, not a fabricated database response. The unchanged 55 unit and
+16 PostgreSQL results remain bound to their original receipt; later client
+entrypoint changes are covered by scoped lint/types and current browser runs.
+
 The source brief is [Inspiration Canvas / All projects](https://app.notion.com/p/3b6a1ee8bd06803e99d1cf6b0218c207),
 fetched this turn with returned edit timestamp 15 October 2026. It explicitly
 requires local PostgreSQL and Supabase/Vercel readiness for the four named apps.

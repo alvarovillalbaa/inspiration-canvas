@@ -326,6 +326,7 @@ export function InspirationCanvas() {
   const [preview, setPreview] = useState<MediaItem | null>(null);
   const [commentsByMediaId, setCommentsByMediaId] = useState<Record<string, CommentRecord[]>>({});
   const [commentDrafts, setCommentDrafts] = useState<Record<string, string>>({});
+  const commentReadEpochs = useRef(new Map<string, number>());
   const [authState, setAuthState] = useState<CanvasAuthState>("checking");
   const [authDialogOpen, setAuthDialogOpen] = useState(false);
   const [authEmail, setAuthEmail] = useState("");
@@ -551,6 +552,7 @@ export function InspirationCanvas() {
 
   useEffect(() => {
     function onKeyDown(event: KeyboardEvent) {
+      if (isEditableTarget(event.target)) return;
       if (cropItem) return;
       if (event.key === "Escape") {
         setPreview(null);
@@ -720,47 +722,75 @@ export function InspirationCanvas() {
     setConfirmDelete(false);
   }
 
-  async function loadComments(mediaId: string) {
-    if (!usesServerPersistence) {
-      setCommentsByMediaId((current) => ({
-        ...current,
-        [mediaId]: tempState?.commentsByMediaId[mediaId] || [],
-      }));
-      return;
-    }
+  function invalidateCommentReads(mediaId: string): number {
+    const epoch = (commentReadEpochs.current.get(mediaId) || 0) + 1;
+    commentReadEpochs.current.set(mediaId, epoch);
+    return epoch;
+  }
 
-    const response = await fetch(`/api/media/${mediaId}/comments`, { cache: "no-store" });
-    const data = (await response.json()) as { comments: CommentRecord[] };
-    setCommentsByMediaId((current) => ({ ...current, [mediaId]: data.comments }));
+  async function loadComments(mediaId: string) {
+    const epoch = invalidateCommentReads(mediaId), session = authEpoch.current;
+    try {
+      if (!usesServerPersistence) {
+        setCommentsByMediaId((current) => ({
+          ...current,
+          [mediaId]: tempState?.commentsByMediaId[mediaId] || [],
+        }));
+        return;
+      }
+
+      const response = await fetch(`/api/media/${mediaId}/comments`, { cache: "no-store" });
+      const data = (await response.json()) as { comments?: CommentRecord[]; error?: string };
+      if (session !== authEpoch.current || epoch !== commentReadEpochs.current.get(mediaId)) return;
+      if (!response.ok || !Array.isArray(data.comments)) throw new Error(data.error || "Could not load comments.");
+      setCommentsByMediaId((current) => ({ ...current, [mediaId]: data.comments! }));
+    } catch (error) {
+      if (session === authEpoch.current && epoch === commentReadEpochs.current.get(mediaId)) {
+        setError(error instanceof Error ? error.message : "Could not load comments.");
+      }
+    }
   }
 
   async function addComment(mediaId: string) {
-    const body = commentDrafts[mediaId]?.trim();
+    const draft = commentDrafts[mediaId] || "", body = draft.trim();
     if (!body) return;
-    if (!usesServerPersistence) {
-      if (!tempState) return;
-      const result = addTempComment(tempState, mediaId, body);
-      setTempState(result.state);
-      setCommentsByMediaId(result.state.commentsByMediaId);
-      setCommentDrafts((current) => ({ ...current, [mediaId]: "" }));
-      return;
-    }
+    const session = authEpoch.current;
+    let writeStarted = false;
+    try {
+      if (!usesServerPersistence) {
+        if (!tempState) return;
+        const result = addTempComment(tempState, mediaId, body);
+        setTempState(result.state);
+        setCommentsByMediaId(result.state.commentsByMediaId);
+        setCommentDrafts((current) => current[mediaId] === draft ? { ...current, [mediaId]: "" } : current);
+        return;
+      }
 
-    const response = await fetch(`/api/media/${mediaId}/comments`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ body }),
-    });
-    const data = (await response.json()) as { comment?: CommentRecord; error?: string };
-    if (!response.ok || !data.comment) {
-      setError(data.error || "Could not add comment.");
-      return;
+      invalidateCommentReads(mediaId);
+      writeStarted = true;
+      const response = await fetch(`/api/media/${mediaId}/comments`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ body }),
+      });
+      const data = (await response.json()) as { comment?: CommentRecord; error?: string };
+      if (session !== authEpoch.current) return;
+      if (!response.ok || !data.comment || !data.comment.id || data.comment.mediaItemId !== mediaId || data.comment.body !== body) {
+        throw new Error(data.error || "Could not confirm the saved comment. Your draft has been kept.");
+      }
+      const comment = data.comment;
+      setCommentsByMediaId((current) => ({
+        ...current,
+        [mediaId]: (current[mediaId] || []).some((entry) => entry.id === comment.id)
+          ? current[mediaId] : [...(current[mediaId] || []), comment],
+      }));
+      setCommentDrafts((current) => current[mediaId] === draft ? { ...current, [mediaId]: "" } : current);
+    } catch (error) {
+      if (session === authEpoch.current) setError(error instanceof Error ? error.message : "Could not save comment. Your draft has been kept.");
+    } finally {
+      // Also fence reads that started while the server was committing this write.
+      if (writeStarted && session === authEpoch.current) invalidateCommentReads(mediaId);
     }
-    setCommentsByMediaId((current) => ({
-      ...current,
-      [mediaId]: [...(current[mediaId] || []), data.comment!],
-    }));
-    setCommentDrafts((current) => ({ ...current, [mediaId]: "" }));
   }
 
   function createClientMediaContext(item: MediaItem): ClientMediaContext {
@@ -1093,7 +1123,7 @@ export function InspirationCanvas() {
             ) : (
               itemComments.map((comment) => (
                 <div key={comment.id} className="rounded-md border border-border p-2 text-sm">
-                  {comment.body}
+                  <p data-testid="media-comment-body" className="whitespace-pre-wrap">{comment.body}</p>
                   <div className="mt-1 text-[11px] text-muted-foreground">
                     {new Date(comment.createdAt).toLocaleString()}
                   </div>
@@ -1439,6 +1469,7 @@ export function InspirationCanvas() {
               onContextMenu={() => setSelectedIds(new Set([item.id]))}
               onDoubleClick={() => setPreview(item)}
               onKeyDown={(event) => {
+                if (event.target !== event.currentTarget) return;
                 if (event.key === "Enter" || event.key === " ") {
                   event.preventDefault();
                   setSelectedIds(new Set([item.id]));

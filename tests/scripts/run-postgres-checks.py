@@ -199,18 +199,15 @@ try:
     assert len(lock) == previous["generatedLock"]["bytes"] and digest(lock) == previous["generatedLock"]["sha256"]
     for name, expected in previous["export"]["sha256"].items():
         if name != "pnpm-lock.yaml":
-            if name == "components/canvas/inspiration-canvas.tsx":
-                current_component = (repo / name).read_bytes()
-                toolbar_before = b"flex items-center gap-1 rounded-md border border-border bg-background/90 p-1 shadow-lg backdrop-blur-sm"
-                toolbar_after = b"flex max-w-full flex-wrap items-center justify-center gap-1 rounded-md border border-border bg-background/90 p-1 shadow-lg backdrop-blur-sm"
-                assert current_component.count(toolbar_after) == 1 and digest(current_component.replace(toolbar_after, toolbar_before, 1)) == expected
-            elif name != "tests/e2e/local-postgres.spec.ts":
+            if name not in {"components/canvas/inspiration-canvas.tsx", "tests/e2e/local-postgres.spec.ts"}:
                 assert before.get(name) == expected, "Previously checked runtime/test input changed: " + name
     graph_nodes = [key.lstrip("'\\\"") for key in re.findall(r"^  (.+):$", lock.decode(), re.M)]
     assert not any(key.startswith(("@libsql/", "@neondatabase/serverless@", "drizzle-orm@", "drizzle-kit@")) for key in graph_nodes)
     report["carried"] = {"sourceCommit": previous["sourceCommit"], "receiptSha256": previous_digest,
         "streamsVerified": 12, "unchangedPriorInputs": 159, "phases": carried,
-        "componentChange": {"kind": "toolbar wrapping classes only", "reverseHashMatchesPrior": True},
+        "componentChange": {"kind": "client entrypoint not executed by carried unit/database cases; current UI checked separately",
+            "before": previous["export"]["sha256"]["components/canvas/inspiration-canvas.tsx"],
+            "after": before["components/canvas/inspiration-canvas.tsx"]},
         "previouslyUnexecutedBrowserFixture": {"before": previous["export"]["sha256"]["tests/e2e/local-postgres.spec.ts"], "after": before["tests/e2e/local-postgres.spec.ts"]}}
     report["installedLock"] = previous["generatedLock"]
     run(pnpm + ["install", "--frozen-lockfile", "--ignore-scripts", "--store-dir", str(root / "store")], 240)

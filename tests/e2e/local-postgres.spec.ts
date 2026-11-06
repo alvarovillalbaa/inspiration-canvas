@@ -107,7 +107,7 @@ test("local PostgreSQL preserves uploaded metadata and crop across reload and de
   const narrow = testInfo.project.name === "narrow-chromium";
   const suffix = randomUUID(), fileName = `local-postgres-${suffix}.png`;
   const title = `Local persisted ${suffix}`, category = `Local category ${suffix}`, tag = `warm, muted ${suffix}`;
-  const comment = `An authored PostgreSQL comment ${suffix}`;
+  const comment = `An authored PostgreSQL comment ${suffix}\nSpaces + minus - and zero 0 stay in this note.`;
   const unexpected: string[] = [], pageErrors: string[] = [], httpErrors: string[] = [];
   const pngPath = testInfo.outputPath(fileName);
   let pngIdentity: Stats | null = null;
@@ -116,6 +116,10 @@ test("local PostgreSQL preserves uploaded metadata and crop across reload and de
   let stage = "prepare-authored-png", primaryError: string | null = null;
   let uploadControl: { visible: boolean; enabled: boolean; box: { x: number; y: number; width: number; height: number } | null; viewport: { width: number; height: number } | null } | null = null;
   let positionBatches = 0;
+  let holdCommentRead = false, staleReadHeld = false, staleReadDelivered = false;
+  let commentGetRequests = 0, heldCommentReadOrdinal = 0;
+  let releaseCommentRead: (() => void) | undefined;
+  const commentReadGate = new Promise<void>((resolve) => { releaseCommentRead = resolve; });
   let restoredComments: { rows: number; authoredRowMatches: boolean; selected: string | null; closeButtons: number; noteInputs: number; textMatches: number } | null = null;
   let uploadObservation: { status: number; contentType: string; bodyShape: ReturnType<typeof responseBodyShape> | null } | null = null;
   const requestDiagnostics: Array<{ method: string; path: string; queryKeys: string[]; queryKeyCount: number; originClass: string }> = [];
@@ -160,6 +164,21 @@ test("local PostgreSQL preserves uploaded metadata and crop across reload and de
       || (ownComments && method === "POST") || positionBatch) {
       if (positionBatch) positionBatches++;
       if (read) reads++; else writes++;
+      if (ownComments && method === "GET") commentGetRequests++;
+      if (ownComments && method === "GET" && holdCommentRead) {
+        holdCommentRead = false;
+        heldCommentReadOrdinal = commentGetRequests;
+        // Delay an actual empty server response across the real POST. Preserve
+        // its status, headers and body; no fabricated backend result is used.
+        const response = await route.fetch({ timeout: 10_000, maxRedirects: 0, maxRetries: 0 });
+        expect(response.ok()).toBe(true);
+        expect(await response.json()).toEqual({ comments: [] });
+        staleReadHeld = true;
+        await commentReadGate;
+        await route.fulfill({ response });
+        staleReadDelivered = true;
+        return;
+      }
       await route.continue(); return;
     }
     record(unexpected, `Unexpected local request ${method} ${url.pathname}`); recordRequest(method, url); await route.abort("blockedbyclient");
@@ -224,13 +243,43 @@ test("local PostgreSQL preserves uploaded metadata and crop across reload and de
 
     if (!narrow) {
       stage = "add-comment";
+      holdCommentRead = true;
       await openAction(page, item, "Comments");
-      await item.getByPlaceholder("Add a note...", { exact: true }).fill(comment);
+      await expect.poll(() => staleReadHeld).toBe(true);
+      const note = item.getByPlaceholder("Add a note...", { exact: true });
+      await note.click();
+      // Browser keyboard events expose nested-card and global shortcut bugs
+      // that programmatic fill cannot exercise.
+      await note.pressSequentially(comment.split("\n")[0]);
+      await note.press("Enter");
+      await note.pressSequentially(comment.split("\n")[1]);
+      await note.press("ControlOrMeta+a");
+      expect(await note.evaluate((element) => {
+        const input = element as HTMLTextAreaElement;
+        return [input.selectionStart, input.selectionEnd];
+      })).toEqual([0, comment.length]);
+      await note.press("ArrowRight");
+      await expect(note).toHaveValue(comment);
       const [added] = await Promise.all([
         page.waitForResponse(matchesResponse(`/api/media/${ownId}/comments`, "POST")),
         item.getByRole("button", { name: "Add comment", exact: true }).click(),
       ]);
-      expect(added.status()).toBe(201); await expect(item.getByText(comment, { exact: true })).toBeVisible();
+      expect(added.status()).toBe(201);
+      expect(await added.json()).toMatchObject({ comment: { mediaItemId: ownId, body: comment } });
+      const commentBody = item.getByTestId("media-comment-body");
+      await expect(commentBody).toBeVisible();
+      expect(await commentBody.textContent()).toBe(comment);
+      stage = "release-pre-write-comment-read";
+      // A newer read would invalidate the held read independently of POST and
+      // make the write-race regression meaningless.
+      expect(commentGetRequests).toBe(heldCommentReadOrdinal);
+      const delivered = page.waitForResponse(matchesResponse(`/api/media/${ownId}/comments`, "GET"));
+      releaseCommentRead!();
+      expect(await (await delivered).finished()).toBeNull();
+      await expect.poll(() => staleReadDelivered).toBe(true);
+      await page.evaluate(() => new Promise<void>((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => resolve()))));
+      await expect(commentBody).toBeVisible();
+      expect(await commentBody.textContent()).toBe(comment);
       await item.getByRole("button", { name: "Close comments", exact: true }).click();
     }
     stage = "crop-image";
@@ -280,9 +329,10 @@ test("local PostgreSQL preserves uploaded metadata and crop across reload and de
         selected: await item.getAttribute("aria-pressed"),
         closeButtons: await item.getByRole("button", { name: "Close comments", exact: true }).count(),
         noteInputs: await item.getByPlaceholder("Add a note...", { exact: true }).count(),
-        textMatches: await item.getByText(comment, { exact: true }).count() };
+        textMatches: await item.getByTestId("media-comment-body").count() };
       expect(restoredComments.authoredRowMatches).toBe(true);
-      await expect(item.getByText(comment, { exact: true })).toBeVisible();
+      await expect(item.getByTestId("media-comment-body")).toBeVisible();
+      expect(await item.getByTestId("media-comment-body").textContent()).toBe(comment);
       commentPersisted = true;
     }
     stage = "verify-layout";
@@ -294,6 +344,7 @@ test("local PostgreSQL preserves uploaded metadata and crop across reload and de
     primaryError = diagnosticText(error instanceof Error ? `${error.name}: ${error.message}` : String(error), 4096);
     throw error;
   } finally {
+    releaseCommentRead!();
     // Only the identity returned by this test's actual upload may be deleted.
     if (ownId) {
       try {
@@ -331,7 +382,8 @@ test("local PostgreSQL preserves uploaded metadata and crop across reload and de
     await new Promise<void>((resolve) => setImmediate(resolve));
     const boundary = { kind: "local-postgres-boundary", schemaVersion: 1, project: testInfo.project.name,
       mediaId: ownId, persisted, commentPersisted, removed, reads, writes, developmentWebSockets,
-      unexpected, pageErrors, httpErrors, cleanupError, stage, primaryError, uploadObservation, requestDiagnostics, uploadControl, positionBatches, restoredComments };
+      unexpected, pageErrors, httpErrors, cleanupError, stage, primaryError, uploadObservation, requestDiagnostics, uploadControl, positionBatches, restoredComments,
+      staleReadHeld, staleReadDelivered, heldCommentReadOrdinal, commentGetRequests };
     const body = Buffer.from(JSON.stringify(boundary));
     expect.soft(body.length).toBeLessThanOrEqual(16 * 1024);
     if (body.length <= 16 * 1024) {
