@@ -32,7 +32,7 @@ and four completed crop cases remain separate evidence.
 - Supabase Auth/Postgres/Storage for hosted persistence
 - Optional Vercel Blob media storage for signed-in hosted uploads
 - Vercel AI SDK through AI Gateway
-- Vercel Workflow SDK for ingestion and child generation
+- Vercel Workflow SDK for local ingestion and local child generation
 - Vercel Eve for the Curator Agent and approval-gated tools
 - Vitest and Playwright
 
@@ -104,7 +104,17 @@ All mutating Eve tools create approval records instead of writing directly.
 
 ## Workflows
 
-`workflows/media-ingestion.ts` analyzes uploaded media. `workflows/child-generation.ts` creates generated child media. Local route handlers fall back to direct execution if Workflow runtime endpoints are not available.
+The workflows under `workflows/` use the local repository. Local route handlers
+fall back to direct execution if Workflow runtime endpoints are unavailable.
+
+Signed-in Supabase child generation runs inside the authenticated request.
+`POST /api/generate-child` returns 200 only after confirmed completion. When a
+known run's outcome is uncertain, “Check saved result” reads the owner's saved
+run; it cannot resume execution. The model calls share a 45-second/request-abort
+budget with SDK retries disabled, and the route declares a 60-second maximum.
+The budget does not make requests durable, stop in-flight database/storage
+operations, or guarantee provider work and billing stop. Uncertain stored
+results are retained. See the [coordinator contract](docs/proposals/supabase-child-generation.md).
 
 ## Commands
 
@@ -128,7 +138,7 @@ corepack pnpm db:seed
 
 ## Roadmap
 
-- Supabase-backed AI ingestion and child generation workflows
+- Supabase-backed AI ingestion, durable child-generation coordination, and hosted/model acceptance
 - Direct Blob or Supabase client uploads for very large video files
 - Vector similarity search for visual embeddings
 - Generated video workflows
