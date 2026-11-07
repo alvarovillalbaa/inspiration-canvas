@@ -910,7 +910,9 @@ export function InspirationCanvas() {
       if (epoch !== authEpoch.current || attempt !== childGenerationAttempt.current) return;
       if (!response.ok) {
         if (data.unconfirmed && data.runId) setChildGenerationRecovery({ runId: data.runId, canvasId, epoch });
-        setError(data.error || "Child media generation could not be confirmed. Refresh your canvas before trying again.");
+        setError(data.unconfirmed && !data.runId
+          ? "The generation request could not be confirmed. Refresh your canvas before trying again."
+          : data.error || "Child media generation could not be confirmed. Refresh your canvas before trying again.");
         return;
       }
       if (response.status === 200 && data.run?.status === "complete") {
