@@ -1,0 +1,27 @@
+# INACTIVE. Root must review the pinned manifest/source and replace SOURCE_COMMIT before activation.
+name: Temporary canvas Supabase generation contracts
+on:
+  create:
+permissions:
+  contents: read
+jobs:
+  generation:
+    if: github.repository == 'alvarovillalbaa/inspiration-canvas' && github.event.repository.private == false && github.event.ref_type == 'branch' && github.event.ref == 'qa/supabase-generation-20261107-1' && github.ref == 'refs/heads/qa/supabase-generation-20261107-1'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      SOURCE_COMMIT: a62f7e9541df4ab1919bd1662be7708e0190e042
+      SUPABASE_GENERATION_PUBLIC_REPOSITORY: ${{ github.event.repository.private == false }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ env.SOURCE_COMMIT }}
+          persist-credentials: false
+          fetch-depth: 1
+          clean: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
+        with:
+          node-version: 24.21.0
+          package-manager-cache: false
+      - name: Check only authored generation contracts and scoped static inputs
+        run: python3 tests/scripts/run-supabase-generation-checks.py
