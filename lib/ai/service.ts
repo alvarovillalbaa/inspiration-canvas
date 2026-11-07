@@ -205,15 +205,22 @@ export async function generateTasteBrief(input: {
   return text;
 }
 
+export type ChildGenerationCallOptions = {
+  abortSignal?: AbortSignal;
+  maxRetries?: 0;
+};
+
 export async function proposeChildMediaPrompt(input: {
   mediaItems: MediaItem[];
   userPrompt?: string;
-}): Promise<string> {
+} & ChildGenerationCallOptions): Promise<string> {
   assertAiAvailable();
   const config = getConfig();
   const context = input.mediaItems.map((media) => summarizeMedia(media)).join("\n\n---\n\n");
   const { text } = await generateText({
     model: config.aiTextModel,
+    abortSignal: input.abortSignal,
+    maxRetries: input.maxRetries,
     prompt: [
       "Create one image-generation prompt that combines these references into a coherent child image.",
       "Preserve shared taste signals without copying any single parent literally.",
@@ -231,7 +238,7 @@ export async function proposeChildMediaPrompt(input: {
   return text.trim();
 }
 
-export async function generateChildImageBytes(prompt: string): Promise<{
+export async function generateChildImageBytes(prompt: string, options: ChildGenerationCallOptions = {}): Promise<{
   data: Uint8Array;
   mediaType: string;
 }> {
@@ -240,6 +247,8 @@ export async function generateChildImageBytes(prompt: string): Promise<{
   const result = await generateText({
     model: config.aiImageModel,
     prompt,
+    abortSignal: options.abortSignal,
+    maxRetries: options.maxRetries,
     providerOptions: {
       gateway: {
         tags: ["feature:child-image"],
