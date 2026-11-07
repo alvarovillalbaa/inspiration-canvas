@@ -1,6 +1,7 @@
 # Request-bound Supabase child generation
 
-Status: source candidate; no hosted, model, database, or request-lifetime acceptance.
+Status: implemented with focused mocked/static checks; hosted, model, database,
+browser and request-lifetime acceptance remain pending.
 
 `lib/workflows/supabase-child-generation.ts` exports
 `runSupabaseChildGeneration({ supabase, userId, canvasId, mediaIds, prompt?, signal? })`,
@@ -42,7 +43,7 @@ owned UUID, all expected media fields, and the expected complete run receipt.
 
 `SupabaseChildGenerationError` exposes only finite messages, `runId: string | null`,
 and `code: invalid_request | not_found | credentials | unconfirmed | failed`.
-Suggested route mappings are 400/404/402/503/500 respectively; awaited completion
+The route maps these to 400/404/402/503/500 respectively; awaited completion
 is 200, never a durable-job 202. Definite failures before storage attempt a
 running-only failed transition. After any storage write attempt, unconfirmed
 outcomes retain objects and never blindly delete, retry insertion, regenerate,
@@ -52,11 +53,11 @@ Retained objects can remain orphaned; this scope does not add garbage collection
 
 Request termination can leave pending/running state. Owner-scoped polling can
 observe persisted state but cannot resume execution or prove a missing write
-never committed. The route/UI owner must authenticate before any workflow-engine
-lookup, avoid local/engine fallback in Supabase mode, and retain an uncertainty
-message rather than automatically generating again. Existing global polling
-routes and the delayed client reload do not supply this contract by themselves.
-The route owner sets a 60-second platform `maxDuration`; the shared model budget
+never committed. The status/events routes authenticate before any workflow-engine
+lookup and avoid local/engine fallback in Supabase mode. The UI retains an
+uncertainty message, offers a manual owned-result check and does not automatically
+generate again. Supabase event streaming returns 409 for an owned run rather
+than presenting a durable stream. The route sets a 60-second platform `maxDuration`; the shared model budget
 is 45 seconds, not a hard bound on all database/storage I/O or a guarantee that
 the request will survive that long. Platform termination remains uncertain and
 does not make the request durable. No schema, dependency, account, or AI policy
@@ -65,6 +66,10 @@ change is included.
 The 25 authored cases in `tests/unit/supabase-child-generation.test.ts` mock the
 request/SDK/model/storage boundaries. They cover ownership, CAS, supported output,
 lost responses, later edits/completions, shared cancellation/retry options, and
-retained objects. They are not auth,
-RLS, actual image-decoder, real provider, hosted, or browser proof. Only static
-syntax and whitespace checks are authorized locally for this source candidate.
+retained objects. They passed with the repository and route cases in the
+[first focused run](../results/2026/11-07/supabase-generation-attempt-1.md),
+whose overall AI-fixture type failure remains recorded. The
+[follow-up](../results/2026/11-07/supabase-generation-attempt-2.md) reran only
+the seven corrected AI-helper cases and their lint, passed the complete focused
+type check, and bound the other 69 results to unchanged source inputs. These
+are not real auth, RLS, image-decoder, provider, hosted or browser proof.
