@@ -55,3 +55,21 @@ provider/model billing, database, browser, platform-duration, or durable-worker
 proof. No old tests, build, server, or provider journey ran. See the
 [scope proposal](../../../proposals/supabase-generation-checks.md). No source
 fix, retry, commit, branch retirement, or deployment was performed by this audit.
+
+## Publication follow-up
+
+The original 3,518-byte audit above is preserved (SHA-256
+`1902ec5faaa09991ccebb6815dc11bb880f382788697ac141c00717c858f45e0`).
+Receipt commit `44c74f60a59bc18381545288738c4b8867015118` is published on
+`work/supabase-child-generation-20261107`. The owned QA branch was retired at
+`e9684eb0f3d094cf45b42216747c9e0a8a98f3e8`, whose tree exactly matches that
+receipt commit and contains no active attempt-1 workflow. Atomic publication
+and fresh remote-ref readback both succeeded. Main and production remain at
+`3d0f0d12bd5a4ccfa1cc921a7f8ff193f2802383`.
+
+The follow-up corrects the authored parent fixture with all required `MediaItem`
+fields. All seven test bodies and their consumed summary inputs remain
+unchanged. A separate bounded check is being prepared for those seven cases,
+the changed test's lint and the complete original focused type-check scope;
+the 69 unchanged contracts will retain their first-run evidence. This failed
+overall attempt remains failed.
