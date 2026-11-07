@@ -5,6 +5,7 @@ import type {
   CanvasRecord,
   CommentRecord,
   DesignAnalysis,
+  GenerationRun,
   JsonRecord,
   MediaItem,
   MediaKind,
@@ -80,6 +81,34 @@ type TasteBriefRow = {
   media_item_ids_json: JsonValue | null;
   text: string;
   created_at: string;
+};
+
+type GenerationRunRow = {
+  id: string;
+  canvas_id: string;
+  user_id: string;
+  media_item_ids_json: JsonValue | null;
+  status: GenerationRun["status"];
+  prompt: string;
+  result_media_item_id: string | null;
+  error: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+export type CreateSupabaseGenerationRunInput = {
+  canvasId: string;
+  mediaIds: string[];
+  prompt: string;
+  status?: GenerationRun["status"];
+};
+
+export type SupabaseGenerationRunPatch = Partial<
+  Pick<GenerationRun, "status" | "prompt" | "resultMediaItemId" | "error">
+>;
+
+export type SupabaseGenerationRunUpdateOptions = {
+  expectedStatus?: GenerationRun["status"];
 };
 
 export type CreateSupabaseMediaInput = Omit<
@@ -180,6 +209,31 @@ function tasteBriefFromRow(row: TasteBriefRow): TasteBrief {
     mediaItemIdsJson: asStringArray(row.media_item_ids_json),
     text: row.text,
     createdAt: row.created_at,
+  };
+}
+
+function generationRunFromRow(row: GenerationRunRow): GenerationRun {
+  if (!row || typeof row !== "object" || Array.isArray(row)) throw new Error("Invalid stored generation run.");
+  const parents = row.media_item_ids_json;
+  if (!generationId(row.id) || !generationId(row.canvas_id) || !generationId(row.user_id)
+    || !Array.isArray(parents) || parents.length < 2 || !parents.every(generationId) || new Set(parents).size !== parents.length
+    || !generationStatus(row.status) || typeof row.prompt !== "string"
+    || (row.result_media_item_id !== null && !generationId(row.result_media_item_id))
+    || (row.error !== null && typeof row.error !== "string")
+    || typeof row.created_at !== "string" || !Number.isFinite(Date.parse(row.created_at))
+    || typeof row.updated_at !== "string" || !Number.isFinite(Date.parse(row.updated_at))) {
+    throw new Error("Invalid stored generation run.");
+  }
+  return {
+    id: row.id,
+    canvasId: row.canvas_id,
+    mediaItemIdsJson: [...parents],
+    status: row.status,
+    prompt: row.prompt,
+    resultMediaItemId: row.result_media_item_id,
+    error: row.error,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
   };
 }
 
@@ -570,4 +624,107 @@ export async function createTasteBriefForUser(
     .single<TasteBriefRow>();
   throwIfError(inserted.error);
   return tasteBriefFromRow(inserted.data);
+}
+
+function generationInput(condition: unknown): asserts condition {
+  if (!condition) throw new Error("Invalid generation run input.");
+}
+
+function generationId(value: unknown): value is string {
+  return typeof value === "string" && value.length <= 1024 && value.trim().length > 0 && !value.includes("\0");
+}
+
+function generationStatus(value: unknown): value is GenerationRun["status"] {
+  return value === "pending" || value === "running" || value === "complete" || value === "failed";
+}
+
+async function generationMediaInCanvas(
+  supabase: SupabaseClient,
+  userId: string,
+  canvasId: string,
+  mediaId: string,
+): Promise<boolean> {
+  const media = await supabase.from("media_items").select("id, canvas_id, user_id")
+    .eq("id", mediaId).eq("user_id", userId).eq("canvas_id", canvasId)
+    .maybeSingle<{ id: string; canvas_id: string; user_id: string }>();
+  if (isNoRowsError(media.error)) return false;
+  throwIfError(media.error);
+  return media.data?.id === mediaId && media.data.user_id === userId && media.data.canvas_id === canvasId;
+}
+
+export async function createGenerationRunForUser(
+  supabase: SupabaseClient,
+  userId: string,
+  input: CreateSupabaseGenerationRunInput,
+): Promise<GenerationRun | null> {
+  generationInput(generationId(userId) && input && typeof input === "object" && !Array.isArray(input));
+  generationInput(Object.keys(input).every(key => ["canvasId", "mediaIds", "prompt", "status"].includes(key)));
+  generationInput(generationId(input.canvasId) && Array.isArray(input.mediaIds)
+    && input.mediaIds.length >= 2 && input.mediaIds.every(generationId)
+    && new Set(input.mediaIds).size === input.mediaIds.length
+    && typeof input.prompt === "string" && input.prompt.length <= 4000
+    && (input.status === undefined || generationStatus(input.status)));
+  const { canvasId, prompt } = input, status = input.status ?? "pending", mediaIds = [...input.mediaIds];
+  if (!await getCanvasForUser(supabase, userId, canvasId)) return null;
+  // These are separate authenticated requests, not a transaction or parent lock.
+  for (const mediaId of mediaIds) {
+    if (!await generationMediaInCanvas(supabase, userId, canvasId, mediaId)) return null;
+  }
+  const createdAt = now();
+  const inserted = await supabase.from("generation_runs").insert({
+    id: id(), canvas_id: canvasId, user_id: userId, media_item_ids_json: mediaIds,
+    status, prompt, result_media_item_id: null, error: null, created_at: createdAt, updated_at: createdAt,
+  }).select("*").single<GenerationRunRow>();
+  throwIfError(inserted.error);
+  return generationRunFromRow(inserted.data);
+}
+
+export async function getGenerationRunForUser(
+  supabase: SupabaseClient,
+  userId: string,
+  runId: string,
+): Promise<GenerationRun | null> {
+  generationInput(generationId(userId) && generationId(runId));
+  const run = await supabase.from("generation_runs").select("*").eq("id", runId).eq("user_id", userId)
+    .maybeSingle<GenerationRunRow>();
+  if (isNoRowsError(run.error)) return null;
+  throwIfError(run.error);
+  if (!run.data) return null;
+  const value = generationRunFromRow(run.data);
+  if (value.id !== runId || run.data.user_id !== userId
+    || !await getCanvasForUser(supabase, userId, value.canvasId)) return null;
+  return value;
+}
+
+export async function updateGenerationRunForUser(
+  supabase: SupabaseClient,
+  userId: string,
+  runId: string,
+  patch: SupabaseGenerationRunPatch,
+  options: SupabaseGenerationRunUpdateOptions = {},
+): Promise<GenerationRun | null> {
+  generationInput(generationId(userId) && generationId(runId) && patch && typeof patch === "object" && !Array.isArray(patch));
+  generationInput(options && typeof options === "object" && !Array.isArray(options)
+    && Object.keys(options).every(key => key === "expectedStatus")
+    && (options.expectedStatus === undefined || generationStatus(options.expectedStatus)));
+  const columns: Record<string, string> = { status: "status", prompt: "prompt", resultMediaItemId: "result_media_item_id", error: "error" };
+  generationInput(Object.keys(patch).every(key => Object.hasOwn(columns, key)));
+  generationInput((patch.status === undefined || generationStatus(patch.status))
+    && (patch.prompt === undefined || typeof patch.prompt === "string" && patch.prompt.length <= 4000)
+    && (patch.resultMediaItemId === undefined || patch.resultMediaItemId === null || generationId(patch.resultMediaItemId))
+    && (patch.error === undefined || patch.error === null || typeof patch.error === "string"));
+  const entries = Object.entries(patch).filter(([, value]) => value !== undefined);
+  const resultMediaItemId = patch.resultMediaItemId, expectedStatus = options.expectedStatus;
+  const run = await getGenerationRunForUser(supabase, userId, runId);
+  if (!run) return null;
+  if (!entries.length) return expectedStatus === undefined || run.status === expectedStatus ? run : null;
+  if (resultMediaItemId != null && !await generationMediaInCanvas(supabase, userId, run.canvasId, resultMediaItemId)) return null;
+  let query = supabase.from("generation_runs")
+    .update({ ...Object.fromEntries(entries.map(([key, value]) => [columns[key], value])), updated_at: now() })
+    .eq("id", runId).eq("user_id", userId).eq("canvas_id", run.canvasId);
+  if (expectedStatus !== undefined) query = query.eq("status", expectedStatus);
+  const updated = await query.select("*").maybeSingle<GenerationRunRow>();
+  if (isNoRowsError(updated.error)) return null;
+  throwIfError(updated.error);
+  return updated.data ? generationRunFromRow(updated.data) : null;
 }
