@@ -25,14 +25,15 @@ The schema includes tags, category, subcategory, description, color palette, com
 
 ## Child Media
 
-`POST /api/generate-child` requires at least two distinct parents belonging to
-the same owned canvas. It creates a run and proposes a prompt when none is given.
+`POST /api/generate-child` accepts at least two parent identifiers, creates a
+run and proposes a prompt when none is given.
 Local mode starts the existing workflow and returns 202. Supabase mode awaits
 the authenticated, request-bound coordinator and returns 200 only after the
 child and completed run are confirmed. Generated images use the configured
 storage adapter and `generated_image` rows with `parentIdsJson`.
 
-Supabase generation uses the caller's authenticated client, owner checks and
+Supabase generation requires at least two distinct parents belonging to the
+same owned canvas. It uses the caller's authenticated client, owner checks and
 conditional run transitions. Its two model calls share a 45-second/request-abort
 budget and disable SDK retries. The route declares a 60-second maximum; this
 does not bound every storage/database operation or make the request durable.
