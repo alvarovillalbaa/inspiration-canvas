@@ -1,12 +1,20 @@
-# Supabase generation contracts — CI2 prepared, not run
+# Supabase generation contracts — focused checks completed
+
+[CI2 passed](../results/2026/11-07/supabase-generation-attempt-2.md) at
+`606b544fbb64a496bfe1f4c6782fb275a5fcc6f0`: seven fresh AI-helper cases,
+changed-test lint and the full focused TypeScript command. The 69 unchanged
+unit identities and ten lint inputs retain their exact first-source evidence;
+the earlier overall failure remains false. Both temporary workflows are disabled;
+the inactive example below does not activate a new run. Hosted Supabase/RLS,
+model, browser and request-lifetime acceptance remain unverified.
 
 7 November 2026. This packet covers only the four newly authored unit files:
 `supabase-generation-runs.test.ts`, `supabase-child-generation.test.ts` and
 `supabase-child-routes.test.ts`, plus `supabase-child-ai.test.ts`.
 The [controller](../../tests/scripts/run-supabase-generation-checks.py) preserves
 the full 76-identity manifest for export/type coverage: 21 repository, 25
-coordinator, 23 route and seven SDK-policy cases. Root still reviews this
-follow-up and supplies its immutable source pin before activation.
+coordinator, 23 route and seven SDK-policy cases. Root reviewed this
+follow-up and supplied its immutable source pin before activation.
 Existing transfer/PostgreSQL,
 crop/metadata and browser results remain at their original sources; none rerun.
 
@@ -22,7 +30,7 @@ is 320,234 bytes, SHA256
 `031cd7f272bb5fd1a20595524e4e1d21e0cee434361132892808dc3ab977f950`.
 
 CI2 executes only those seven AI identities, lints only the changed AI test and
-reruns the complete 11-entry scoped TypeScript check, which has not passed yet.
+reruns the complete 11-entry scoped TypeScript check, which passed in CI2.
 The other 69 unit identities and ten unchanged lint inputs are referenced from
 the first source, not repeated. The controller verifies all 15 original captures,
 raw-unit-JSON equality, all 76 original identities, exact command statuses and

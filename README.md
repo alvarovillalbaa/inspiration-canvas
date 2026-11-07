@@ -136,6 +136,14 @@ corepack pnpm db:seed
 - Generated video is documented as an extension point; v1 implements generated images.
 - Provider-backed Curator and generation acceptance still requires configured credentials and separate runtime checks; the supported Eve/AI versions and release evidence are recorded in `docs/implementation-notes.md`.
 
+The [generation follow-up](docs/results/2026/11-07/supabase-generation-attempt-2.md)
+passed seven AI-helper cases, changed-test lint and the complete focused type
+check. It binds 69 unchanged repository/coordinator/route cases and their lint
+inputs to the [first run](docs/results/2026/11-07/supabase-generation-attempt-1.md),
+whose overall fixture type failure remains recorded. These checks mock auth,
+SDK and storage boundaries; they do not establish real Supabase/RLS, model,
+signed-in browser or request-lifetime acceptance.
+
 ## Roadmap
 
 - Supabase-backed AI ingestion, durable child-generation coordination, and hosted/model acceptance
