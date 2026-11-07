@@ -349,6 +349,10 @@ export function InspirationCanvas() {
   const [groupBy, setGroupBy] = useState<GroupByMode>("none");
   const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(new Set());
   const [classifying, setClassifying] = useState(false);
+  const [generatingChild, setGeneratingChild] = useState(false);
+  const [childGenerationRecovery, setChildGenerationRecovery] = useState<{ runId: string; canvasId: string; epoch: number } | null>(null);
+  const childGenerationBusy = useRef(false);
+  const childGenerationAttempt = useRef(0);
   const [cropItem, setCropItem] = useState<MediaItem | null>(null);
   const [cropDraft, setCropDraft] = useState<NormalizedCrop>({
     x: 0,
@@ -515,6 +519,7 @@ export function InspirationCanvas() {
       return () => {
         active = false;
         ++canvasLoadEpoch.current;
+        ++childGenerationAttempt.current;
       };
     }
 
@@ -534,11 +539,19 @@ export function InspirationCanvas() {
       if (!active) return;
       if (event === "SIGNED_IN") {
         ++authEpoch.current;
+        ++childGenerationAttempt.current;
+        childGenerationBusy.current = false;
+        setGeneratingChild(false);
+        setChildGenerationRecovery(null);
         setAuthState("authenticated");
         void loadCanvas();
       }
       if (event === "SIGNED_OUT") {
         ++authEpoch.current;
+        ++childGenerationAttempt.current;
+        childGenerationBusy.current = false;
+        setGeneratingChild(false);
+        setChildGenerationRecovery(null);
         void loadTemporaryCanvas();
       }
     });
@@ -546,6 +559,7 @@ export function InspirationCanvas() {
     return () => {
       active = false;
       ++canvasLoadEpoch.current;
+      ++childGenerationAttempt.current;
       subscription.subscription.unsubscribe();
     };
   }, [loadCanvas, loadTemporaryCanvas]);
@@ -876,27 +890,80 @@ export function InspirationCanvas() {
   }
 
   async function generateChildMedia() {
-    if (!canvas || selectedItems.length < 2) return;
+    if (!canvas || selectedItems.length < 2 || childGenerationBusy.current || childGenerationRecovery) return;
     if (!usesServerPersistence) {
       setError("Sign in to save this temporary canvas before generating child media.");
       setAuthDialogOpen(true);
       return;
     }
+    const epoch = authEpoch.current, attempt = ++childGenerationAttempt.current, canvasId = canvas.id;
+    childGenerationBusy.current = true;
+    setGeneratingChild(true);
     setError(null);
-    const response = await fetch("/api/generate-child", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        canvasId: canvas.id,
-        mediaIds: selectedItems.map((item) => item.id),
-      }),
-    });
-    const data = (await response.json()) as { error?: string };
-    if (!response.ok) {
-      setError(data.error || "Child media generation failed.");
-      return;
+    try {
+      const response = await fetch("/api/generate-child", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ canvasId, mediaIds: selectedItems.map((item) => item.id) }),
+      });
+      const data = (await response.json()) as { error?: string; runId?: string | null; unconfirmed?: boolean; run?: { id: string; status: string } };
+      if (epoch !== authEpoch.current || attempt !== childGenerationAttempt.current) return;
+      if (!response.ok) {
+        if (data.unconfirmed && data.runId) setChildGenerationRecovery({ runId: data.runId, canvasId, epoch });
+        setError(data.error || "Child media generation could not be confirmed. Refresh your canvas before trying again.");
+        return;
+      }
+      if (response.status === 200 && data.run?.status === "complete") {
+        await loadCanvas();
+      } else if (response.status === 202) {
+        setTimeout(() => { if (epoch === authEpoch.current && attempt === childGenerationAttempt.current) void loadCanvas(); }, 1200);
+      } else {
+        if (data.run?.id) setChildGenerationRecovery({ runId: data.run.id, canvasId, epoch });
+        setError("Child media generation could not be confirmed. Refresh your canvas before trying again.");
+      }
+    } catch {
+      if (epoch === authEpoch.current && attempt === childGenerationAttempt.current) {
+        setError("The generation response was lost. Refresh your canvas before trying again; an image may already have been saved.");
+      }
+    } finally {
+      if (attempt === childGenerationAttempt.current) {
+        childGenerationBusy.current = false;
+        setGeneratingChild(false);
+      }
     }
-    setTimeout(() => void loadCanvas(), 1200);
+  }
+
+  async function checkChildGenerationStatus() {
+    const recovery = childGenerationRecovery;
+    if (!recovery || childGenerationBusy.current || recovery.epoch !== authEpoch.current || recovery.canvasId !== canvas?.id) return;
+    const attempt = ++childGenerationAttempt.current;
+    childGenerationBusy.current = true;
+    setGeneratingChild(true);
+    try {
+      const response = await fetch(`/api/workflows/runs/${encodeURIComponent(recovery.runId)}`, { cache: "no-store" });
+      const data = (await response.json()) as { generationRun?: { status: string; resultMediaItemId: string | null; error: string | null } };
+      if (recovery.epoch !== authEpoch.current || attempt !== childGenerationAttempt.current) return;
+      if (response.ok && data.generationRun?.status === "complete" && data.generationRun.resultMediaItemId) {
+        setChildGenerationRecovery(null);
+        setError(null);
+        await loadCanvas();
+      } else if (response.ok && data.generationRun?.status === "failed") {
+        setChildGenerationRecovery(null);
+        setError(data.generationRun.error || "The image was not generated. You can try again.");
+      } else if (response.status === 404) {
+        setChildGenerationRecovery(null);
+        setError("That generation run is no longer available. Refresh your canvas before trying again.");
+      } else {
+        setError("The saved result is still unconfirmed. Check your canvas before starting another generation.");
+      }
+    } catch {
+      if (recovery.epoch === authEpoch.current && attempt === childGenerationAttempt.current) setError("The saved result could not be checked. Your canvas has been kept.");
+    } finally {
+      if (attempt === childGenerationAttempt.current) {
+        childGenerationBusy.current = false;
+        setGeneratingChild(false);
+      }
+    }
   }
 
   async function runAutoClassify() {
@@ -1696,10 +1763,18 @@ export function InspirationCanvas() {
               </Button>
             )}
           </div>
-          {error ? (
+          {error || childGenerationRecovery ? (
             <Alert className="pointer-events-auto w-[420px] border-destructive/50 bg-background/95">
               <AlertTitle>Action needs attention</AlertTitle>
-              <AlertDescription>{error}</AlertDescription>
+              <AlertDescription>
+                {error || "Check the saved generation result before starting another."}
+                {childGenerationRecovery ? (
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    <Button size="sm" variant="outline" disabled={generatingChild} onClick={() => void checkChildGenerationStatus()}>Check saved result</Button>
+                    <Button size="sm" variant="ghost" disabled={generatingChild} onClick={() => setChildGenerationRecovery(null)}>Dismiss</Button>
+                  </div>
+                ) : null}
+              </AlertDescription>
             </Alert>
           ) : null}
         </div>
@@ -1774,11 +1849,11 @@ export function InspirationCanvas() {
               <FileText className="size-4" />
             </ToolButton>
             <ToolButton
-              label="Generate child media"
-              disabled={selectedItems.length < 2}
+              label={generatingChild ? childGenerationRecovery ? "Checking saved result" : "Generating child media" : "Generate child media"}
+              disabled={selectedItems.length < 2 || generatingChild || childGenerationRecovery !== null}
               onClick={generateChildMedia}
             >
-              <WandSparkles className="size-4" />
+              {generatingChild ? <Activity className="size-4" /> : <WandSparkles className="size-4" />}
             </ToolButton>
             <ToolButton
               label="Auto-classify"

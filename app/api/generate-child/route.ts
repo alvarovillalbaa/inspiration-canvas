@@ -13,22 +13,52 @@ import {
   updateGenerationRun,
 } from "@/lib/db/repository";
 import { startChildGenerationRun } from "@/lib/workflows/start";
+import {
+  runSupabaseChildGeneration,
+  SupabaseChildGenerationError,
+} from "@/lib/workflows/supabase-child-generation";
+
+const privateHeaders = { "Cache-Control": "private, no-store" };
+export const maxDuration = 60;
 
 export async function POST(request: Request) {
-  const parsed = childGenerationRequestSchema.safeParse(await request.json());
-  if (!parsed.success) {
-    return NextResponse.json({ error: parsed.error.message }, { status: 400 });
-  }
   const persistence = await getRequestPersistenceContext();
   if (persistence.mode === "error") return persistence.response;
+  let body: unknown;
+  try {
+    body = await request.json();
+  } catch {
+    return NextResponse.json({ error: "Invalid generation request." }, { status: 400, headers: privateHeaders });
+  }
+  const parsed = childGenerationRequestSchema.safeParse(body);
+  if (!parsed.success) {
+    return NextResponse.json({ error: parsed.error.message }, { status: 400, headers: privateHeaders });
+  }
   if (persistence.mode === "supabase") {
-    return NextResponse.json(
-      {
-        error:
-          "Child media generation for signed-in Supabase canvases is not connected yet.",
-      },
-      { status: 501 },
-    );
+    try {
+      const result = await runSupabaseChildGeneration({
+        supabase: persistence.context.supabase,
+        userId: persistence.context.user.id,
+        ...parsed.data,
+        signal: request.signal,
+      });
+      return NextResponse.json(
+        { ...result, workflow: { workflowRunId: null, mode: "supabase" } },
+        { status: 200, headers: privateHeaders },
+      );
+    } catch (error) {
+      if (error instanceof SupabaseChildGenerationError) {
+        const status = { invalid_request: 400, not_found: 404, credentials: 402, unconfirmed: 503, failed: 500 }[error.code];
+        return NextResponse.json(
+          { error: error.message, runId: error.runId, unconfirmed: error.code === "unconfirmed", requiresAiCredentials: error.code === "credentials" },
+          { status, headers: privateHeaders },
+        );
+      }
+      return NextResponse.json(
+        { error: "Child media generation could not be confirmed. Refresh your canvas before trying again." },
+        { status: 503, headers: privateHeaders },
+      );
+    }
   }
 
   const mediaItems = (
