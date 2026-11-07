@@ -11,11 +11,17 @@ vi.mock("@/lib/db/repository", () => ({ createTasteBrief: vi.fn(), listComments:
 
 import { generateChildImageBytes, MissingAICredentialsError, proposeChildMediaPrompt } from "@/lib/ai/service";
 
-const parent = {
-  id: "authored-parent", type: "image", title: "Authored reference", fileName: "reference.png",
-  mimeType: "image/png", tagsJson: [], category: null, subcategory: null,
-  description: null, designAnalysisJson: null,
-} as MediaItem;
+const parent: MediaItem = {
+  id: "authored-parent", canvasId: "authored-canvas", userId: "00000000-0000-4000-8000-000000000001",
+  type: "image", title: "Authored reference", fileName: "reference.png",
+  url: "https://example.invalid/authored-reference.png", storageDriver: "supabase", storageKey: "authored/reference.png",
+  thumbnailUrl: null, thumbnailStorageKey: null, mimeType: "image/png", sizeBytes: 3,
+  intrinsicWidth: 64, intrinsicHeight: 64, durationSeconds: null,
+  x: 0, y: 0, width: 64, height: 64, zIndex: 0, rotation: 0,
+  cropJson: null, tagsJson: [], category: null, subcategory: null,
+  description: null, designAnalysisJson: null, analysisStatus: "complete", analysisError: null, parentIdsJson: [],
+  createdAt: "2026-11-07T00:00:00.000Z", updatedAt: "2026-11-07T00:00:00.000Z",
+};
 beforeEach(() => {
   vi.resetAllMocks();
   sdk.credentials.mockReturnValue(true);
