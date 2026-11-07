@@ -17,9 +17,14 @@ import tempfile
 import time
 import traceback
 import uuid
+import zlib
 
-BRANCH = "qa/supabase-generation-20261107-1"
+BRANCH = "qa/supabase-generation-20261107-2"
 REPOSITORY = "alvarovillalbaa/inspiration-canvas"
+PRIOR_PATH = "docs/results/2026/11-07/supabase-generation-attempt-1.json"
+PRIOR_BYTES = 320234
+PRIOR_SHA = "031cd7f272bb5fd1a20595524e4e1d21e0cee434361132892808dc3ab977f950"
+PRIOR_SOURCE = "a62f7e9541df4ab1919bd1662be7708e0190e042"
 PNPM_URL = "https://github.com/pnpm/pnpm/releases/download/v10.24.0/pnpm-linux-x64"
 PNPM_BYTES = 65768111
 PNPM_SHA = "985824ae016db3c7bbd7b39dcb4e6f5740b11cce79f5c43d5e5e640768fd4806"
@@ -112,7 +117,7 @@ TESTS = {
         ]
     },
     "tests/unit/supabase-child-ai.test.ts": {
-        "sha256": "06ec0ea28a8cb8e73f4f859186c5a5e45743c538c61cea1deb2291e9f53b3352",
+        "sha256": "fd85a1588375101b9d2318161c4dc260922af13a6cde6906f982169c68cc6739",
         "cases": [
             "child generation SDK request policy passes the exact caller deadline and zero retries to prompt generation",
             "child generation SDK request policy passes the exact caller deadline and zero retries to image generation",
@@ -131,9 +136,13 @@ EXPECTED_COUNTS = {
     "tests/unit/supabase-child-ai.test.ts": 7
 }
 EXPECTED_CASES = 76
+AI_TEST = "tests/unit/supabase-child-ai.test.ts"
+RUN_TESTS = {AI_TEST: TESTS[AI_TEST]}
+FRESH_CASES = 7
 SCOPED = ["lib/db/supabase-repository.ts", "lib/workflows/supabase-child-generation.ts", "lib/ai/service.ts",
           "app/api/generate-child/route.ts", "app/api/workflows/runs/[runId]/route.ts",
           "app/api/workflows/runs/[runId]/events/route.ts", "components/canvas/inspiration-canvas.tsx", *TESTS]
+LINT_INPUTS = [AI_TEST]
 STREAM_LIMIT, ZIP_LIMIT, ALL_ZIP_LIMIT, REPORT_LIMIT = 524288, 131072, 524288, 1500000
 repo = Path.cwd().resolve()
 source = os.environ["SOURCE_COMMIT"]
@@ -147,6 +156,7 @@ assert event["ref"] == BRANCH and event["ref_type"] == "branch" and event["repos
 assert os.uname().sysname == "Linux" and os.uname().machine == "x86_64"
 assert all(re.fullmatch(r"[0-9a-f]{64}", v["sha256"]) and v["cases"] and len(v["cases"]) == len(set(v["cases"])) for v in TESTS.values()), "Unreviewed test manifest"
 assert {name: len(item["cases"]) for name, item in TESTS.items()} == EXPECTED_COUNTS and sum(EXPECTED_COUNTS.values()) == EXPECTED_CASES
+assert len(RUN_TESTS) == 1 and len(RUN_TESTS[AI_TEST]["cases"]) == FRESH_CASES
 work_end = time.monotonic() + 1020
 original_home = os.environ["HOME"]
 assert Path(original_home).is_absolute() and Path(original_home).is_dir()
@@ -192,6 +202,83 @@ assert git("rev-parse", "HEAD").decode().strip() == source
 before = vector()
 assert before["package.json"]["sha256"] == PACKAGE_SHA and before["pnpm-lock.yaml"]["sha256"] == LOCK_SHA
 assert all(before[p]["sha256"] == item["sha256"] for p, item in TESTS.items())
+prior_bytes = (repo / PRIOR_PATH).read_bytes()
+assert len(prior_bytes) == PRIOR_BYTES and sha(prior_bytes) == PRIOR_SHA
+prior = json.loads(prior_bytes)
+assert prior["sourceCommit"] == PRIOR_SOURCE and prior["passed"] is False and prior["interrupted"] is False
+assert prior["expectedCases"] == EXPECTED_CASES and prior["expectedFileCounts"] == EXPECTED_COUNTS
+assert prior["originalHomePreserved"] is True and prior["credentialEnvironmentInherited"] is False
+prior_commands = prior["commands"]
+assert len(prior_commands) == 7 and [item["exitCode"] for item in prior_commands] == [0, 0, 0, 0, 0, 0, 2]
+assert len({item["pid"] for item in prior_commands}) == 7
+prior_streams = []
+for item in prior_commands:
+    assert all(item[key] is True for key in ["reaped", "groupAbsent", "descriptorsClosed", "pipesEOF"])
+    assert not any(item[key] for key in ["timedOut", "termSent", "killSent"])
+    for name in ["stdout", "stderr"]:
+        assert item[name]["eof"] is True; prior_streams.append(item[name])
+prior_streams.append(prior["unitJson"])
+assert len(prior_streams) == prior["originalCaptureCount"] == 15
+assert sum(item["compressedBytes"] for item in prior_streams) <= ALL_ZIP_LIMIT
+prior_decoded_bytes = 0
+for item in prior_streams:
+    assert item["complete"] is True and item["retained"] is True and item["encoding"] == "gzip-base64"
+    packed = base64.b64decode(item["data"], validate=True)
+    assert base64.b64encode(packed).decode() == item["data"] and len(packed) == item["compressedBytes"] <= ZIP_LIMIT
+    decoder = zlib.decompressobj(31); original = decoder.decompress(packed, STREAM_LIMIT + 1)
+    assert len(original) <= STREAM_LIMIT and decoder.eof and not decoder.unused_data and not decoder.unconsumed_tail
+    assert len(original) == item["bytes"] == item["observedBytes"] and sha(original) == item["sha256"] == item["observedSha256"]
+    prior_decoded_bytes += len(original)
+    if item is prior["unitJson"]:
+        assert json.loads(original) == prior["unitResults"]
+assert prior_decoded_bytes == 32899
+prior_unit = prior["unitResults"]
+assert prior_unit["success"] is True and prior_unit["numTotalTests"] == prior_unit["numPassedTests"] == EXPECTED_CASES
+assert all(prior_unit[key] == 0 for key in ["numFailedTests", "numPendingTests", "numTodoTests", "numFailedTestSuites", "numPendingTestSuites"])
+assert prior_unit["numPassedTestSuites"] == prior_unit["numTotalTestSuites"]
+assert len(prior_unit["testResults"]) == 4
+old_app = Path(prior_commands[4]["argv"][1]).parents[2]
+assert prior_commands[4]["argv"][1] == str(old_app / "node_modules/vitest/vitest.mjs")
+assert prior_commands[5]["argv"][1] == str(old_app / "node_modules/eslint/bin/eslint.js") and prior_commands[5]["argv"][2:] == ["--no-cache", *SCOPED]
+assert prior_commands[6]["argv"][1] == str(old_app / "node_modules/typescript/bin/tsc")
+assert prior_commands[6]["argv"][2:] == ["--noEmit", "-p", str(old_app / ".generation-checks/tsconfig.json")]
+prior_pairs = set()
+for result in prior_unit["testResults"]:
+    name = str(Path(result["name"]).relative_to(old_app)); assert name in TESTS and result["status"] == "passed"
+    for case in result["assertionResults"]:
+        key = (name, case["fullName"])
+        assert key not in prior_pairs and case["status"] == "passed" and case["failureMessages"] == []
+        prior_pairs.add(key)
+assert prior_pairs == {(name, title) for name, entry in TESTS.items() for title in entry["cases"]}
+assert prior["testManifest"][AI_TEST]["sha256"] == "06ec0ea28a8cb8e73f4f859186c5a5e45743c538c61cea1deb2291e9f53b3352"
+for name, item in TESTS.items():
+    assert prior["testManifest"][name]["cases"] == item["cases"]
+    if name != AI_TEST:
+        assert prior["testManifest"][name] == item
+prior_export = prior["sourceExport"]["inputs"]
+assert len(prior_export) == prior["sourceExport"]["files"] == 141 and sum(x["bytes"] for x in prior_export.values()) == prior["sourceExport"]["bytes"] == 1260336
+assert before[AI_TEST]["mode"] == prior_export[AI_TEST]["mode"] == "100644"
+assert all(before.get(name) == item for name, item in prior_export.items() if name != AI_TEST)
+assert all(prior_export[name]["sha256"] == item["sha256"] for name, item in prior["testManifest"].items())
+prior_vector = sha(json.dumps(prior["sourceFiles"], sort_keys=True, separators=(",", ":")).encode())
+assert prior_vector == "31045c1981f03996fb69ea772d0f0254af55015cb917727ad2c543f2d161c204"
+assert [item["label"] for item in prior["guards"]] == ["before-export", "after-install", "after-cleanup-barrier", "after-scratch-cleanup"]
+assert all(item["unchanged"] is True and item["files"] == 1084 and item["bytes"] == 9511943 and item["vectorSha256"] == prior_vector for item in prior["guards"])
+assert prior["processCleanup"]["passed"] is True and prior["processCleanup"]["owned"] == prior["processCleanup"]["uncertainPids"] == []
+assert all(prior["processCleanup"][key] is True for key in ["allReaped", "allPipeEOF", "groupsAbsent"])
+assert prior["trackedChildrenFinal"] == [{"pid": item["pid"], "reaped": True, "exitCode": item["exitCode"], "descriptorsClosed": True} for item in prior_commands]
+assert prior["scratchIdentityMatches"] is True and prior["scratchRemoved"] is True and prior["cleanupSignals"] == []
+carried_lint = [name for name in SCOPED if name != AI_TEST]
+assert len(carried_lint) == 10 and all(before[name] == prior_export[name] for name in carried_lint)
+previous_acceptance = {"receipt": PRIOR_PATH, "bytes": PRIOR_BYTES, "sha256": PRIOR_SHA, "sourceCommit": PRIOR_SOURCE,
+    "overallPassed": False, "unitPassed": True, "historicalUnitCases": 76, "carriedUnitCases": 69,
+    "carriedManifest": {name: entry for name, entry in prior["testManifest"].items() if name != AI_TEST},
+    "carriedLintInputs": carried_lint, "historicalAICasesNotCarried": 7, "typecheckCarried": False,
+    "originalCapturesVerified": 15, "decodedCaptureBytes": prior_decoded_bytes,
+    "unchangedExportInputs": 140, "changedExportInputs": {AI_TEST: {"accepted": prior_export[AI_TEST], "current": before[AI_TEST],
+        "reason": "Complete typed MediaItem fixture replaces the incomplete cast; all seven literal identities remain exact"}},
+    "carriedUnitCasesReexecuted": 0, "changedAIIdentitiesReexecuted": 7,
+    "limit": "No current 76-case invocation: 69 historical identities plus 7 fresh identities across editions; the first 76-unit invocation passed inside an overall failed packet"}
 parent = Path(os.environ["RUNNER_TEMP"]).resolve(strict=True)
 assert parent.is_dir() and parent.stat().st_uid == os.getuid()
 os.umask(0o077)
@@ -216,11 +303,12 @@ env = {"PATH": str(Path(node).parent) + ":/usr/bin:/bin", "HOME": original_home,
        "ENABLE_AI": "false", "ENABLE_EVE_DEV": "false", "ENABLE_BLOB_STORAGE": "false", "LOCAL_PERSISTENCE_ENABLED": "false",
        "NEXT_TELEMETRY_DISABLED": "1", "DO_NOT_TRACK": "1", "PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD": "1"}
 report = {"schemaVersion": 1, "sourceCommit": source, "startedAt": time.time(), "passed": False, "commands": [], "guards": [],
-          "sourceFiles": before, "testManifest": TESTS, "expectedCases": EXPECTED_CASES, "expectedFileCounts": EXPECTED_COUNTS,
-          "scope": "Four authored SDK-mock unit files plus scoped lint/types; no real provider, model, DB, server, browser or build",
+          "sourceFiles": before, "testManifest": TESTS, "fullManifestCases": EXPECTED_CASES, "fullManifestFileCounts": EXPECTED_COUNTS,
+          "freshManifest": RUN_TESTS, "expectedCases": FRESH_CASES, "expectedFileCounts": {AI_TEST: FRESH_CASES}, "previousAcceptance": previous_acceptance,
+          "scope": "Seven fresh authored AI SDK-mock identities plus changed-test lint and full scoped types; 69 historical units/10 lint inputs referenced separately; no real provider/model/DB/server/browser/build",
           "limits": {"workSeconds": 1020, "cleanupSeconds": 90, "jobMinutes": 20, "streamBytes": STREAM_LIMIT, "gzipBytes": ZIP_LIMIT,
                      "allGzipBytes": ALL_ZIP_LIMIT, "reportBytes": REPORT_LIMIT}, "originalHomePreserved": True, "credentialEnvironmentInherited": False,
-          "oldTestsExecuted": 0, "errors": [], "proofLimits": ["SDK/storage/auth leaves are authored mocks, not hosted Supabase/RLS/model proof",
+          "oldTestsExecuted": 0, "oldTestsScope": "Unrelated transfer/PostgreSQL/crop/metadata suites", "errors": [], "proofLimits": ["SDK/storage/auth leaves are authored mocks, not hosted Supabase/RLS/model proof",
           "Registry/tool downloads are setup traffic; unit-process network tripwires are not an OS egress sandbox"]}
 export, groups, processes = {}, {}, []
 zip_total, interrupted = 0, False
@@ -418,6 +506,7 @@ try:
     configs = {"package.json", "pnpm-lock.yaml", "tsconfig.json", "vitest.config.ts", "eslint.config.mjs", "next-env.d.ts"}
     names = [n for n in before if n.startswith(("app/", "components/", "hooks/", "lib/", "agent/", "workflows/")) or n in configs or n in TESTS]
     assert len(names) <= 1500 and sum(before[n]["bytes"] for n in names) <= 32 * 1024 * 1024 and set(SCOPED) <= set(names)
+    assert set(names) == set(prior_export), "Changed export membership"
     for name in names:
         assert before[name]["mode"] != "120000"
         for ancestor in (repo / name).parents:
@@ -480,7 +569,7 @@ tls.connect = deny; http.request = deny; http.get = deny; https.request = deny; 
 syncBuiltinESMExports(); afterAll(() => { if (blocked !== 0) throw new Error('Unexpected unit network attempt'); });
 ''')
     (generated / "vitest.mts").write_text("import {defineConfig} from 'vitest/config';\nexport default defineConfig(" + json.dumps({
-        "test": {"environment": "node", "include": list(TESTS), "setupFiles": ["./.generation-checks/network.mjs"],
+        "test": {"environment": "node", "include": list(RUN_TESTS), "setupFiles": ["./.generation-checks/network.mjs"],
                  "pool": "threads", "fileParallelism": False, "maxWorkers": 1, "retry": 0, "testTimeout": 10000, "hookTimeout": 10000},
         "resolve": {"alias": {"@": str(app)}}}) + ");\n")
     (generated / "tsconfig.json").write_text(json.dumps({"extends": "../tsconfig.json", "include": ["../" + n for n in SCOPED],
@@ -495,18 +584,19 @@ syncBuiltinESMExports(); afterAll(() => { if (blocked !== 0) throw new Error('Un
         report["unitCommandError"] = unit_command_error
     info = result_file.lstat(); assert stat.S_ISREG(info.st_mode) and not result_file.is_symlink() and info.st_uid == os.getuid() and info.st_size <= STREAM_LIMIT
     data = result_file.read_bytes(); report["unitJson"] = capture(data, len(data), sha(data), True); value = json.loads(data)
-    report["unitResults"] = value; expected = {(path, title) for path, entry in TESTS.items() for title in entry["cases"]}; actual = set()
+    report["unitResults"] = value; expected = {(path, title) for path, entry in RUN_TESTS.items() for title in entry["cases"]}; actual = set()
     assert unit_command_error is None, "Unit command failed; original JSON retained"
     assert value["success"] is True and value["numTotalTests"] == value["numPassedTests"] == len(expected)
     assert value["numFailedTests"] == value.get("numPendingTests", 0) == value.get("numTodoTests", 0) == 0
-    assert len(value["testResults"]) == 4
+    assert len(expected) == FRESH_CASES and len(value["testResults"]) == 1
     for item in value["testResults"]:
-        name = str(Path(item["name"]).resolve().relative_to(app)); assert name in TESTS and item["status"] == "passed"
+        name = str(Path(item["name"]).resolve().relative_to(app)); assert name in RUN_TESTS and item["status"] == "passed"
         for case in item["assertionResults"]:
             key = (name, case["fullName"]); assert case["status"] == "passed" and not case["failureMessages"] and key not in actual
             actual.add(key)
     assert actual == expected and report["unitJson"]["complete"] and report["unitJson"]["retained"]
-    run([node, str(app / "node_modules/eslint/bin/eslint.js"), "--no-cache", *SCOPED], 120)
+    report["freshUnitCasesPassed"] = len(actual)
+    run([node, str(app / "node_modules/eslint/bin/eslint.js"), "--no-cache", *LINT_INPUTS], 120)
     run([node, str(app / "node_modules/typescript/bin/tsc"), "--noEmit", "-p", str(generated / "tsconfig.json")], 120)
     guard("after-checks"); ok = True
 except Exception as error:
