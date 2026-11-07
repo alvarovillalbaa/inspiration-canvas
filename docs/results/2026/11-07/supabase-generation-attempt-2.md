@@ -58,3 +58,27 @@ This is packaging metadata, not page or hosted behavior evidence. Neither run
 checks actual Supabase Auth/RLS, models/billing, provider storage, browser/UI,
 request termination, or durability. See the [scope](../../../proposals/supabase-generation-checks.md).
 This audit performed no source fix, retry, commit, retirement, or deployment.
+
+## Publication follow-up
+
+The original 3,802-byte audit above is preserved (SHA-256
+`09294c001fae4a5ad34e9f326c403dd9e5d4843cfb27ebe539f9fabd1f20d8f0`).
+Receipt commit `63c90b4` and three later status-document changes were published
+to main and the candidate branch at
+`c484764d1cf6e47fc455b2997b67c6e0ee73759d`. All 141 exported application,
+configuration and test inputs remain exact to the checked source. The native
+checkout was clean, and atomic publication plus fresh remote-ref readback
+succeeded at `07:18:28 UTC`.
+
+The owned QA branch is retired at
+`0bdc3d040ac1223d9f58e44f212e805c11cfd19f`, with parents activation and published
+main. Its tree `fb7b9dd947931ba03dda1a011f65b7043e6f8e33` exactly matches that
+published main; no active workflow file remains. Attempt 1 stays failed and its
+raw receipt is unchanged.
+
+Root's fresh Vercel deployment-detail observation at `07:20:54 UTC` returned
+`dpl_D4RnpcRZmXx3qXFNXCZfBqpEwFvj` READY, target production, exact source
+`c484764d1cf6e47fc455b2997b67c6e0ee73759d`, with the canonical
+`inspiration-canvas.vercel.app` alias. This confirms production packaging and
+alias metadata only. No live page, signed-in persistence, model call or provider
+operation was exercised by this publication.
